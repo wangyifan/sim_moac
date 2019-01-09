@@ -1,0 +1,12 @@
+{
+    "VnodeServiceCfg": "localhost:50062",
+    "DataDir": "./scsdata",
+    "LogPath": "./_logs",
+    "Beneficiary": "0xD814F2ac2c4cA49b33066582E4e97EBae02F2aB9",
+    "VnodechainId": 101,
+    "Capability": 10,
+    "ReconnectInterval": 5,
+    "LogLevel": 4,
+    "BondLimit":2,
+    "ReWardMin":0.0001
+}
