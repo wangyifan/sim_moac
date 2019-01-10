@@ -46,7 +46,7 @@ RUN moac init genesis.json --datadir=/vnode \
 
 VOLUME /vnode
 
-CMD ["moac", "--networkid", "95125", "--vnodeconfig", "vnodeconfig.json", "--datadir=/vnode", "--ethash.dagdir", "/vnode/.ethash",  "--verbosity",  "3", "--rpc", "--rpccorsdomain", "\"http://wallet.moac.io\"", "--mine", "--minerthreads", "1", "--rpcapi", "\"chain3,mc,net,vnode,personal\"", "--ipcpath=/root/.moac/moac.ipc", "2>&1"]
+CMD ["moac", "--networkid", "95125", "--vnodeconfig", "vnodeconfig.json", "--datadir=/vnode", "--ethash.dagdir", "/vnode/.ethash",  "--verbosity",  "3", "--rpc", "--rpcaddr", "0.0.0.0", "--mine", "--minerthreads", "1", "--rpcapi", "chain3,mc,personal", "--ipcpath=/root/.moac/moac.ipc", "2>&1"]
 
 # rpc port
 EXPOSE 8545
