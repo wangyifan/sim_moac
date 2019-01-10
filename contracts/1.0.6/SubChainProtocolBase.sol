@@ -40,7 +40,7 @@ contract SubChainProtocolBase {
     uint public scsCount;
     string public subChainProtocol;
     uint public bondMin;
-    uint public constant PENDING_BLOCK_DELAY = 5; // 8 minutes
+    uint public constant PENDING_BLOCK_DELAY = 0; // 8 minutes
     uint public constant WITHDRAW_BLOCK_DELAY = 8640; // one day, given 10s block rate
     SysContract internal constant SYS_CONTRACT = SysContract(0x0000000000000000000000000000000000000065);
 

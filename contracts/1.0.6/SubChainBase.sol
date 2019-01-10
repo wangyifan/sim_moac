@@ -1,36 +1,38 @@
 pragma solidity ^0.4.11;
 pragma experimental ABIEncoderV2;
 
-import "./SubChainProtocolBase.sol";
-
 /**
- * @title SubChainBaseAST.sol
+ * @title SubChainBase.sol
  * @author David Chen
  * @dev 
- * Subchain protocol definition with Atomic Swap of ERC20 Tokens.
+ * Subchain protocol definition for consenus.
  * It also contains the logic to allow user to join this
- * pool with bond
- * Requires : SubChainProtocolBase
+ * pool with bond. After deployment, the contract address
+ * is used for MicroChain Address for Dapp.
+ * Requires : SubChainProtocolBase.sol
  * Required by: none
  */
+import "./SubChainProtocolBase.sol";
+
 
 contract SCSRelay {
     // 0-registeropen, 1-registerclose, 2-createproposal, 3-disputeproposal, 4-approveproposal, 5-registeradd
     function notifySCS(address cnt, uint msgtype) public returns (bool success);
 }
 
-//ATO new
-contract TestCoin {
-    function allowance(address _owner, address _spender) public view returns (uint256);
-    function approve(address _spender, uint256 _value) public returns (bool);
-    function transferFrom(address _from, address _to, uint256 _value) public returns (bool);
-    function transfer(address _to, uint256 _value) public returns (bool);
-    function balanceOf(address _owner) public view returns (uint256 balance);
+//ATO structure
+contract MarketableToken {
+    function initToken(address[] addr, uint256[] bals, uint256[] lock) public ;
+    function refresh() public;
+    function buyMintToken(address useraddr, uint256 value) public payable returns (uint256);
+    function sellMintTokenPre(address useraddr, uint256 amount) public returns (uint256);
+    function sellMintToken(address useraddr, uint256 amount) public returns (bool);
+    function requestEnterMicrochain(address useraddr, uint256 amount) public returns (bool);
+    function redeemFromMicroChain(address[] addr, uint256[] bals) public returns (bool);
     function totalSupply() public view returns (uint256);
 }
 
-
-contract SubChainBaseAST {
+contract SubChainBase {
     enum ProposalFlag {noState, pending, disputed, approved, rejected, expired, pendingAccept}
     enum ProposalCheckStatus {undecided, approval, expired}
     enum ConsensusStatus {initStage, workingStage, failure}
@@ -82,7 +84,7 @@ contract SubChainBaseAST {
         uint[] amount;
         uint[] time;
     }
-
+    
     struct TransRecords {
         uint[] enterAmount;
         uint[] entertime;
@@ -110,12 +112,6 @@ contract SubChainBaseAST {
         address[] nodeList; 
         address[] nodesToJoin;
     }
-
-     struct MonitorInfo {
-        address from; // address as id
-        uint256 bond; // value
-        string link;  // ip:prort
-    } 
 
     address public protocol;
     uint public minMember;
@@ -181,7 +177,7 @@ contract SubChainBaseAST {
 
     uint internal subchainstatus;
     uint256 public BALANCE = 0;    //index: 30
-    address public ERCAddr;
+    // address public ERCAddr;
     // ErcMapping internal erc;
     // mapping(bytes32 => ErcMapping) internal erc;
     // ErcMapping[] public erc;
@@ -192,15 +188,13 @@ contract SubChainBaseAST {
     holdings internal holdingPool;
     uint public holdingPoolPos = 0;
     uint public MAX_USERADDR_TO_SUBCHAIN = 100;
-    
+
     // inidicator of fund needed
     uint public contractNeedFund;
-
-    mapping(address=>TransRecords) internal records;
-    MonitorInfo[] public monitors;
     
+    mapping(address=>TransRecords) internal records;
+
     uint public MAX_DELETE_NUM = 5;
-    uint public ERCRate = 1;
 
     //events
     event ReportStatus(string message);
@@ -209,18 +203,13 @@ contract SubChainBaseAST {
 
 
     //constructor
-    function SubChainBaseAST(address proto, address vnodeProtocolBaseAddr, address ercAddr,  uint ercRate, uint min, uint max, uint thousandth, uint flushRound) public {
+    function SubChainBase(address proto, address vnodeProtocolBaseAddr, uint min, uint max, uint thousandth, uint flushRound) public {
         VnodeProtocolBaseAddr = vnodeProtocolBaseAddr;
+        // ERCAddr = ercAddr;
         SubChainProtocolBase protocnt = SubChainProtocolBase(proto);
         selTarget = protocnt.getSelectionTarget(thousandth, min);
         protocnt.setSubchainExpireBlock(flushInRound*5);
         protocnt.setSubchainActiveBlock();
-
-        ERCAddr = ercAddr;
-        TestCoin erc20 = TestCoin(ERCAddr);
-	    ERCRate = ercRate;
-        BALANCE = erc20.totalSupply() * ERCRate * (10 ** 18);
-
 
         minMember = min;
         maxMember = max;
@@ -229,8 +218,8 @@ contract SubChainBaseAST {
         owner = msg.sender;
 
         flushInRound = flushRound;
-        if (flushInRound <= 40) {
-            flushInRound = 40;
+        if (flushInRound <= 100) {
+            flushInRound = 100;
         }
         lastFlushBlk = 2 ** 256 - 1;
 
@@ -324,46 +313,20 @@ contract SubChainBaseAST {
         return 0;
     }
 
-    function registerAsMonitor(address monitor, string link) public payable { 
+    function registerAsMonitor(address monitor) public payable { 
         require(msg.value >= MONITOR_MIN_FEE);
         require(nodesWatching[monitor] == 0); 
         require(monitor != address(0));
         nodesWatching[monitor] = msg.value;
-
-        // Add MonitorInfo        
-        monitors.push(MonitorInfo(monitor, msg.value, link));
-               
         SCS_RELAY.notifySCS(address(this), uint(SCSRelayStatus.regAsMonitor));
     }
 
-    function getMonitorInfo() public view returns (address[], string[]) {
-        uint cnt = monitors.length;
-        address[] memory addrlist = new address[](cnt);
-        string[] memory strlist = new string[](cnt);
-        uint i = 0;
-        for (i = 0; i < cnt; i++) {
-            addrlist[i] = monitors[i].from;
-            strlist[i] = monitors[i].link;
-        }
-
-        return (addrlist, strlist);
-    }
-
     function removeMonitorInfo(address monitor) public {
-        uint i = 0;
-        uint cnt = monitors.length;
-        for (i = cnt-1; i >= 0; i--) {
-            if (monitors[i].from == monitor) {
-                // withdraw                
-                monitor.transfer(monitors[i].bond);
-
-                // delete
-                monitors[i] = monitors[cnt-1];
-                delete monitors[cnt-1];
-                monitors.length--;
-                nodesWatching[monitor] = 0;
-                delete nodesWatching[monitor];
-            }
+	    if (nodesWatching[monitor] > 0) {
+            // withdraw                
+            monitor.transfer(nodesWatching[monitor]);
+            nodesWatching[monitor] = 0;
+            delete nodesWatching[monitor];
         }
     }
 
@@ -576,7 +539,7 @@ contract SubChainBaseAST {
         //call precompiled code to invoke action on v-node
         SCS_RELAY.notifySCS(address(this), uint(SCSRelayStatus.registerAdd)); // todo David
     }
-    
+
     function getFlushInfo() public view returns (uint) {
         
         for (uint i=1; i <= nodeCount; i++) {
@@ -590,6 +553,11 @@ contract SubChainBaseAST {
         return 0;
     }
 
+    function getholdingPool() public constant returns (address[]) {
+        
+        return holdingPool.userAddr;
+    }
+    
     function getEnteringAmount(address userAddr) public constant returns (uint[] enteringAmt, uint[] enteringtime) {
         uint i;
         uint j = 0;
@@ -611,6 +579,11 @@ contract SubChainBaseAST {
             }
         }
         return (amounts, times);
+    }
+
+    function getTransRecords(address userAddr) public view returns (TransRecords) {
+        
+        return records[userAddr];
     }
 
     //|----------|---------|---------|xxx|yyy|zzz|
@@ -741,7 +714,7 @@ contract SubChainBaseAST {
         }
         
         proposals[curhash].distributeFlag = 0;
-        
+
         //notify v-node
         SCS_RELAY.notifySCS(address(this), uint(SCSRelayStatus.createProposal));
 
@@ -758,7 +731,7 @@ contract SubChainBaseAST {
     function voteOnProposal(uint indexInlist, bytes32 hash) public returns (bool) {
         uint gasinit = msg.gas;
         Proposal storage prop = proposals[hash];
-        
+
         require(indexInlist < nodeCount && msg.sender == nodeList[indexInlist]);
         require( tx.gasprice <= MAX_GAS_PRICE );
         //check if sender is part of SCS list
@@ -786,7 +759,7 @@ contract SubChainBaseAST {
                 return false;
             }
         }
-
+        
         //add into voter list
         prop.voters.push(indexInlist);
         prop.votecount++;
@@ -826,7 +799,7 @@ contract SubChainBaseAST {
     function requestProposalAction(uint indexInlist, bytes32 hash) public payable returns (bool) {
         uint gasinit = msg.gas;
         Proposal storage prop = proposals[hash];
-        
+
         require(indexInlist < nodeCount && msg.sender == nodeList[indexInlist]);
         require(prop.flag == uint(ProposalFlag.pending));
         require( tx.gasprice <= MAX_GAS_PRICE );
@@ -880,7 +853,7 @@ contract SubChainBaseAST {
             nodesToDispel.push(badguy);
             scsRelayStatus = uint(SCSRelayStatus.approveProposalBat);
         }
-        
+
         //punish nodePerformance is 0
         if (nodesToDispel.length < MAX_DELETE_NUM) {
             uint num = MAX_DELETE_NUM - nodesToDispel.length;
@@ -909,9 +882,9 @@ contract SubChainBaseAST {
 
         //award via nodes
         //in following request action
-         //token redeem
-        //token redeem is done in following request action
-        
+
+        //token redeem
+        //token redeem is done in following request action        
 
         //remove bad nodes
         applyRemoveNodes(0);
@@ -964,7 +937,7 @@ contract SubChainBaseAST {
 
         return true;
     }
-    
+
     function requestDistributeAction(bytes32 hash) public payable returns (bool) {
         uint gasinit = msg.gas;
         //any one can request
@@ -972,30 +945,36 @@ contract SubChainBaseAST {
         require(prop.distributeFlag == 1);
         uint i;
         address cur;
-         //check if contract has enough fund
+
+        //check if contract has enough fund
         uint totalamount = 0;
         for (i = 0; i < prop.viaNodeAddress.length; i++) {
             totalamount += prop.viaNodeAmount[i];
         }        
-         for (i = 0; i < prop.minerAddr.length; i++) {
+
+        for (i = 0; i < prop.minerAddr.length; i++) {
             cur = prop.minerAddr[i];
             totalamount += currentRefundGas[cur];
             totalamount += prop.distributionAmount[i];
         }
-         //if not enough amount, halt proposal
+
+        //if not enough amount, halt proposal
         if( totalamount > this.balance ) {
             //set global flag
             contractNeedFund += totalamount;
             return false;
         }
-         //setflag
+
+        //setflag
         prop.distributeFlag = 2;
-         //doing actual distribution
+
+        //doing actual distribution
         for ( i = 0; i < prop.viaNodeAddress.length; i++) {
             prop.viaNodeAddress[i].transfer(prop.viaNodeAmount[i]);
             TransferAmount(prop.viaNodeAddress[i], prop.viaNodeAmount[i]);
         }
-         for ( i = 0; i < prop.minerAddr.length; i++) {
+
+        for ( i = 0; i < prop.minerAddr.length; i++) {
             cur = prop.minerAddr[i];
             uint targetGas = currentRefundGas[cur];
             currentRefundGas[cur] = 0;
@@ -1006,21 +985,22 @@ contract SubChainBaseAST {
             TransferAmount(scsBeneficiary[cur], targetGas);
             
         }
+
+
         //redeem tokens
         if (BALANCE != 0 ) {
             removeholdingPool(hash);
             if (prop.ercAddress.length != 0) {
                 redeemFromMicroChain(prop.ercAddress, prop.ercAmount);
-                //sellMintTokenPri(prop.ercAddress, prop.ercAmount);
                 for (i = 0; i < prop.ercAddress.length; i++) {
                     records[prop.ercAddress[i]].redeemAmount.push(prop.ercAmount[i]);
                     records[prop.ercAddress[i]].redeemtime.push(now);
                 }
             }
+            
         }
-        
+
         SCS_RELAY.notifySCS(address(this), uint(SCSRelayStatus.distributeProposal));
-        
         //refund current caller
         msg.sender.transfer((gasinit - msg.gas + 15000) * tx.gasprice);
         if (subchainstatus == uint(SubChainStatus.pending)) {
@@ -1028,7 +1008,7 @@ contract SubChainBaseAST {
         }
         return true;
     }
-    
+
     function removeholdingPool(bytes32 hash) private {
         if (proposals[hash].lastApproved != 0x0) {
             uint i;
@@ -1088,13 +1068,6 @@ contract SubChainBaseAST {
         //withdraw to address
         recv.transfer(amount);
     }
-
-    /*function withdrawTokenMoac(address recv, uint256 amount) public {
-        require(owner == msg.sender);
-
-        DirectExchangeToken token = DirectExchangeToken(tokenAddress);
-        token.withdrawTokenMoac(recv, amount);
-    }*/
     
     function withdrawal() private {
         subchainstatus = uint(SubChainStatus.close);
@@ -1130,13 +1103,13 @@ contract SubChainBaseAST {
             SCS_RELAY.notifySCS(address(this), uint(SCSRelayStatus.updateLastFlushBlk));
         }
     }
-
+    
     function reset() public {
         require(owner == msg.sender);
         uint blk = lastFlushBlk + flushInRound + nodeCount * 2 * proposalExpiration;
         if (block.number >= blk) {
             SCS_RELAY.notifySCS(address(this), uint(SCSRelayStatus.reset));
-        }
+        }        
     }
 
     function addSyncNode(address id, string link) public {
@@ -1312,60 +1285,80 @@ contract SubChainBaseAST {
         return true;
     }
     
-    function buyMintToken(address _to, uint256 _value) public returns (bool) {
-        if (ERCAddr != address(0) && _to == address(this)) {
-            TestCoin erc20 = TestCoin(ERCAddr);
-            uint256 allowedamt = erc20.allowance(msg.sender, address(this));
-            if (_value < allowedamt) {
-                if (erc20.transferFrom(msg.sender, _to, _value)) {
-                    return requestEnterMicrochain(_value*ERCRate*(10**18));
-                }
-            }
+    //ATO new
+    //if this microchain support token, it can call below functions
+    function setToken(address addr) public {
+        require(msg.sender == owner);
+        require(addr != address(0));
+
+        tokenAddress = addr;
+        
+        MarketableToken token = MarketableToken(tokenAddress);
+        BALANCE = token.totalSupply();
+        
+    }
+
+    //ATO new
+    function initToken(address[] addr, uint256[] bals, uint256[] lock) public {
+        require(msg.sender == owner);
+        if( tokenAddress != address(0)) {
+            MarketableToken token = MarketableToken(tokenAddress);
+            token.initToken(addr, bals, lock);
         }
-        return false;
+    }
+
+    //ATO new
+    function refresh() public {
+        if( tokenAddress != address(0)) {
+            MarketableToken token = MarketableToken(tokenAddress);
+            token.refresh();
+        }        
+    }
+
+    //ATO new
+    function buyMintToken() public payable returns (bool){
+        if( tokenAddress != address(0)) {
+            MarketableToken token = MarketableToken(tokenAddress);
+            uint256 refund = token.buyMintToken(msg.sender, msg.value);
+            tokenAddress.transfer(msg.value-refund);
+            if( refund > 0 ) {
+                msg.sender.transfer( refund );
+            }
+        }              
+    }
+
+    //ATO new    
+    function sellMintToken(uint256 amount) public returns (bool){
+        if( tokenAddress != address(0)) {
+            MarketableToken token = MarketableToken(tokenAddress);
+            uint256 proceed = token.sellMintTokenPre(msg.sender, amount);
+            if( proceed > 0 ) {
+                token.sellMintToken(msg.sender, amount);
+                // msg.sender.transfer( proceed );
+                return true;
+            }
+        }              
+    }
+
+    //ATO new
+    function requestEnterMicrochain(uint256 amount) public returns (bool){
+        bool res = false;
+        if( tokenAddress != address(0)) {
+            MarketableToken token = MarketableToken(tokenAddress);
+            res = token.requestEnterMicrochain(msg.sender, amount);
+            if (res) {
+                holdingPool.userAddr.push(msg.sender);
+                holdingPool.amount.push(amount);
+            }
+        }              
+        return res;
     }
     
-    function approve(address _spender, uint256 _value) public returns (bool) {
-        TestCoin erc20 = TestCoin(ERCAddr);        
-        return erc20.approve(_spender, _value);
-    }
-    function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {
-        TestCoin erc20 = TestCoin(ERCAddr);        
-        return erc20.transferFrom(_from, _to, _value);
-    }
-
-    function balanceOf(address _owner) public view returns (uint256 balance) {
-        TestCoin erc20 = TestCoin(ERCAddr);        
-        return erc20.balanceOf(_owner);
-    }
-
-    function requestEnterMicrochain(uint256 amount) public returns (bool){
-        if( ERCAddr != address(0)) {
-            holdingPool.userAddr.push(msg.sender);
-            holdingPool.amount.push(amount);
-            holdingPool.time.push(now);
-
-            return true;
-        }               
-        return false;
-    }
-
-    function redeemFromMicroChain(address[] useraddr,uint256[] amount) private returns (bool) {
-        if( ERCAddr != address(0)) {
-            TestCoin erc20 = TestCoin(ERCAddr); 
-            uint256 balance = erc20.balanceOf(address(this));
-            for (uint i = 0; i < useraddr.length; i++) {                
-                balance = balance - amount[i];
-                if( balance > 0 ) {
-                    if (!erc20.transfer(useraddr[i], amount[i]/ERCRate/(10**18))) {
-                        return false;
-                    }
-                } else if( balance < 0 )  {
-                    return false;
-                }
-            }
-        }
-
-        return true;             
+    //ATO new
+    function redeemFromMicroChain(address[] addr, uint256[] bals) private returns (bool){
+        if( tokenAddress != address(0)) {
+            MarketableToken token = MarketableToken(tokenAddress);
+            return token.redeemFromMicroChain(addr, bals);
+        }              
     }
 }

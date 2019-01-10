@@ -8,7 +8,7 @@
     "author": "Yifan Wang, yifan.wang@moac.io",
     "license": "MIT",
     "dependencies": {
-        "solc": "^0.4.25",
-        "chain3": "^0.1.14"
+        "solc": "0.4.17",
+        "chain3": "0.1.14"
     }
 }

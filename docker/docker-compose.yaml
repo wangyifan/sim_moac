@@ -1,0 +1,32 @@
+version: '3.1'
+
+services:
+  vnode:
+    image: moacofficial/vnode:1.0.6-dev
+    ports:
+        - "52159:8545"
+    command: moac --networkid 95125 --vnodeconfig vnodeconfig.json --datadir=/vnode --ethash.dagdir /vnode/.ethash --verbosity 4 --rpc --rpcaddr 0.0.0.0 --mine --minerthreads 1 --rpcapi chain3,mc,personal --ipcpath=/root/.moac/moac.ipc 2>&1
+  scs1:
+    working_dir: /scs/1
+    image: moacofficial/scs:1.0.6-dev
+    command: wait-for-it.sh vnode:50062 -- scsserver --password 123456 --userconfig userconfig.json --datadir /scs/1 --rpcaddr 0.0.0.0 --rpcport 12345 --rpccorsdomain "*" --rpcdebug
+    ports:
+        - "52160:12345"
+  scs2:
+    working_dir: /scs/2
+    image: moacofficial/scs:1.0.6-dev
+    command: wait-for-it.sh vnode:50062 -- scsserver --password 123456 --userconfig userconfig.json --datadir /scs/2 --rpcaddr 0.0.0.0 --rpcport 12345 --rpccorsdomain "*" --rpcdebug
+    ports:
+        - "52161:12345"
+  scs3:
+    working_dir: /scs/3
+    image: moacofficial/scs:1.0.6-dev
+    command: wait-for-it.sh vnode:50062 -- scsserver --password 123456 --userconfig userconfig.json --datadir /scs/3 --rpcaddr 0.0.0.0 --rpcport 12345 --rpccorsdomain "*" --rpcdebug
+    ports:
+        - "52162:12345"
+  scs_monitor:
+    working_dir: /scs/monitor
+    image: moacofficial/scs:1.0.6-dev
+    command: wait-for-it.sh vnode:50062 -- scsserver --password 123456 --userconfig userconfig.json --datadir /scs/monitor --rpcaddr 0.0.0.0 --rpcport 12345 --rpccorsdomain "*" --rpcdebug
+    ports:
+        - "52163:12345"
