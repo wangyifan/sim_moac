@@ -1,0 +1,28 @@
+###########
+   VNODE
+###########
+# accounts, all have 1,000,000 moac initially
+Address: a35add395b804c3faacf7c7829638e42ffa1d051  # vnode beneficiary
+Address: f34c3a04099a76dda80517373b21409391540b82  # scs1 beneficiary
+Address: 903ee4f9753b3717aa6a295b02095aa0c94036d0  # scs2 beneficiary
+Address: f084d898a6329d0d9159ddccca0380d651ee1c17  # scs3 beneficiary
+Address: 3563e38cc436bd6835da191228115fe7869a382c  # scsm beneficiary
+Address: a221d547d2e3821f24924d7bd89e443045d81f6e
+Address: 7ac799d9fb930fafc3d50937b10ea30f0c1c30ce
+Address: b544fd6b593807b864998836db91ab0d81626745
+Address: b94b69cc0fb38a6b1be2cd5466f0676b7d5be7f8
+Address: da8ad06b2a20c6f92641d185c22f0479b00a90f3
+
+# resume from stopped container
+docker start -ai 22397186e350
+# named volume
+docker run -it -v vnode1:/vnode -p 8545:8545 yifan:vnode
+
+
+###########
+    SCS
+###########
+scs 1: a63a7764d01a6b11ba628f06b00a1828e5955a7f
+scs 2: 43c375d09e8a528770c6e1c76014cc9f4f9139a3
+scs 3: 8d26cd8257288a9f3fcb3c7a4b15ade3cf932925
+scs monitor: 0b52dde836cb80a5d13c68784c338f42e1860922

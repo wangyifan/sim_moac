@@ -1,28 +1,21 @@
 version: '3.1'
 
 services:
-  redis_db:
-    image: redis:4.0.11
-    deploy:
-      mode: global
-      restart_policy:
-        condition: any
-        delay: 5s
-        # max_attempts: default to be never give up
-        window: 60s
-  scs_server:
-    image: heavenstar/moac:scs
-    command: scsserver
-    deploy:
-      mode: global
-      restart_policy:
-        condition: any
-        delay: 5s
-        window: 60s
-  vnode_server:
-    image: heavenstar/moac:vnode
-    deploy:
-      mode: global
-      restart_policy:
-        condition: any
-        window: 60s
+  vnode:
+    image: yifan:vnode
+  scs1:
+    working_dir: /scs/1
+    image: yifan:scs
+    command: scsserver --password 123456 --userconfig userconfig.json --datadir /scs/1 --rpcaddr 0.0.0.0 --rpcport 12345
+  scs2:
+    working_dir: /scs/2
+    image: yifan:scs
+    command: scsserver --password 123456 --userconfig userconfig.json --datadir /scs/2 --rpcaddr 0.0.0.0 --rpcport 12345
+  scs3:
+    working_dir: /scs/3
+    image: yifan:scs
+    command: scsserver --password 123456 --userconfig userconfig.json --datadir /scs/3 --rpcaddr 0.0.0.0 --rpcport 12345
+  scs_monitor:
+    working_dir: /scs/monitor
+    image: yifan:scs
+    command: scsserver --password 123456 --userconfig userconfig.json --datadir /scs/monitor --rpcaddr 0.0.0.0 --rpcport 12345

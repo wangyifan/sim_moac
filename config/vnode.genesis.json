@@ -1,6 +1,7 @@
 {
     "config": {
-        "chainId": 95125
+        "chainId": 95125,
+        "nuwaBlock": 0
     },
     "coinbase": "0x0000000000000000000000000000000000000000",
     "timestamp": "0x00",
@@ -72,6 +73,42 @@
         "0xA35aDd395b804c3fAACF7c7829638E42fFa1D051": {
             "balance": "10000000000000000000000",
             "privatekey": "0x393873d6bbc61b9d83ba923e08375b7bf8210a12bed4ea2016d96021e9378cc9"
+        },
+        "0xDA8Ad06b2A20c6f92641d185C22f0479b00a90f3": {
+            "balance": "10000000000000000000000",
+            "privatekey": "0x797d1b94bf8e7df4f81428950c1ab8c5067e8163c20f7d20d217f51fbb363987"
+        },
+        "0xf34c3a04099a76dDa80517373B21409391540B82": {
+            "balance": "10000000000000000000000",
+            "privatekey": "0xc0f21b2a6f4e2a8d43bc915e660dcacc13a76876151208d4c67cd5cc6120fa34"
+        },
+        "0x903Ee4f9753B3717aa6A295B02095aA0c94036D0": {
+            "balance": "10000000000000000000000",
+            "privatekey": "0x5042894502ee04d1aa9f7ec9ac2c7722f3df095c5520f69d235ae7f29659f6c4"
+        },
+        "0xf084D898A6329d0D9159DDcCcA0380d651ee1c17": {
+            "balance": "10000000000000000000000",
+            "privatekey": "0xfb0f0c79d16ed967dc1e346c2863edd25a611860d7a2723d87c4c8f490212a74"
+        },
+        "0x3563e38cc436BD6835Da191228115Fe7869A382C": {
+            "balance": "10000000000000000000000",
+            "privatekey": "0x311335a8ea375cbb33659efb955ab9f400557e74f56216ec4192bba7d806204a"
+        },
+        "0xa221d547D2e3821f24924D7bD89E443045D81f6E": {
+            "balance": "10000000000000000000000",
+            "privatekey": "0x21afe6edda0dd2005736d1d0a58867a8a16ebe402af9f883f3e20586841d40fe"
+        },
+        "0x7ac799D9fB930faFC3d50937b10eA30f0c1c30ce": {
+            "balance": "10000000000000000000000",
+            "privatekey": "0x50a6c30f527db0413d8187c843962a29fec156ce3947cbd0864f95a06830f3c9"
+        },
+        "0xb544Fd6b593807B864998836Db91aB0d81626745": {
+            "balance": "10000000000000000000000",
+            "privatekey": "0x8fe93b1ee0b7a4a32315e6caddaf9a85f6af797b9e8c4daa274fc3e4243a1959"
+        },
+        "0xb94b69cc0FB38A6B1BE2cd5466f0676b7D5bE7F8": {
+            "balance": "10000000000000000000000",
+            "privatekey": "0x2cdbd03f8c7dda48232712c9d0655014663c175dc17f4e0325fba0988755ae22"
         }
     }
 }
