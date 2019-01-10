@@ -1,0 +1,14 @@
+{
+    "name": "moac_dev_chain",
+    "version": "0.0.1",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+    },
+    "author": "Yifan Wang, yifan.wang@moac.io",
+    "license": "MIT",
+    "dependencies": {
+        "solc": "^0.4.25",
+        "chain3": "^0.1.14"
+    }
+}
