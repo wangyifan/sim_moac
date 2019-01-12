@@ -5,15 +5,7 @@ ARG version=1.0.6
 
 RUN mkdir /vnode
 
-# install editor
-#RUN apt-get update \
-#    && apt-get install -y vim-tiny \
-#    && apt-get install -y iputils-ping \
-#    && apt-get install lsof -y \
-#    && apt-get install net-tools -y \
-#    && apt-get install curl -y
-
-# install moac-vnode
+# install moac vnode
 COPY bin/$version/vnode/moac /usr/local/sbin/
 COPY bin/$version/vnode/vnodeconfig.json /vnode/vnodeconfig.json
 COPY config/vnode.genesis.json /vnode/genesis.json
@@ -46,9 +38,8 @@ RUN moac init genesis.json --datadir=/vnode \
 
 VOLUME /vnode
 
-CMD ["moac", "--networkid", "95125", "--vnodeconfig", "vnodeconfig.json", "--datadir=/vnode", "--ethash.dagdir", "/vnode/.ethash",  "--verbosity",  "3", "--rpc", "--rpcaddr", "0.0.0.0", "--mine", "--minerthreads", "1", "--rpcapi", "chain3,mc,personal", "--ipcpath=/root/.moac/moac.ipc", "2>&1"]
+CMD ["echo", "This is moac vnode."]
 
 # rpc port
 EXPOSE 8545
 EXPOSE 50062
-
