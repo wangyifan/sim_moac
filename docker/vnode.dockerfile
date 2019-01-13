@@ -5,6 +5,9 @@ ARG version=1.0.6
 
 RUN mkdir /vnode
 
+# install tc
+RUN apt-get update && apt-get install iproute2 -y
+
 # install moac vnode
 COPY bin/$version/vnode/moac /usr/local/sbin/
 COPY bin/$version/vnode/vnodeconfig.json /vnode/vnodeconfig.json

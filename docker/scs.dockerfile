@@ -3,6 +3,9 @@ LABEL MAINTAINER="Yifan Wang <yifan.wang@moac.io>"
 
 ARG version=1.0.6
 
+# install tc
+RUN apt-get update && apt-get install iproute2 -y
+
 RUN mkdir -p /scs/1 \
     && mkdir -p /scs/2 \
     && mkdir -p /scs/3 \
