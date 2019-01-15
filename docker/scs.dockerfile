@@ -4,7 +4,7 @@ LABEL MAINTAINER="Yifan Wang <yifan.wang@moac.io>"
 ARG version=1.0.6
 
 # install tc
-RUN apk add iproute2 && ln -s /usr/lib/tc /lib/tc
+RUN apk add iproute2 && ln -s /usr/lib/tc /lib/tc && apk add bash
 
 RUN mkdir -p /scs/1 \
     && mkdir -p /scs/2 \
