@@ -1,14 +1,15 @@
 {
-    "name": "moac_dev_chain",
-    "version": "0.0.1",
-    "description": "",
-    "main": "index.js",
-    "scripts": {
-    },
-    "author": "Yifan Wang, yifan.wang@moac.io",
-    "license": "MIT",
-    "dependencies": {
-        "solc": "0.4.17",
-        "chain3": "0.1.14"
-    }
+  "name": "moac_dev_chain",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {},
+  "author": "Yifan Wang, yifan.wang@moac.io",
+  "license": "MIT",
+  "dependencies": {
+    "chain3": "0.1.14",
+    "request": "2.88.0",
+    "solc": "0.4.17",
+    "web3": "1.0.0-beta.37"
+  }
 }

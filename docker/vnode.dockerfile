@@ -1,12 +1,12 @@
-FROM ubuntu:18.04
-MAINTAINER Yifan Wang <yifan.wang@moac.io>
+FROM frolvlad/alpine-glibc:alpine-3.8_glibc-2.28
+MAINTAINER "Yifan Wang <yifan.wang@moac.io>"
 
 ARG version=1.0.6
 
 RUN mkdir /vnode
 
 # install tc
-RUN apt-get update && apt-get install iproute2 -y
+RUN apk add iproute2 && ln -s /usr/lib/tc /lib/tc
 
 # install moac vnode
 COPY bin/$version/vnode/moac /usr/local/sbin/

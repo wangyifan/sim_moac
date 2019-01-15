@@ -2,3 +2,4 @@ moac-scs
 moac-vnode
 node_modules
 *~
+bin/dev
