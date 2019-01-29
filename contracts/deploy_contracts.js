@@ -6,7 +6,8 @@ const solc = require("solc");
 let install_account = "0xa35add395b804c3faacf7c7829638e42ffa1d051";
 let vnodeLink = "vnode:50062";
 let vnodeRpc = "vnode:8545";
-let version = "1.0.6";
+//let version = "1.0.6";
+let version = "dev";
 let password = "123456";
 let bmin = 2;
 let unlock_forever = 0;
@@ -20,9 +21,11 @@ let subChainProtocolBase = null;
 let vnodeProtocolBase = null;
 let subChainBase = null;
 let minMember = 1;
-let maxMember = 30;
+let maxMember = 31;
 let thousandth = 1000;
-let flushRound = 10;
+let flushRound = 40;
+let tokensupply = 2;
+let exchangerate = 1;
 
 chain3.setProvider(new chain3.providers.HttpProvider('http://localhost:52159'));
 chain3.personal.unlockAccount(install_account, password, unlock_forever);
@@ -140,11 +143,11 @@ async function main() {
     registerOpenResult = await registerOpenPromise();
     console.log("SubChainBase register open, hash: " + registerOpenResult + " " + green_check_mark);
 
-    // wait for 10 blocks for all scs to send register tx
+    // wait for 6 blocks for all scs to send register tx
     _bc = await getBlockNumber();
     while(true) {
         bc = await getBlockNumber();
-        if (bc > _bc + 10) {
+        if (bc > _bc + 6) {
             break;
         }
     }
@@ -248,6 +251,8 @@ function deploySubChainBaseContractPromise(){
             maxMember,
             thousandth,
             flushRound,
+            tokensupply,
+            exchangerate,
             deployTransaction,
             (e, contract) => {
                 if (e) {
@@ -288,7 +293,7 @@ function registerSCSSubChainBaseAsMonitorPromise(scsid) {
             from: install_account,
 		    to: subChainBase.address,
 		    gas: "9000000",
-		    data: subChainBase.registerAsMonitor.getData("0x" + scsid),
+		    data: subChainBase.registerAsMonitor.getData("0x" + scsid, "scs_monitor:8545"),
             value: chain3.toSha(1, 'mc')
         };
         chain3.mc.sendTransaction(registerTransaction, (e, transactionHash) => {
