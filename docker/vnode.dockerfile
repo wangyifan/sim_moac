@@ -10,8 +10,8 @@ RUN apk add iproute2 && ln -s /usr/lib/tc /lib/tc
 
 # install moac vnode
 COPY bin/$version/vnode/moac /usr/local/sbin/
-COPY bin/$version/vnode/vnodeconfig.json /vnode/vnodeconfig.json
-COPY config/vnode.genesis.json /vnode/genesis.json
+COPY config/vnode/vnodeconfig.json /vnode/vnodeconfig.json
+COPY config/vnode/vnode.genesis.json /vnode/genesis.json
 
 WORKDIR /vnode
 
