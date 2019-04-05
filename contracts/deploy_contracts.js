@@ -23,18 +23,20 @@ let subChainBase = null;
 let minMember = 1;
 let maxMember = 31;
 let thousandth = 1000;
-let flushRound = 40;
+let threshold = 5;
+let flushRound = 50;
 let tokensupply = 2;
 let exchangerate = 1;
-
-chain3.setProvider(new chain3.providers.HttpProvider('http://localhost:52159'));
-chain3.personal.unlockAccount(install_account, password, unlock_forever);
 
 scs_amount = 1000;
 scsids = [
     "a63a7764d01a6b11ba628f06b00a1828e5955a7f", // scs 1
     "43c375d09e8a528770c6e1c76014cc9f4f9139a3", // scs 2
-    "8d26cd8257288a9f3fcb3c7a4b15ade3cf932925"  // scs 3
+    "8d26cd8257288a9f3fcb3c7a4b15ade3cf932925", // scs 3
+    "632774bf61ffc8873e43f3ce68cf3f169300efa3", // scs 4
+    "d7e1cf982f75563f166726a5814c7fa3c1948068", // scs 5
+    "30601cba96b98f22d5c46bb8a8b0b298b8017ef2", // scs 6
+    "c24c73cfb25e444fb20c3405a8327808303f4040", // scs 7
 ];
 
 scsmonitorids = [
@@ -47,7 +49,6 @@ vnodeProtocolBaseContract = fs.readFileSync(vnodeProtocolBaseSolfile, 'utf8');
 vnodeProtocolBaseOutput = solc.compile(vnodeProtocolBaseContract, 1);
 vnodeProtocolBaseAbi = vnodeProtocolBaseOutput.contracts[':VnodeProtocolBase'].interface;
 vnodeProtocolBaseBin = vnodeProtocolBaseOutput.contracts[':VnodeProtocolBase'].bytecode;
-vnodeProtocolBaseContract = chain3.mc.contract(JSON.parse(vnodeProtocolBaseAbi));
 console.log("VnodeProtocolBase Contract compiled, size = " + vnodeProtocolBaseBin.length + " " + green_check_mark);
 
 // compile subchainprotocolbase
@@ -58,7 +59,6 @@ subChainProtocolBaseContract = fs.readFileSync(subChainProtocolBaseSolfile, 'utf
 subChainProtocolBaseOutput = solc.compile(subChainProtocolBaseContract, 1);
 subChainProtocolBaseAbi = subChainProtocolBaseOutput.contracts[':SubChainProtocolBase'].interface;
 subChainProtocolBaseBin = subChainProtocolBaseOutput.contracts[':SubChainProtocolBase'].bytecode;
-subChainProtocolBaseContract = chain3.mc.contract(JSON.parse(subChainProtocolBaseAbi));
 console.log("SubChainProtocolBase Contract compiled, size = " + subChainProtocolBaseBin.length + " " + green_check_mark);
 
 subChainBaseSolfiles = ["SubChainBase.sol", "SubChainProtocolBase.sol"];
@@ -79,10 +79,21 @@ subChainBaseOutput = solc.compile(
     },
     1
 );
+
+if (subChainBaseOutput.errors.length > 0) {
+    //console.log(subChainBaseOutput.errors);
+}
 subChainBaseAbi = subChainBaseOutput.contracts['SubChainBase.sol:SubChainBase'].interface;
+//console.log(subChainBaseAbi);
 subChainBaseBin = subChainBaseOutput.contracts['SubChainBase.sol:SubChainBase'].bytecode;
-subChainBaseContract = chain3.mc.contract(JSON.parse(subChainBaseAbi));
 console.log("SubChainBase Contract compiled, size = " + subChainBaseBin.length + " " + green_check_mark);
+
+
+chain3.setProvider(new chain3.providers.HttpProvider('http://localhost:52159'));
+chain3.personal.unlockAccount(install_account, password, unlock_forever);
+vnodeProtocolBaseContract = chain3.mc.contract(JSON.parse(vnodeProtocolBaseAbi));
+subChainProtocolBaseContract = chain3.mc.contract(JSON.parse(subChainProtocolBaseAbi));
+subChainBaseContract = chain3.mc.contract(JSON.parse(subChainBaseAbi));
 
 async function main() {
     // deploy two contracts: vnodeprotocolbase, subchainprotocolbase
@@ -137,6 +148,17 @@ async function main() {
         }
     }
 
+    // wait for 3 blocks for before deploy subchainbase becausue its size too large for contract creation gas cost
+    _bc = await getBlockNumber();
+    while(true) {
+        bc = await getBlockNumber();
+        //console.log("1 Current bc: ", bc, "wait until bc: ", (_bc + 3));
+        sleep(1000);
+        if (bc > _bc + 3) {
+            break;
+        }
+    }
+
     subChainBase = await deploySubChainBaseContractPromise();
     console.log("SubChainBase Contract deployed! address: "+ subChainBase.address + " " + green_check_mark);
 
@@ -147,6 +169,8 @@ async function main() {
     _bc = await getBlockNumber();
     while(true) {
         bc = await getBlockNumber();
+        sleep(1000);
+        //console.log("2 Current bc: ", bc, "wait until bc: ", (_bc + 3));
         if (bc > _bc + 6) {
             break;
         }
@@ -162,6 +186,45 @@ async function main() {
         result = await registerSCSSubChainBaseAsMonitorPromise(scsid);
         console.log("Registered scs " + scsid + " as monitor " + "hash: " + result + " " + green_check_mark);
     }
+
+    // wait for 3 blocks before enable rng
+    _bc = await getBlockNumber();
+    while(true) {
+        bc = await getBlockNumber();
+        sleep(1000);
+        //console.log("3 Current bc: ", bc, "wait until bc: ", (_bc + 3));
+        if (bc > _bc + 3) {
+            break;
+        }
+    }
+
+    // wait for 6 blocks before query for rng node count
+    _bc = await getBlockNumber();
+    while(true) {
+        bc = await getBlockNumber();
+        sleep(1000);
+        if (bc > _bc + 6) {
+            break;
+        }
+    }
+
+    result = await getRNGNodeCountPromise();
+    console.log("RNG enabled with " + result + " nodes." + green_check_mark);
+
+    // wait for 50 blocks before query for reset rng
+    while(true) {
+        _bc = await getBlockNumber();
+        while(true) {
+            bc = await getBlockNumber();
+            sleep(1000);
+            if (bc > _bc + 50) {
+                break;
+            }
+        }
+
+        result = await getResetRNGGroupPromise();
+        console.log("RNG reset with " + result + " nodes." + green_check_mark);
+    }
 }
 
 main();
@@ -173,7 +236,7 @@ function sendMCPromise(src, dest, amount_in_mc) {
             from: src,
 		    value: chain3.toSha(amount_in_mc,'mc'),
 		    to: dest,
-		    gas: "9000000",
+		    gas: "10000000",
 		    data: ""
         };
         chain3.mc.sendTransaction(transaction, (e, transactionHash) => {
@@ -192,7 +255,7 @@ function deployVnodeProtocolBaseContractPromise() {
         deployTransaction = {
             from: install_account,
             data: '0x' + vnodeProtocolBaseBin,
-            gas: "9000000"
+            gas: "10000000"
         };
 
         vnodeProtocolBaseContract.new(
@@ -216,7 +279,7 @@ function deploySubChainProtocolBaseContractPromise(){
         deployTransaction = {
             from: install_account,
             data: '0x' + subChainProtocolBaseBin,
-            gas: "9000000"
+            gas: "10000000"
         };
 
         subChainProtocolBaseContract.new(
@@ -242,7 +305,7 @@ function deploySubChainBaseContractPromise(){
         deployTransaction = {
             from: install_account,
             data: '0x' + subChainBaseBin,
-            gas: "9000000"
+            gas: "10000000"
         };
         subChainBaseContract.new(
             subChainProtocolBase.address,
@@ -253,6 +316,7 @@ function deploySubChainBaseContractPromise(){
             flushRound,
             tokensupply,
             exchangerate,
+            threshold,
             deployTransaction,
             (e, contract) => {
                 if (e) {
@@ -272,7 +336,7 @@ function registerSCSSubChainProtocolBasePromise(scsid) {
         registerTransaction = {
             from: install_account,
 		    to: subChainProtocolBase.address,
-		    gas: "9000000",
+		    gas: "10000000",
 		    data: subChainProtocolBase.register.getData("0x" + scsid),
             value: chain3.toSha(bmin, 'mc')
         };
@@ -292,7 +356,7 @@ function registerSCSSubChainBaseAsMonitorPromise(scsid) {
         registerTransaction = {
             from: install_account,
 		    to: subChainBase.address,
-		    gas: "9000000",
+		    gas: "10000000",
 		    data: subChainBase.registerAsMonitor.getData("0x" + scsid, "scs_monitor:8545"),
             value: chain3.toSha(1, 'mc')
         };
@@ -312,7 +376,7 @@ function registerOpenPromise(scsid) {
         registerOpenTransaction = {
             from: install_account,
 		    to: subChainBase.address,
-		    gas: "9000000",
+		    gas: "10000000",
 		    data: subChainBase.registerOpen.getData()
         };
         chain3.mc.sendTransaction(registerOpenTransaction, (e, transactionHash) => {
@@ -331,7 +395,7 @@ function registerClosePromise(scsid) {
         registerCloseTransaction = {
             from: install_account,
 		    to: subChainBase.address,
-		    gas: "9000000",
+		    gas: "3000000",
 		    data: subChainBase.registerClose.getData()
         };
         chain3.mc.sendTransaction(registerCloseTransaction, (e, transactionHash) => {
@@ -363,11 +427,51 @@ function registerAsVnodeProxy(vnode, via, link, rpclink) {
         registerAsVnodeProxyTransaction = {
             from: install_account,
 		    to: vnodeProtocolBase.address,
-		    gas: "9000000",
+		    gas: "10000000",
 		    data: vnodeProtocolBase.register.getData(vnode, via, link, rpclink),
             value: chain3.toSha(bmin, 'mc')
         };
         chain3.mc.sendTransaction(registerAsVnodeProxyTransaction, (e, transactionHash) => {
+            if (!e) {
+                resolve(transactionHash);
+            } else {
+                reject(e);
+            }
+        });
+    });
+}
+
+function getRNGNodeCountPromise() {
+    return new Promise((resolve, reject) => {
+        transaction = {
+            from: install_account,
+		    to: subChainBase.address,
+		    gas: "10000000",
+		    data: subChainBase.rngNodeCount.getData()
+        };
+        chain3.mc.sendTransaction(transaction, (e, transactionHash) => {
+            if (!e) {
+                resolve(transactionHash);
+            } else {
+                reject(e);
+            }
+        });
+    });
+}
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function getResetRNGGroupPromise() {
+    return new Promise((resolve, reject) => {
+        transaction = {
+            from: install_account,
+		    to: subChainBase.address,
+		    gas: "10000000",
+		    data: subChainBase.resetRNGGroup.getData()
+        };
+        chain3.mc.sendTransaction(transaction, (e, transactionHash) => {
             if (!e) {
                 resolve(transactionHash);
             } else {

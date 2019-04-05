@@ -1,5 +1,8 @@
 version: '3.1'
 
+# create scs data volume for each one
+# docker create -v /scs/1 --name scs_data_1 busybox /bin/true
+
 services:
   vnode:
     # image: moacofficial/vnode:1.0.6-dev
@@ -9,7 +12,8 @@ services:
     command: moac --networkid 95125 --vnodeconfig vnodeconfig.json --datadir=/vnode --ethash.dagdir /vnode/.ethash --verbosity 4 --rpc --rpcaddr 0.0.0.0 --mine --minerthreads 1 --rpcapi chain3,mc,net,vnode,personal --ipcpath=/root/.moac/moac.ipc 2>&1
   scs1:
     working_dir: /scs/1
-    # image: moacofficial/scs:1.0.6-dev
+    #volumes_from:
+    #  - "scs_data_1"
     image: yifan:scs
     command: wait-for-it.sh vnode:50062 --strict -- scsserver --password 123456 --userconfig userconfig.json --datadir /scs/1 --rpcaddr 0.0.0.0 --rpcport 12345 --rpccorsdomain "*" --rpcdebug
     depends_on:
@@ -34,6 +38,42 @@ services:
       - "vnode"
     ports:
         - "52162:12345"
+  scs4:
+    working_dir: /scs/4
+    # image: moacofficial/scs:1.0.6-dev
+    image: yifan:scs
+    command: wait-for-it.sh vnode:50062 --strict -- scsserver --password 123456 --userconfig userconfig.json --datadir /scs/4 --rpcaddr 0.0.0.0 --rpcport 12345 --rpccorsdomain "*" --rpcdebug
+    depends_on:
+      - "vnode"
+    ports:
+        - "52163:12345"
+  scs5:
+    working_dir: /scs/5
+    # image: moacofficial/scs:1.0.6-dev
+    image: yifan:scs
+    command: wait-for-it.sh vnode:50062 --strict -- scsserver --password 123456 --userconfig userconfig.json --datadir /scs/5 --rpcaddr 0.0.0.0 --rpcport 12345 --rpccorsdomain "*" --rpcdebug
+    depends_on:
+      - "vnode"
+    ports:
+        - "52164:12345"
+  scs6:
+    working_dir: /scs/6
+    # image: moacofficial/scs:1.0.6-dev
+    image: yifan:scs
+    command: wait-for-it.sh vnode:50062 --strict -- scsserver --password 123456 --userconfig userconfig.json --datadir /scs/6 --rpcaddr 0.0.0.0 --rpcport 12345 --rpccorsdomain "*" --rpcdebug
+    depends_on:
+      - "vnode"
+    ports:
+        - "52165:12345"
+  scs7:
+    working_dir: /scs/7
+    # image: moacofficial/scs:1.0.6-dev
+    image: yifan:scs
+    command: wait-for-it.sh vnode:50062 --strict -- scsserver --password 123456 --userconfig userconfig.json --datadir /scs/7 --rpcaddr 0.0.0.0 --rpcport 12345 --rpccorsdomain "*" --rpcdebug
+    depends_on:
+      - "vnode"
+    ports:
+        - "52166:12345"
   scs_monitor:
     working_dir: /scs/monitor
     # image: moacofficial/scs:1.0.6-dev
@@ -42,4 +82,4 @@ services:
     depends_on:
       - "vnode"
     ports:
-        - "52163:12345"
+        - "52167:12345"

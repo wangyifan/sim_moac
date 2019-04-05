@@ -4,7 +4,8 @@ LABEL MAINTAINER="Yifan Wang <yifan.wang@moac.io>"
 ARG version=dev
 
 # install tc
-RUN apk add iproute2 && ln -s /usr/lib/tc /lib/tc && apk add bash
+# RUN apk add iproute2 && ln -s /usr/lib/tc /lib/tc
+RUN apk add bash
 
 RUN mkdir -p /scs/1 \
     && mkdir -p /scs/2 \
@@ -13,7 +14,6 @@ RUN mkdir -p /scs/1 \
 
 # install scsserver and its config
 COPY bin/tools/wait-for-it.sh  /usr/local/sbin/
-COPY bin/$version/scs/scsserver /usr/local/sbin/
 COPY config/scs/1 /scs/1
 COPY config/scs/2 /scs/2
 COPY config/scs/3 /scs/3
@@ -30,8 +30,8 @@ COPY config/scs/13 /scs/13
 COPY config/scs/14 /scs/14
 COPY config/scs/15 /scs/15
 COPY config/scs/monitor /scs/monitor
+COPY bin/$version/scs/scsserver /usr/local/sbin/
 
 WORKDIR /scs
-VOLUME /scs
 
 CMD ["echo", "This is moac scs server."]

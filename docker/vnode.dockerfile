@@ -6,15 +6,13 @@ ARG version=dev
 RUN mkdir /vnode
 
 # install tc
-RUN apk add iproute2 && ln -s /usr/lib/tc /lib/tc
+# RUN apk add iproute2 && ln -s /usr/lib/tc /lib/tc
 
 # install moac vnode
-COPY bin/$version/vnode/moac /usr/local/sbin/
 COPY config/vnode/vnodeconfig.json /vnode/vnodeconfig.json
 COPY config/vnode/vnode.genesis.json /vnode/genesis.json
-
+COPY bin/$version/vnode/moac /usr/local/sbin/
 WORKDIR /vnode
-
 RUN moac init genesis.json --datadir=/vnode \
     && echo "123456" > password \
     && echo "393873d6bbc61b9d83ba923e08375b7bf8210a12bed4ea2016d96021e9378cc9" > pk \
