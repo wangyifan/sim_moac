@@ -3,4 +3,3 @@ moac-vnode
 node_modules
 *~
 bin/dev
-contracts/dev

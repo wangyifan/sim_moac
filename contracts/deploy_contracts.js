@@ -24,9 +24,11 @@ let minMember = 1;
 let maxMember = 31;
 let thousandth = 1000;
 let threshold = 5;
+let rngEnabled = true;
 let flushRound = 50;
 let tokensupply = 2;
 let exchangerate = 1;
+let addFundAmount = 50;
 
 scs_amount = 1000;
 scsids = [
@@ -50,6 +52,14 @@ vnodeProtocolBaseOutput = solc.compile(vnodeProtocolBaseContract, 1);
 vnodeProtocolBaseAbi = vnodeProtocolBaseOutput.contracts[':VnodeProtocolBase'].interface;
 vnodeProtocolBaseBin = vnodeProtocolBaseOutput.contracts[':VnodeProtocolBase'].bytecode;
 console.log("VnodeProtocolBase Contract compiled, size = " + vnodeProtocolBaseBin.length + " " + green_check_mark);
+
+// compile dappbase
+dappBaseFile = version + "/" + "dappbase.sol";
+dappBaseContract = fs.readFileSync(dappBaseFile, 'utf8');
+dappBaseOutput = solc.compile(dappBaseContract, 1);
+dappBaseAbi = dappBaseOutput.contracts[':DappBase'].interface;
+dappBaseBin = dappBaseOutput.contracts[':DappBase'].bytecode;
+console.log("dappBase Contract compiled, size = " + dappBaseBin.length + " " + green_check_mark);
 
 // compile subchainprotocolbase
 subChainProtocolBaseProtocol = "pos";
@@ -94,6 +104,7 @@ chain3.personal.unlockAccount(install_account, password, unlock_forever);
 vnodeProtocolBaseContract = chain3.mc.contract(JSON.parse(vnodeProtocolBaseAbi));
 subChainProtocolBaseContract = chain3.mc.contract(JSON.parse(subChainProtocolBaseAbi));
 subChainBaseContract = chain3.mc.contract(JSON.parse(subChainBaseAbi));
+dappBaseContract = chain3.mc.contract(JSON.parse(dappBaseAbi));
 
 async function main() {
     // deploy two contracts: vnodeprotocolbase, subchainprotocolbase
@@ -162,6 +173,9 @@ async function main() {
     subChainBase = await deploySubChainBaseContractPromise();
     console.log("SubChainBase Contract deployed! address: "+ subChainBase.address + " " + green_check_mark);
 
+    addfund =  await addFundPromise(addFundAmount);
+    console.log("Added fund " + addFundAmount + " mc to subchain addr: " + subChainBase.address + " "+ green_check_mark);
+
     registerOpenResult = await registerOpenPromise();
     console.log("SubChainBase register open, hash: " + registerOpenResult + " " + green_check_mark);
 
@@ -187,7 +201,7 @@ async function main() {
         console.log("Registered scs " + scsid + " as monitor " + "hash: " + result + " " + green_check_mark);
     }
 
-    // wait for 3 blocks before enable rng
+    // wait for 3 blocks before deploy dappbase
     _bc = await getBlockNumber();
     while(true) {
         bc = await getBlockNumber();
@@ -198,6 +212,11 @@ async function main() {
         }
     }
 
+    /*
+    dappBaseContract = await deployDappBaseContractPromise();
+    console.log("DappBase Contract deployed! address: "+ dappBaseContract.address + " " + green_check_mark);
+
+
     // wait for 6 blocks before query for rng node count
     _bc = await getBlockNumber();
     while(true) {
@@ -206,10 +225,12 @@ async function main() {
         if (bc > _bc + 6) {
             break;
         }
-    }
+    }*/
 
+    /*
     result = await getRNGNodeCountPromise();
     console.log("RNG enabled with " + result + " nodes." + green_check_mark);
+    */
 
     // wait for 50 blocks before query for reset rng
     while(true) {
@@ -299,6 +320,33 @@ function deploySubChainProtocolBaseContractPromise(){
     });
 }
 
+// For deploy dappbase
+function deployDappBaseContractPromise(){
+    return new Promise((resolve, reject) => {
+        deployTransaction = {
+            from: install_account,
+            value: 0,
+            to: subChainBase.address,
+            data: '0x' + dappBaseBin,
+            gas: "0",
+            shardingFlag: "0x3",
+            nonce: 0,
+            via: install_account
+        };
+        dappBaseContract.new(
+            deployTransaction,
+            (e, contract) => {
+                if (e) {
+                    reject(e);
+                }
+
+                if (contract && typeof contract.address !== 'undefined') {
+                    resolve(contract);
+                }
+            });
+    });
+}
+
 // For deploy subchainbase
 function deploySubChainBaseContractPromise(){
     return new Promise((resolve, reject) => {
@@ -317,6 +365,7 @@ function deploySubChainBaseContractPromise(){
             tokensupply,
             exchangerate,
             threshold,
+            rngEnabled,
             deployTransaction,
             (e, contract) => {
                 if (e) {
@@ -390,15 +439,35 @@ function registerOpenPromise(scsid) {
 }
 
 // For subchainbase register close
-function registerClosePromise(scsid) {
+function registerClosePromise() {
     return new Promise((resolve, reject) => {
         registerCloseTransaction = {
             from: install_account,
 		    to: subChainBase.address,
-		    gas: "3000000",
+		    gas: "2000000",
 		    data: subChainBase.registerClose.getData()
         };
         chain3.mc.sendTransaction(registerCloseTransaction, (e, transactionHash) => {
+            if (!e) {
+                resolve(transactionHash);
+            } else {
+                reject(e);
+            }
+        });
+    });
+}
+
+// For subchainbase add fund
+function addFundPromise(amount_in_mc) {
+    return new Promise((resolve, reject) => {
+        addFundTransaction = {
+            from: install_account,
+		    to: subChainBase.address,
+		    gas: "2000000",
+		    data: subChainBase.addFund.getData(),
+            value: chain3.toSha(amount_in_mc,'mc')
+        };
+        chain3.mc.sendTransaction(addFundTransaction, (e, transactionHash) => {
             if (!e) {
                 resolve(transactionHash);
             } else {
