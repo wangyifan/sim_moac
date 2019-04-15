@@ -16,7 +16,7 @@ contract SubChainBase {
     enum ProposalFlag {noState, pending, disputed, approved, rejected, expired, pendingAccept}
     enum ProposalCheckStatus {undecided, approval, expired}
     enum ConsensusStatus {initStage, workingStage, failure}
-    enum SCSRelayStatus {registerOpen, registerClose, createProposal, disputeProposal, approveProposal, registerAdd, regAsMonitor, regAsBackup, updateLastFlushBlk, distributeProposal, reset, uploadRedeemData, requestEnterAndRedeem, requestRelease, rngEnabled, rngGroupConfig}
+    enum SCSRelayStatus {registerOpen, registerClose, createProposal, disputeProposal, approveProposal, registerAdd, regAsMonitor, regAsBackup, updateLastFlushBlk, distributeProposal, reset, uploadRedeemData, requestEnterAndRedeem, requestRelease, rngEnabled, rngGroupConfig, distributeProposalAndRNGGroupConfig}
     enum SubChainStatus {open, pending, close}
 
     struct Proposal {
@@ -502,8 +502,8 @@ contract SubChainBase {
         nodePerformance[msg.sender] = NODE_INIT_PERFORMANCE;
     }
 
-    //user can explicitly release
-    function requestRelease(uint senderType, uint index) public returns (bool) {
+    function requestReleaseCheck(uint senderType, uint index) private returns (bool) {
+        return true; // for test only
         //only in nodeList and scsBeneficiary can call this function
         if (senderType == 1) {
             if (nodeList[index] != msg.sender) {
@@ -514,6 +514,15 @@ contract SubChainBase {
                 return false;
             }
         } else {
+            return false;
+        }
+
+        return true;
+    }
+
+    //user can explicitly release
+    function requestRelease(uint senderType, uint index) public returns (bool) {
+        if (!requestReleaseCheck(senderType, index)) {
             return false;
         }
         //check if already requested
@@ -1023,10 +1032,10 @@ contract SubChainBase {
 
 
         //remove bad nodes
-        applyRemoveNodes(0);
+        bool nodesChanged = applyRemoveNodes(0);
 
         //remove node to release
-        applyRemoveNodes(1);
+        nodesChanged = nodesChanged || applyRemoveNodes(1);
 
         //update randIndex
         bytes32 randseed = sha256(hash, block.number);
@@ -1035,7 +1044,7 @@ contract SubChainBase {
 
         //if some nodes want to join in
         if (registerFlag == 2) {
-            applyJoinNodes();
+            nodesChanged = nodesChanged || applyJoinNodes();
         }
 
         //if need toauto retire nodes
@@ -1052,7 +1061,7 @@ contract SubChainBase {
         //notify v-node
         if (prop.redeemAddr.length == 0) {
             revenueDistribution(hash);
-            flushEnd(hash);
+            flushEnd(hash, nodesChanged);
         } else {
             SCS_RELAY.notifySCS(address(this), uint(SCSRelayStatus.approveProposal));
         }
@@ -1074,12 +1083,10 @@ contract SubChainBase {
             owner.transfer(this.balance - totalExchange/priceOneGInMOAC - totalBond);
             totalOperation = 0;
         }
-
-        //SCS_RELAY.notifySCS(address(this), uint(SCSRelayStatus.rngGroupConfig));
         return true;
     }
 
-    function flushEnd(bytes32 hash ) private {
+    function flushEnd(bytes32 hash, bool nodesChanged) private {
         Proposal storage prop = proposals[hash];
 
         //setflag
@@ -1100,7 +1107,11 @@ contract SubChainBase {
             withdrawal();
         }
 
-        SCS_RELAY.notifySCS(address(this), uint(SCSRelayStatus.distributeProposal));
+        if (nodesChanged) {
+          SCS_RELAY.notifySCS(address(this), uint(SCSRelayStatus.distributeProposalAndRNGGroupConfig));
+        } else {
+          SCS_RELAY.notifySCS(address(this), uint(SCSRelayStatus.distributeProposal));
+        }
     }
 
     function requestEnterAndRedeemAction(bytes32 hash) public returns (bool) {
@@ -1154,7 +1165,7 @@ contract SubChainBase {
         }
         if (res) {
             revenueDistribution(hash);
-            flushEnd(hash);
+            flushEnd(hash, false);
         } else {
             SCS_RELAY.notifySCS(address(this), uint(SCSRelayStatus.requestEnterAndRedeem));
         }
@@ -1289,12 +1300,14 @@ contract SubChainBase {
         return true;
     }
 
-    function applyJoinNodes() private {
+    function applyJoinNodes() private returns (bool) {
         uint i = 0;
+        bool nodesChanged = false;
         for (i = joinCntNow; i > 0; i--) {
             if( nodePerformance[nodesToJoin[i-1]] == NODE_INIT_PERFORMANCE) {
                 nodeList.push(nodesToJoin[i-1]);
                 nodeCount++;
+                nodesChanged = true;
 
                 // register the node with rng
                 activateRNG(nodesToJoin[i-1]);
@@ -1311,20 +1324,22 @@ contract SubChainBase {
             joinCntMax = 0;
             registerFlag = 0;
         }
+
+        return nodesChanged;
     }
 
     // reuse this code for remove bad node or other volunteerly leaving node
     // nodetype 0: bad node, 1: volunteer leaving node
-    function applyRemoveNodes(uint nodetype) private {
+    function applyRemoveNodes(uint nodetype) private returns (bool) {
         SubChainProtocolBase protocnt = SubChainProtocolBase(protocol);
-
+        bool nodesChanged = false;
         uint count = nodesToDispel.length;
         if (nodetype == 1) {
             count = nodeToReleaseCount;
         }
 
         if (count == 0) {
-            return;
+            return nodesChanged;
         }
 
         // all nodes set 0 at initial, set node to be removed as 1.
@@ -1361,6 +1376,7 @@ contract SubChainBase {
                 nodeList[i-1] = nodeList[nodeCount];
                 delete nodeList[nodeCount];
                 nodeList.length--;
+                nodesChanged = true;
                 //nodesToDispel.length--;
             }
 
@@ -1380,6 +1396,8 @@ contract SubChainBase {
             //clear release count
             nodeToReleaseCount = 0;
         }
+
+        return nodesChanged;
     }
 
     // ATO new

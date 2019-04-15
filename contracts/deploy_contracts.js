@@ -23,7 +23,7 @@ let subChainBase = null;
 let minMember = 1;
 let maxMember = 31;
 let thousandth = 1000;
-let threshold = 5;
+let threshold = 3;
 let rngEnabled = true;
 let flushRound = 50;
 let tokensupply = 2;
@@ -37,8 +37,8 @@ scsids = [
     "8d26cd8257288a9f3fcb3c7a4b15ade3cf932925", // scs 3
     "632774bf61ffc8873e43f3ce68cf3f169300efa3", // scs 4
     "d7e1cf982f75563f166726a5814c7fa3c1948068", // scs 5
-    "30601cba96b98f22d5c46bb8a8b0b298b8017ef2", // scs 6
-    "c24c73cfb25e444fb20c3405a8327808303f4040", // scs 7
+    //"30601cba96b98f22d5c46bb8a8b0b298b8017ef2", // scs 6
+    //"c24c73cfb25e444fb20c3405a8327808303f4040", // scs 7
 ];
 
 scsmonitorids = [
@@ -91,10 +91,10 @@ subChainBaseOutput = solc.compile(
 );
 
 if (subChainBaseOutput.errors.length > 0) {
-    //console.log(subChainBaseOutput.errors);
+    console.log(subChainBaseOutput.errors);
 }
 subChainBaseAbi = subChainBaseOutput.contracts['SubChainBase.sol:SubChainBase'].interface;
-//console.log(subChainBaseAbi);
+console.log(subChainBaseAbi);
 subChainBaseBin = subChainBaseOutput.contracts['SubChainBase.sol:SubChainBase'].bytecode;
 console.log("SubChainBase Contract compiled, size = " + subChainBaseBin.length + " " + green_check_mark);
 
@@ -230,7 +230,6 @@ async function main() {
     /*
     result = await getRNGNodeCountPromise();
     console.log("RNG enabled with " + result + " nodes." + green_check_mark);
-    */
 
     // wait for 50 blocks before query for reset rng
     while(true) {
@@ -245,7 +244,12 @@ async function main() {
 
         result = await getResetRNGGroupPromise();
         console.log("RNG reset with " + result + " nodes." + green_check_mark);
-    }
+        }*/
+
+
+    scsNodeIndex = 2;
+    result = await requestReleaseSCSPromise(scsNodeIndex);
+    console.log("Request release scs ", scsNodeIndex, " ", green_check_mark, " tx = ", result);
 }
 
 main();
@@ -390,6 +394,25 @@ function registerSCSSubChainProtocolBasePromise(scsid) {
             value: chain3.toSha(bmin, 'mc')
         };
         chain3.mc.sendTransaction(registerTransaction, (e, transactionHash) => {
+            if (!e) {
+                resolve(transactionHash);
+            } else {
+                reject(e);
+            }
+        });
+    });
+}
+
+// For register scs to subchainbase as monitor
+function requestReleaseSCSPromise(scsNodeIndex) {
+    return new Promise((resolve, reject) => {
+        requestReleaseTransaction = {
+            from: install_account,
+		    to: subChainBase.address,
+		    gas: "10000000",
+		    data: subChainBase.requestRelease.getData(1, scsNodeIndex)
+        };
+        chain3.mc.sendTransaction(requestReleaseTransaction, (e, transactionHash) => {
             if (!e) {
                 resolve(transactionHash);
             } else {
