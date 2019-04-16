@@ -183,6 +183,10 @@ contract SubChainBase {
         require(flushRound >= 1  && flushRound <= 100);
 
         flushInRound = flushRound;
+
+        rngThreshold = threshold;
+        rngEnabled = enableRNG;
+
         VnodeProtocolBaseAddr = vnodeProtocolBaseAddr;
         SubChainProtocolBase protocnt = SubChainProtocolBase(proto);
         selTarget = protocnt.getSelectionTarget(thousandth, min);
@@ -411,7 +415,11 @@ contract SubChainBase {
         nodeList.push(msg.sender);
         nodeCount++;
         nodePerformance[msg.sender] = NODE_INIT_PERFORMANCE;
-        
+
+        // put the scs in rng group
+        registerRNG(msg.sender, publickey);
+        activateRNG(msg.sender);
+
         //todo: refund gas
         //msg.sender.send(gasleft() * tx.gasprice);
 
@@ -558,6 +566,7 @@ contract SubChainBase {
         );
 
         nodeCount--;
+        unregisterRNG(nodeList[index]);
         nodeList[index] = nodeList[nodeCount];
         delete nodeList[nodeCount];
         nodeList.length--;
@@ -591,6 +600,7 @@ contract SubChainBase {
                     cur,
                     penaltyBond
                 );
+                unregisterRNG(cur);
                 delete nodeList[i - 1];
             }
 
@@ -1224,6 +1234,7 @@ contract SubChainBase {
                 cur,
                 penaltyBond
             );
+            unregisterRNG(cur);
             delete nodeList[i-1];
         }
         nodeCount = 0;
@@ -1234,6 +1245,7 @@ contract SubChainBase {
                 cur,
                 penaltyBond
             );
+            unregisterRNG(cur);
             delete nodesToJoin[i-1];
             nodesToJoin.length --;
         }
@@ -1296,6 +1308,10 @@ contract SubChainBase {
                 nodeList.push(nodesToJoin[i-1]);
                 nodeCount++;
                 nodesChanged = true;
+
+                // register the node with rng
+                activateRNG(nodesToJoin[i-1]);
+
                 //delete node
                 nodesToJoin[i-1] = nodesToJoin[nodesToJoin.length-1];
                 delete nodesToJoin[nodesToJoin.length-1];
@@ -1356,6 +1372,7 @@ contract SubChainBase {
                 //swap with last element
                 // remove node from list
                 nodeCount--;
+                unregisterRNG(nodeList[i-1]);
                 nodeList[i-1] = nodeList[nodeCount];
                 delete nodeList[nodeCount];
                 nodeList.length--;
@@ -1457,4 +1474,137 @@ contract SubChainBase {
         holdingPool.time.push(now);
         return true;
     }
+
+    //////////////////////////////////////
+    //////////////////////////////////////
+    // code and data for random number  //
+    // generator (RNG) in subchain      //
+    //////////////////////////////////////
+    ///////////////START//////////////////
+    mapping(address => bytes32) public rngPublicKeys;
+    mapping(address => uint) public rngNodeIndexs;  // value start from 0
+    mapping(uint => address) public reverseRNGNodeIndexs; // key start from 0
+    mapping(address => uint) public rngNodeMemberships; // Indicates if the node is still in the rng group
+    mapping(address => bytes) public rngPublicShares; // nodeID => list of public shares in json
+    mapping(address => bytes) public rngPrivateShares; // nodeID => list of private shares in json
+    bool public rngEnabled = false;
+    uint public rngThreshold = 0;
+    uint public rngNodeCount = 0;
+    uint public rngConfigVersion = 0;
+    enum RngMembership {noreg, active, inactive}
+
+    function registerRNG(address sender, bytes32 publickey) private {
+        rngPublicKeys[sender] = publickey;
+    }
+
+    function activateRNG(address sender) private {
+        if (rngNodeMemberships[sender] == uint(RngMembership.noreg)) {
+            rngNodeIndexs[sender] = rngNodeCount;
+            reverseRNGNodeIndexs[rngNodeCount] = sender;
+            rngNodeCount++;
+            rngNodeMemberships[sender] = uint(RngMembership.active);
+          }
+
+        if (rngNodeMemberships[sender] == uint(RngMembership.inactive)) {
+            rngNodeMemberships[sender] = uint(RngMembership.active);
+        }
+    }
+
+    function unregisterRNG(address sender) private {
+        if (rngNodeMemberships[sender] == uint(RngMembership.active)) {
+            rngNodeMemberships[sender] = uint(RngMembership.inactive);
+        }
+    }
+
+    function uploadRNGConfig(bytes publicShares, bytes privateShares) public {
+        // only active member can upload rng config
+        if (rngNodeMemberships[msg.sender] != uint(RngMembership.active)) {
+            return;
+        }
+
+        // publicShares.length only needs to be > threshold so other nodes can re-computer the poly
+        rngPublicShares[msg.sender] = publicShares;
+        rngPrivateShares[msg.sender] = privateShares;
+
+        rngConfigVersion++;
+    }
+
+    function getRNGConfigVersion() public view returns(uint) {
+        return rngConfigVersion;
+    }
+
+    function getRNGEnabled() public view returns(bool) {
+        return rngEnabled;
+    }
+
+    function getPublicShares(address node) public view returns(bytes) {
+        return rngPublicShares[node];
+    }
+
+    function getPrivateShares(address node) public view returns(bytes) {
+        return rngPrivateShares[node];
+    }
+
+    function getRNGNodesPubkey(address[] nodes) public view returns (bytes32[]) {
+        uint n = nodes.length;
+        bytes32[] memory publickeys = new bytes32[](n);
+        for(uint i = 0; i < nodes.length; i++) {
+            publickeys[i] = rngPublicKeys[nodes[i]];
+        }
+        return publickeys;
+    }
+
+    function getRNGNodeCount() public view returns (uint) {
+        return rngNodeCount;
+    }
+
+    function getActiveRNGMemberCount() public view returns (uint) {
+        uint result = 0;
+        for(uint i=0;i<rngNodeCount;i++) {
+            if (rngNodeMemberships[reverseRNGNodeIndexs[i]] == uint(RngMembership.active)) {
+                result++;
+            }
+        }
+
+        return result;
+    }
+
+    function getActiveRNGMemberList() public view returns (address[]) {
+        uint n = getActiveRNGMemberCount();
+        address[] memory addressList = new address[](n);
+        uint index = 0;
+        for(uint i = 0;i < rngNodeCount; i++) {
+            if (rngNodeMemberships[reverseRNGNodeIndexs[i]] == uint(RngMembership.active)) {
+                addressList[index] = reverseRNGNodeIndexs[i];
+                index++;
+            }
+        }
+
+        return addressList;
+    }
+
+    function getRNGNodesIndexs(address[] nodes) public view returns (uint[]) {
+        uint n = nodes.length;
+        uint[] memory indexs = new uint[](n);
+        for(uint i = 0; i < nodes.length; i++) {
+            indexs[i] = rngNodeIndexs[nodes[i]];
+        }
+        return indexs;
+    }
+
+    function getRNGNodeIndex(address scs) public view returns (uint) {
+        return rngNodeIndexs[scs];
+    }
+
+    function resetRNGGroup() public {
+        require(owner == msg.sender);
+        SCS_RELAY.notifySCS(address(this), uint(SCSRelayStatus.rngGroupConfig));
+    }
+
+    //////////////////////////////////////
+    /////////////////END//////////////////
+    // code and data for random number  //
+    // generator (RNG) in subchain      //
+    //////////////////////////////////////
+    //////////////////////////////////////
 }

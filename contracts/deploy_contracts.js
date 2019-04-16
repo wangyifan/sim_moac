@@ -91,13 +91,12 @@ subChainBaseOutput = solc.compile(
 );
 
 if (subChainBaseOutput.errors.length > 0) {
-    console.log(subChainBaseOutput.errors);
+    //console.log(subChainBaseOutput.errors);
 }
 subChainBaseAbi = subChainBaseOutput.contracts['SubChainBase.sol:SubChainBase'].interface;
-console.log(subChainBaseAbi);
+//console.log(subChainBaseAbi);
 subChainBaseBin = subChainBaseOutput.contracts['SubChainBase.sol:SubChainBase'].bytecode;
 console.log("SubChainBase Contract compiled, size = " + subChainBaseBin.length + " " + green_check_mark);
-
 
 chain3.setProvider(new chain3.providers.HttpProvider('http://localhost:52159'));
 chain3.personal.unlockAccount(install_account, password, unlock_forever);
@@ -212,11 +211,10 @@ async function main() {
         }
     }
 
-    /*
     dappBaseContract = await deployDappBaseContractPromise();
     console.log("DappBase Contract deployed! address: "+ dappBaseContract.address + " " + green_check_mark);
 
-
+    /*
     // wait for 6 blocks before query for rng node count
     _bc = await getBlockNumber();
     while(true) {
@@ -247,9 +245,11 @@ async function main() {
         }*/
 
 
+    /*
     scsNodeIndex = 2;
     result = await requestReleaseSCSPromise(scsNodeIndex);
     console.log("Request release scs ", scsNodeIndex, " ", green_check_mark, " tx = ", result);
+    */
 }
 
 main();
