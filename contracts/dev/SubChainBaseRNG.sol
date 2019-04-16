@@ -177,16 +177,12 @@ contract SubChainBase {
     event TransferAmount(address addr, uint amount);
 
     //constructor
-    function SubChainBase(address proto, address vnodeProtocolBaseAddr, uint min, uint max, uint thousandth, uint flushRound, uint256 tokensupply, uint256 exchangerate, uint threshold, bool enableRNG) public {
+    function SubChainBase(address proto, address vnodeProtocolBaseAddr, uint min, uint max, uint thousandth, uint flushRound, uint256 tokensupply, uint256 exchangerate, int threshold) public {
         require(min == 1 || min == 3 || min == 5 || min == 7);
         require(max == 11 || max == 21 || max == 31 || max == 51 || max == 99);
         require(flushRound >= 1  && flushRound <= 100);
-
         flushInRound = flushRound;
-
         rngThreshold = threshold;
-        rngEnabled = enableRNG;
-
         VnodeProtocolBaseAddr = vnodeProtocolBaseAddr;
         SubChainProtocolBase protocnt = SubChainProtocolBase(proto);
         selTarget = protocnt.getSelectionTarget(thousandth, min);
@@ -1487,8 +1483,7 @@ contract SubChainBase {
     mapping(address => uint) public rngNodeMemberships; // Indicates if the node is still in the rng group
     mapping(address => bytes) public rngPublicShares; // nodeID => list of public shares in json
     mapping(address => bytes) public rngPrivateShares; // nodeID => list of private shares in json
-    bool public rngEnabled = false;
-    uint public rngThreshold = 0;
+    int public rngThreshold = 0;
     uint public rngNodeCount = 0;
     uint public rngConfigVersion = 0;
     enum RngMembership {noreg, active, inactive}
@@ -1531,10 +1526,6 @@ contract SubChainBase {
 
     function getRNGConfigVersion() public view returns(uint) {
         return rngConfigVersion;
-    }
-
-    function getRNGEnabled() public view returns(bool) {
-        return rngEnabled;
     }
 
     function getPublicShares(address node) public view returns(bytes) {

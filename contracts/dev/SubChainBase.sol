@@ -172,12 +172,14 @@ contract SubChainBase {
     uint public totalOperation;
     uint public totalBond;
 
+    int public rngThreshold = -1;
+
     //events
     event ReportStatus(string message);
     event TransferAmount(address addr, uint amount);
 
     //constructor
-    function SubChainBase(address proto, address vnodeProtocolBaseAddr, uint min, uint max, uint thousandth, uint flushRound, uint256 tokensupply, uint256 exchangerate, uint threshold, bool enableRNG) public {
+    function SubChainBase(address proto, address vnodeProtocolBaseAddr, uint min, uint max, uint thousandth, uint flushRound, uint256 tokensupply, uint256 exchangerate, uint threshold) public {
         require(min == 1 || min == 3 || min == 5 || min == 7);
         require(max == 11 || max == 21 || max == 31 || max == 51 || max == 99);
         require(flushRound >= 1  && flushRound <= 100);
@@ -411,7 +413,7 @@ contract SubChainBase {
         nodeList.push(msg.sender);
         nodeCount++;
         nodePerformance[msg.sender] = NODE_INIT_PERFORMANCE;
-        
+
         //todo: refund gas
         //msg.sender.send(gasleft() * tx.gasprice);
 

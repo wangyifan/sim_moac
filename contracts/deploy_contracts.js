@@ -24,9 +24,8 @@ let minMember = 1;
 let maxMember = 31;
 let thousandth = 1000;
 let threshold = 3;
-let rngEnabled = true;
 let flushRound = 50;
-let tokensupply = 2;
+let tokensupply = 3;
 let exchangerate = 1;
 let addFundAmount = 50;
 
@@ -71,7 +70,9 @@ subChainProtocolBaseAbi = subChainProtocolBaseOutput.contracts[':SubChainProtoco
 subChainProtocolBaseBin = subChainProtocolBaseOutput.contracts[':SubChainProtocolBase'].bytecode;
 console.log("SubChainProtocolBase Contract compiled, size = " + subChainProtocolBaseBin.length + " " + green_check_mark);
 
-subChainBaseSolfiles = ["SubChainBase.sol", "SubChainProtocolBase.sol"];
+subChainBaseFileName = "SubChainBaseRNG.sol";
+subChainBaseSolfiles = [subChainBaseFileName, "SubChainProtocolBase.sol"];
+//subChainBaseSolfiles = ["SubChainBase.sol", "SubChainProtocolBase.sol"];
 subChainBaseInput = {};
 subChainBaseSolfiles.forEach(fileName => {
     file = fs.readFileSync(version + "/" + fileName, 'utf8');
@@ -91,11 +92,11 @@ subChainBaseOutput = solc.compile(
 );
 
 if (subChainBaseOutput.errors.length > 0) {
-    //console.log(subChainBaseOutput.errors);
+    console.log(subChainBaseOutput.errors);
 }
-subChainBaseAbi = subChainBaseOutput.contracts['SubChainBase.sol:SubChainBase'].interface;
-//console.log(subChainBaseAbi);
-subChainBaseBin = subChainBaseOutput.contracts['SubChainBase.sol:SubChainBase'].bytecode;
+subChainBaseAbi = subChainBaseOutput.contracts[subChainBaseFileName + ':SubChainBase'].interface;
+console.log(subChainBaseAbi);
+subChainBaseBin = subChainBaseOutput.contracts[subChainBaseFileName + ':SubChainBase'].bytecode;
 console.log("SubChainBase Contract compiled, size = " + subChainBaseBin.length + " " + green_check_mark);
 
 chain3.setProvider(new chain3.providers.HttpProvider('http://localhost:52159'));
@@ -211,7 +212,7 @@ async function main() {
         }
     }
 
-    dappBaseContract = await deployDappBaseContractPromise();
+    dappBaseContract = await deployDappBaseContractPromise(tokensupply/exchangerate);
     console.log("DappBase Contract deployed! address: "+ dappBaseContract.address + " " + green_check_mark);
 
     /*
@@ -325,29 +326,26 @@ function deploySubChainProtocolBaseContractPromise(){
 }
 
 // For deploy dappbase
-function deployDappBaseContractPromise(){
+function deployDappBaseContractPromise(amount_in_mc){
     return new Promise((resolve, reject) => {
         deployTransaction = {
             from: install_account,
-            value: 0,
+            value: chain3.toSha(amount_in_mc,'mc'),
             to: subChainBase.address,
             data: '0x' + dappBaseBin,
             gas: "0",
             shardingFlag: "0x3",
-            nonce: 0,
-            via: install_account
+            via: install_account,
+            nonce: 0
         };
-        dappBaseContract.new(
-            deployTransaction,
-            (e, contract) => {
-                if (e) {
-                    reject(e);
-                }
 
-                if (contract && typeof contract.address !== 'undefined') {
-                    resolve(contract);
-                }
-            });
+        chain3.mc.sendTransaction(deployTransaction, (e, transactionHash) => {
+            if (!e) {
+                resolve(transactionHash);
+            } else {
+                reject(e);
+            }
+        });
     });
 }
 
@@ -369,7 +367,6 @@ function deploySubChainBaseContractPromise(){
             tokensupply,
             exchangerate,
             threshold,
-            rngEnabled,
             deployTransaction,
             (e, contract) => {
                 if (e) {
