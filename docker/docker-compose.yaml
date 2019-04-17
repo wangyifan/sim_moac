@@ -56,15 +56,15 @@ services:
       - "vnode"
     ports:
         - "52164:12345"
-  #scs6:
-  #  working_dir: /scs/6
-  #  # image: moacofficial/scs:1.0.6-dev
-  #  image: yifan:scs
-  #  command: wait-for-it.sh vnode:50062 --strict -- scsserver --password 123456 --userconfig userconfig.json --datadir /scs/6 --rpcaddr 0.0.0.0 --rpcport 12345 --rpccorsdomain "*" --rpcdebug
-  #  depends_on:
-  #    - "vnode"
-  #  ports:
-  #      - "52165:12345"
+  scs6:
+    working_dir: /scs/6
+    # image: moacofficial/scs:1.0.6-dev
+    image: yifan:scs
+    command: wait-for-it.sh vnode:50062 --strict -- scsserver --password 123456 --userconfig userconfig.json --datadir /scs/6 --rpcaddr 0.0.0.0 --rpcport 12345 --rpccorsdomain "*" --rpcdebug
+    depends_on:
+      - "vnode"
+    ports:
+        - "52165:12345"
   #scs7:
   #  working_dir: /scs/7
   #  # image: moacofficial/scs:1.0.6-dev
