@@ -148,6 +148,24 @@ function registerSCSSubChainProtocolBasePromise(chain3_, subChainProtocolBase_, 
     });
 }
 
+function getResetRNGGroupPromise(subchainbase) {
+    return new Promise((resolve, reject) => {
+        transaction = {
+            from: install_account,
+		    to: subchainbase.address,
+		    gas: "10000000",
+		    data: subchainbase.resetRNGGroup.getData()
+        };
+        chain3.mc.sendTransaction(transaction, (e, transactionHash) => {
+            if (!e) {
+                resolve(transactionHash);
+            } else {
+                reject(e);
+            }
+        });
+    });
+}
+
 module.exports = {
     install_account: install_account,
     scsids: scsids,
@@ -179,6 +197,7 @@ module.exports = {
     scsmonitorids: scsmonitorids,
     sendMCPromise: sendMCPromise,
     registerSCSSubChainProtocolBasePromise: registerSCSSubChainProtocolBasePromise,
+    getResetRNGGroupPromise: getResetRNGGroupPromise,
     subChainProtocolBaseAbi: subChainProtocolBaseAbi,
     vnodeProtocolBaseAbi: vnodeProtocolBaseAbi,
     subChainBaseAbi: subChainBaseAbi,

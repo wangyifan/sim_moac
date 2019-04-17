@@ -26,6 +26,7 @@ addFundAmount = dcbase.addFundAmount;
 scs_amount = dcbase.scs_amount;
 scsids = dcbase.scsids;
 scsmonitorids = dcbase.scsmonitorids;
+getResetRNGGroupPromise = dcbase.getResetRNGGroupPromise;
 
 chain3.setProvider(new chain3.providers.HttpProvider('http://localhost:52159'));
 chain3.personal.unlockAccount(install_account, password, unlock_forever);
@@ -489,22 +490,4 @@ function getRNGNodeCountPromise() {
 
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-function getResetRNGGroupPromise() {
-    return new Promise((resolve, reject) => {
-        transaction = {
-            from: install_account,
-		    to: subChainBase.address,
-		    gas: "10000000",
-		    data: subChainBase.resetRNGGroup.getData()
-        };
-        chain3.mc.sendTransaction(transaction, (e, transactionHash) => {
-            if (!e) {
-                resolve(transactionHash);
-            } else {
-                reject(e);
-            }
-        });
-    });
 }

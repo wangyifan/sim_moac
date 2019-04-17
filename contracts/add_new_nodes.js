@@ -28,6 +28,7 @@ scsids = dcbase.scsids;
 scsmonitorids = dcbase.scsmonitorids;
 sendMCPromise = dcbase.sendMCPromise;
 registerSCSSubChainProtocolBasePromise = dcbase.registerSCSSubChainProtocolBasePromise;
+getResetRNGGroupPromise = dcbase.getResetRNGGroupPromise;
 
 chain3.setProvider(new chain3.providers.HttpProvider('http://localhost:52159'));
 chain3.personal.unlockAccount(install_account, password, unlock_forever);
@@ -86,6 +87,9 @@ async function main() {
     result = await registerAddPromise(nodetoadd);
     console.log("Register add result with " + result + " " +green_check_mark);
 
+
+    result = await getResetRNGGroupPromise(subChainBase);
+    console.log("reset rng group " + green_check_mark);
 }
 
 // call registeradd to subchainbase
