@@ -44,7 +44,6 @@ subChainProtocolBase = chain3.mc.contract(JSON.parse(subChainProtocolBaseAbi)).a
 
 async function main() {
     scsids = ["30601cba96b98f22d5c46bb8a8b0b298b8017ef2"]; //scs6
-
     // send money
     for (i = 0; i < scsids.length; i++) {
         scsid = scsids[i];
@@ -80,20 +79,20 @@ async function main() {
         }
     }
 
-    result = await getSCSRolePromise("0x"+ scsids[0]);
+    result = await getSCSRolePromise("0x"+ scsids[0], chain3);
     console.log("get scs role promise for ", scsids[0], "with result ", result);
 
     nodetoadd = 10;
-    result = await registerAddPromise(nodetoadd);
+    result = await registerAddPromise(nodetoadd, chain3);
     console.log("Register add result with " + result + " " +green_check_mark);
-
-
-    result = await getResetRNGGroupPromise(subChainBase);
+    /*
+    result = await getResetRNGGroupPromise(subChainBase, chain3);
     console.log("reset rng group " + green_check_mark);
+    */
 }
 
 // call registeradd to subchainbase
-function registerAddPromise(nodetoadd) {
+function registerAddPromise(nodetoadd, chain3) {
     return new Promise((resolve, reject) => {
         registerAddTransaction = {
             from: install_account,
@@ -112,7 +111,7 @@ function registerAddPromise(nodetoadd) {
 }
 
 // call getSCSRole
-function getSCSRolePromise(scsid) {
+function getSCSRolePromise(scsid, chain3) {
     return new Promise((resolve, reject) => {
         registerAddTransaction = {
 		    to: subChainBase.address,

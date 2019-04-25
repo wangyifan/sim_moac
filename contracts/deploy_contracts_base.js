@@ -148,7 +148,7 @@ function registerSCSSubChainProtocolBasePromise(chain3_, subChainProtocolBase_, 
     });
 }
 
-function getResetRNGGroupPromise(subchainbase) {
+function getResetRNGGroupPromise(subchainbase, chain3) {
     return new Promise((resolve, reject) => {
         transaction = {
             from: install_account,

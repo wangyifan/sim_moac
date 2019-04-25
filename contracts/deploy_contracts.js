@@ -105,6 +105,11 @@ async function main() {
     subChainBase = await deploySubChainBaseContractPromise();
     console.log("SubChainBase Contract deployed! address: "+ subChainBase.address + " " + green_check_mark);
 
+    subChainBase.allEvents(
+        {fromBlock: 0},
+        (error, event) => { console.log(event); }
+    );
+
     addfund =  await addFundPromise(addFundAmount);
     console.log("Added fund " + addFundAmount + " mc to subchain addr: " + subChainBase.address + " "+ green_check_mark);
 
@@ -182,12 +187,6 @@ async function main() {
         console.log("RNG reset with " + result + " nodes." + green_check_mark);
         }*/
 
-
-    /*
-    scsNodeIndex = 2;
-    result = await requestReleaseSCSPromise(scsNodeIndex);
-    console.log("Request release scs ", scsNodeIndex, " ", green_check_mark, " tx = ", result);
-    */
 }
 
 main();
@@ -333,25 +332,6 @@ function registerSCSSubChainProtocolBasePromise(scsid) {
             value: chain3.toSha(bmin, 'mc')
         };
         chain3.mc.sendTransaction(registerTransaction, (e, transactionHash) => {
-            if (!e) {
-                resolve(transactionHash);
-            } else {
-                reject(e);
-            }
-        });
-    });
-}
-
-// For register scs to subchainbase as monitor
-function requestReleaseSCSPromise(scsNodeIndex) {
-    return new Promise((resolve, reject) => {
-        requestReleaseTransaction = {
-            from: install_account,
-		    to: subChainBase.address,
-		    gas: "10000000",
-		    data: subChainBase.requestRelease.getData(1, scsNodeIndex)
-        };
-        chain3.mc.sendTransaction(requestReleaseTransaction, (e, transactionHash) => {
             if (!e) {
                 resolve(transactionHash);
             } else {

@@ -1,0 +1,26 @@
+version: '3.1'
+
+# create scs data volume for each one
+# docker create -v /scs/1 --name scs_data_1 busybox /bin/true
+
+services:
+  vnode1:
+    image: yifan:vnode-dev
+    ports:
+        - "52159:8545"
+    command: moac --networkid 95125 --vnodeconfig vnodeconfig.json --datadir=/vnode --ethash.dagdir /vnode/.ethash --verbosity 4 --rpc --rpcaddr 0.0.0.0 --mine --minerthreads 1 --rpcapi chain3,mc,net,vnode,personal --ipcpath=/root/.moac/moac.ipc 2>&1
+  vnode2:
+    image: yifan:vnode-dev
+    ports:
+        - "52160:8545"
+    command: moac --networkid 95125 --vnodeconfig vnodeconfig.json --datadir=/vnode --ethash.dagdir /vnode/.ethash --verbosity 4 --rpc --rpcaddr 0.0.0.0 --mine --minerthreads 1 --rpcapi chain3,mc,net,vnode,personal --ipcpath=/root/.moac/moac.ipc 2>&1
+  vnode3:
+    image: yifan:vnode-1.0.9
+    ports:
+        - "52161:8545"
+    command: moac --networkid 95125 --vnodeconfig vnodeconfig.json --datadir=/vnode --ethash.dagdir /vnode/.ethash --verbosity 4 --rpc --rpcaddr 0.0.0.0 --mine --minerthreads 1 --rpcapi chain3,mc,net,vnode,personal --ipcpath=/root/.moac/moac.ipc 2>&1
+  vnode4:
+    image: yifan:vnode-1.0.9
+    ports:
+        - "52162:8545"
+    command: moac --networkid 95125 --vnodeconfig vnodeconfig.json --datadir=/vnode --ethash.dagdir /vnode/.ethash --verbosity 4 --rpc --rpcaddr 0.0.0.0 --mine --minerthreads 1 --rpcapi chain3,mc,net,vnode,personal --ipcpath=/root/.moac/moac.ipc 2>&1
