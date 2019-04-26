@@ -12,7 +12,22 @@ RUN mkdir /vnode
 COPY config/vnode/vnodeconfig.json /vnode/vnodeconfig.json
 COPY config/vnode/vnode.genesis.json /vnode/genesis.json
 COPY bin/$version/vnode/moac /usr/local/sbin/
+COPY config/vnode/0.bootnode.key /vnode/0.bootnode.key
+COPY config/vnode/1.bootnode.key /vnode/1.bootnode.key
+COPY config/vnode/2.bootnode.key /vnode/2.bootnode.key
+COPY config/vnode/3.bootnode.key /vnode/3.bootnode.key
+COPY config/vnode/4.bootnode.key /vnode/4.bootnode.key
+COPY config/vnode/5.bootnode.key /vnode/5.bootnode.key
+COPY config/vnode/6.bootnode.key /vnode/6.bootnode.key
+COPY config/vnode/7.bootnode.key /vnode/7.bootnode.key
+COPY config/vnode/8.bootnode.key /vnode/8.bootnode.key
+COPY config/vnode/9.bootnode.key /vnode/9.bootnode.key
+COPY config/vnode/10.bootnode.key /vnode/10.bootnode.key
+COPY config/vnode/11.bootnode.key /vnode/11.bootnode.key
+COPY config/vnode/12.bootnode.key /vnode/12.bootnode.key
+
 WORKDIR /vnode
+
 RUN moac init genesis.json --datadir=/vnode \
     && echo "123456" > password \
     && echo "393873d6bbc61b9d83ba923e08375b7bf8210a12bed4ea2016d96021e9378cc9" > pk \
