@@ -1,17 +1,21 @@
-const Chain3 = require("chain3");
-
-let check_mark = "✓";
-let RED = "\033[0;31m";
-let GREEN = "\033[0;32m";
-let NC = "\033[0m";
-let green_check_mark = GREEN + check_mark + NC;
-let install_account = "0xa35add395b804c3faacf7c7829638e42ffa1d051";
-let password = "123456";
-let unlock_forever = 0;
-
-chain3 = new Chain3();
+const dcbase = require("./deploy_contracts_base.js");
+chain3 = dcbase.chain3;
+check_mark = dcbase.check_mark;
+RED = dcbase.RED;
+GREEN = dcbase.GREEN;
+NC = dcbase.NC;
+green_check_mark = dcbase.green_check_mark;
+install_account = dcbase.install_account;
+password = dcbase.password;
+unlock_forever = dcbase.unlock_forever;
 chain3.setProvider(new chain3.providers.HttpProvider('http://localhost:52159'));
 chain3.personal.unlockAccount(install_account, password, unlock_forever);
+deploySubChainProtocolBaseContractPromise = dcbase.deploySubChainProtocolBaseContractPromise;
+deployVnodeProtocolBaseContractPromise = dcbase.deployVnodeProtocolBaseContractPromise;
+deployDappBaseContractPromise = dcbase.deployDappBaseContractPromise;
+vnodeProtocolBaseContract = chain3.mc.contract(JSON.parse(vnodeProtocolBaseAbi));
+subChainProtocolBaseContract = chain3.mc.contract(JSON.parse(subChainProtocolBaseAbi));
+dappBaseContract = chain3.mc.contract(JSON.parse(dappBaseAbi));
 
 scsids = [
     "a63a7764d01a6b11ba628f06b00a1828e5955a7f", // scs 1
@@ -22,13 +26,18 @@ scsids = [
 ];
 
 async function main() {
-    for (j = 0; j < 80000; j++ ) {
-        for (i = 0; i < scsids.length; i++) {
-            scsid = scsids[i];
+    for (j = 0; j < 100; j++ ) {
+        for (i = 0; i < 100 ; i++) {
+            scsid = scsids[i%scsids.length];
             scs_amount = 0.0001;
             result = await sendMCPromise(chain3, install_account, scsid, scs_amount);
             console.log("Sent " + scs_amount + " mc to scsid " + scsid + " " + green_check_mark);
         }
+
+        result = await deploySubChainProtocolBaseContractPromise(subChainProtocolBaseContract);
+        console.log("subchain protocol base deployed " + result + " " + green_check_mark);
+        result = await deployVnodeProtocolBaseContractPromise();
+        console.log("vnode protocol base deployed " + result + " " + green_check_mark);
     }
 }
 

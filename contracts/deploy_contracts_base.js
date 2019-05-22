@@ -166,6 +166,80 @@ function getResetRNGGroupPromise(subchainbase, chain3) {
     });
 }
 
+// For deploy subchainprotocolbase
+function deploySubChainProtocolBaseContractPromise(subChainProtocolBaseContract){
+    return new Promise((resolve, reject) => {
+        deployTransaction = {
+            from: install_account,
+            data: '0x' + subChainProtocolBaseBin,
+            gas: "9000000"
+        };
+
+        subChainProtocolBaseContract.new(
+            subChainProtocolBaseProtocol,
+            bmin,
+            subChainProtocolBaseProtocolType,
+            deployTransaction,
+            (e, contract) => {
+                if (e) {
+                    reject(e);
+                }
+
+                if (contract && typeof contract.address !== 'undefined') {
+                    resolve(contract);
+                }
+            });
+    });
+}
+
+// For deploy vnodeprotocolbase
+function deployVnodeProtocolBaseContractPromise() {
+    return new Promise((resolve, reject) => {
+        deployTransaction = {
+            from: install_account,
+            data: '0x' + vnodeProtocolBaseBin,
+            gas: "9000000"
+        };
+
+        vnodeProtocolBaseContract.new(
+            bmin,
+            deployTransaction,
+            (e, contract) => {
+                if (e) {
+                    reject(e);
+                }
+
+                if (contract && typeof contract.address !== 'undefined') {
+                    resolve(contract);
+                }
+            });
+    });
+}
+
+// For deploy dappbase
+function deployDappBaseContractPromise(amount_in_mc, nonce){
+    return new Promise((resolve, reject) => {
+        deployTransaction = {
+            from: install_account,
+            value: chain3.toSha(amount_in_mc,'mc'),
+            to: subChainBase.address,
+            data: '0x' + dappBaseBin,
+            gas: "0",
+            shardingFlag: "0x3",
+            via: install_account,
+            nonce: nonce
+        };
+
+        chain3.mc.sendTransaction(deployTransaction, (e, transactionHash) => {
+            if (!e) {
+                resolve(transactionHash);
+            } else {
+                reject(e);
+            }
+        });
+    });
+}
+
 module.exports = {
     install_account: install_account,
     scsids: scsids,
@@ -196,11 +270,15 @@ module.exports = {
     scs_amount: 1000,
     scsmonitorids: scsmonitorids,
     sendMCPromise: sendMCPromise,
+    deploySubChainProtocolBaseContractPromise: deploySubChainProtocolBaseContractPromise,
+    deployVnodeProtocolBaseContractPromise: deployVnodeProtocolBaseContractPromise,
+    deployDappBaseContractPromise: deployDappBaseContractPromise,
     registerSCSSubChainProtocolBasePromise: registerSCSSubChainProtocolBasePromise,
     getResetRNGGroupPromise: getResetRNGGroupPromise,
     subChainProtocolBaseAbi: subChainProtocolBaseAbi,
     vnodeProtocolBaseAbi: vnodeProtocolBaseAbi,
     subChainBaseAbi: subChainBaseAbi,
-    dappBaseAbi: dappBaseAbi
+    dappBaseAbi: dappBaseAbi,
+    subChainProtocolBaseContract: subChainProtocolBaseContract
 };
 

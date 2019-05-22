@@ -27,6 +27,9 @@ scs_amount = dcbase.scs_amount;
 scsids = dcbase.scsids;
 scsmonitorids = dcbase.scsmonitorids;
 getResetRNGGroupPromise = dcbase.getResetRNGGroupPromise;
+deploySubChainProtocolBaseContractPromise = dcbase.deploySubChainProtocolBaseContractPromise;
+deployVnodeProtocolBaseContractPromise = dcbase.deployVnodeProtocolBaseContractPromise;
+deployDappBaseContractPromise = dcbase.deployDappBaseContractPromise;
 
 chain3.setProvider(new chain3.providers.HttpProvider('http://localhost:52159'));
 chain3.personal.unlockAccount(install_account, password, unlock_forever);
@@ -203,32 +206,6 @@ function deployVnodeProtocolBaseContractPromise() {
 
         vnodeProtocolBaseContract.new(
             bmin,
-            deployTransaction,
-            (e, contract) => {
-                if (e) {
-                    reject(e);
-                }
-
-                if (contract && typeof contract.address !== 'undefined') {
-                    resolve(contract);
-                }
-            });
-    });
-}
-
-// For deploy subchainprotocolbase
-function deploySubChainProtocolBaseContractPromise(){
-    return new Promise((resolve, reject) => {
-        deployTransaction = {
-            from: install_account,
-            data: '0x' + subChainProtocolBaseBin,
-            gas: "10000000"
-        };
-
-        subChainProtocolBaseContract.new(
-            subChainProtocolBaseProtocol,
-            bmin,
-            subChainProtocolBaseProtocolType,
             deployTransaction,
             (e, contract) => {
                 if (e) {
