@@ -3,5 +3,6 @@
     "VnodeServiceCfg": ":50062",
     "SCSservice": true,
     "VnodeBeneficialAddress" : "0xa35add395b804c3faacf7c7829638e42ffa1d051",
-    "VnodeIp": "0.0.0.0"
+    "VnodeIp": "0.0.0.0",
+    "Subnets": ["0x646eb76026e39510e19c0a5be10ad9493cc2d6039c3a0a8f20a8f471eae6aec1"]
 }
