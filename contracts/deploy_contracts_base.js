@@ -34,8 +34,8 @@ scsids = [
     "a63a7764d01a6b11ba628f06b00a1828e5955a7f", // scs 1
     "43c375d09e8a528770c6e1c76014cc9f4f9139a3", // scs 2
     "8d26cd8257288a9f3fcb3c7a4b15ade3cf932925", // scs 3
-    "632774bf61ffc8873e43f3ce68cf3f169300efa3", // scs 4
-    "d7e1cf982f75563f166726a5814c7fa3c1948068", // scs 5
+    //"632774bf61ffc8873e43f3ce68cf3f169300efa3", // scs 4
+    //"d7e1cf982f75563f166726a5814c7fa3c1948068", // scs 5
     //"30601cba96b98f22d5c46bb8a8b0b298b8017ef2", // scs 6
     //"c24c73cfb25e444fb20c3405a8327808303f4040", // scs 7
 ];
@@ -79,7 +79,7 @@ subChainProtocolBaseBin = subChainProtocolBaseOutput.contracts[':SubChainProtoco
 console.log("SubChainProtocolBase Contract compiled, size = " + subChainProtocolBaseBin.length + " " + green_check_mark);
 
 // compile subchainbase
-subChainBaseFileName = "SubChainBaseRNG.sol";
+subChainBaseFileName = "SubChainBase.sol";
 //subChainBaseFileName = "SubChainBase.sol";
 subChainBaseSolfiles = [subChainBaseFileName, "SubChainProtocolBase.sol"];
 subChainBaseInput = {};
@@ -101,10 +101,10 @@ subChainBaseOutput = solc.compile(
 );
 
 if (subChainBaseOutput.errors.length > 0) {
-    console.log(subChainBaseOutput.errors);
+    //console.log(subChainBaseOutput.errors);
 }
 subChainBaseAbi = subChainBaseOutput.contracts[subChainBaseFileName + ':SubChainBase'].interface;
-console.log(subChainBaseAbi);
+//console.log(subChainBaseAbi);
 subChainBaseBin = subChainBaseOutput.contracts[subChainBaseFileName + ':SubChainBase'].bytecode;
 console.log("SubChainBase Contract compiled, size = " + subChainBaseBin.length + " " + green_check_mark);
 
@@ -115,7 +115,7 @@ function sendMCPromise(chain3_, src, dest, amount_in_mc) {
             from: src,
 		    value: chain3_.toSha(amount_in_mc,'mc'),
 		    to: dest,
-		    gas: "10000000",
+		    gas: "200000",
 		    data: ""
         };
         chain3_.mc.sendTransaction(transaction, (e, transactionHash) => {
@@ -134,7 +134,7 @@ function registerSCSSubChainProtocolBasePromise(chain3_, subChainProtocolBase_, 
         registerTransaction = {
             from: install_account,
 		    to: subChainProtocolBase_.address,
-		    gas: "10000000",
+		    gas: "1000000",
 		    data: subChainProtocolBase_.register.getData("0x" + scsid),
             value: chain3_.toSha(bmin, 'mc')
         };
@@ -153,7 +153,7 @@ function getResetRNGGroupPromise(subchainbase, chain3) {
         transaction = {
             from: install_account,
 		    to: subchainbase.address,
-		    gas: "10000000",
+		    gas: "1000000",
 		    data: subchainbase.resetRNGGroup.getData()
         };
         chain3.mc.sendTransaction(transaction, (e, transactionHash) => {
@@ -193,7 +193,7 @@ function deploySubChainProtocolBaseContractPromise(subChainProtocolBaseContract)
 }
 
 // For deploy vnodeprotocolbase
-function deployVnodeProtocolBaseContractPromise() {
+function deployVnodeProtocolBaseContractPromise(vnodeProtocolBaseContract) {
     return new Promise((resolve, reject) => {
         deployTransaction = {
             from: install_account,
@@ -217,7 +217,7 @@ function deployVnodeProtocolBaseContractPromise() {
 }
 
 // For deploy dappbase
-function deployDappBaseContractPromise(amount_in_mc, nonce){
+function deployDappBaseContractPromise(amount_in_mc, nonce, subChainBase, chain3_){
     return new Promise((resolve, reject) => {
         deployTransaction = {
             from: install_account,
@@ -230,7 +230,7 @@ function deployDappBaseContractPromise(amount_in_mc, nonce){
             nonce: nonce
         };
 
-        chain3.mc.sendTransaction(deployTransaction, (e, transactionHash) => {
+        chain3_.mc.sendTransaction(deployTransaction, (e, transactionHash) => {
             if (!e) {
                 resolve(transactionHash);
             } else {

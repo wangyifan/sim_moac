@@ -31,7 +31,8 @@ deploySubChainProtocolBaseContractPromise = dcbase.deploySubChainProtocolBaseCon
 deployVnodeProtocolBaseContractPromise = dcbase.deployVnodeProtocolBaseContractPromise;
 deployDappBaseContractPromise = dcbase.deployDappBaseContractPromise;
 
-chain3.setProvider(new chain3.providers.HttpProvider('http://localhost:52159'));
+hostport = "http://"+ "172.20.0.11" + ":" + "8545";
+chain3.setProvider(new chain3.providers.HttpProvider(hostport));
 chain3.personal.unlockAccount(install_account, password, unlock_forever);
 vnodeProtocolBaseContract = chain3.mc.contract(JSON.parse(vnodeProtocolBaseAbi));
 subChainProtocolBaseContract = chain3.mc.contract(JSON.parse(subChainProtocolBaseAbi));
@@ -43,9 +44,9 @@ registerSCSSubChainProtocolBasePromise = dcbase.registerSCSSubChainProtocolBaseP
 
 async function main() {
     // deploy two contracts: vnodeprotocolbase, subchainprotocolbase
-    vnodeProtocolBase  = await deployVnodeProtocolBaseContractPromise();
+    vnodeProtocolBase  = await deployVnodeProtocolBaseContractPromise(vnodeProtocolBaseContract);
     console.log('VnodeProtocolBase Contract deployed! address: ' + vnodeProtocolBase.address + " " + green_check_mark);
-    subChainProtocolBase = await deploySubChainProtocolBaseContractPromise();
+    subChainProtocolBase = await deploySubChainProtocolBaseContractPromise(subChainProtocolBaseContract);
     console.log("SubChainProtocolBase Contract deployed! address: "+ subChainProtocolBase.address + " " + green_check_mark);
 
     // send scsid some mc
@@ -108,10 +109,11 @@ async function main() {
     subChainBase = await deploySubChainBaseContractPromise();
     console.log("SubChainBase Contract deployed! address: "+ subChainBase.address + " " + green_check_mark);
 
+    /*
     subChainBase.allEvents(
         {fromBlock: 0},
         (error, event) => { console.log(event); }
-    );
+    );*/
 
     addfund =  await addFundPromise(addFundAmount);
     console.log("Added fund " + addFundAmount + " mc to subchain addr: " + subChainBase.address + " "+ green_check_mark);
@@ -141,6 +143,7 @@ async function main() {
         console.log("Registered scs " + scsid + " as monitor " + "hash: " + result + " " + green_check_mark);
     }
 
+
     // wait for 3 blocks before deploy dappbase
     _bc = await getBlockNumber();
     while(true) {
@@ -152,12 +155,17 @@ async function main() {
         }
     }
 
+
     nonce = 0;
-    dappBaseContract = await deployDappBaseContractPromise(tokensupply/exchangerate, nonce);
+    dappBaseContract = await deployDappBaseContractPromise(
+        tokensupply/exchangerate, nonce, subChainBase, chain3
+    );
     console.log("DappBase Contract deployed! address: "+ dappBaseContract.address + " " + green_check_mark);
 
     nonce += 1;
-    dappContract = await deployDappContractPromise(0, nonce);
+    dappContract = await deployDappContractPromise(
+        3, nonce, subChainBase, chain3
+    );
     console.log("Dapp Contract deployed! address: "+ dappContract.address + " " + green_check_mark);
 
     /*
@@ -201,7 +209,7 @@ function deployVnodeProtocolBaseContractPromise() {
         deployTransaction = {
             from: install_account,
             data: '0x' + vnodeProtocolBaseBin,
-            gas: "10000000"
+            gas: "9000000"
         };
 
         vnodeProtocolBaseContract.new(
@@ -219,32 +227,8 @@ function deployVnodeProtocolBaseContractPromise() {
     });
 }
 
-// For deploy dappbase
-function deployDappBaseContractPromise(amount_in_mc, nonce){
-    return new Promise((resolve, reject) => {
-        deployTransaction = {
-            from: install_account,
-            value: chain3.toSha(amount_in_mc,'mc'),
-            to: subChainBase.address,
-            data: '0x' + dappBaseBin,
-            gas: "0",
-            shardingFlag: "0x3",
-            via: install_account,
-            nonce: nonce
-        };
-
-        chain3.mc.sendTransaction(deployTransaction, (e, transactionHash) => {
-            if (!e) {
-                resolve(transactionHash);
-            } else {
-                reject(e);
-            }
-        });
-    });
-}
-
 // For deploy dapp
-function deployDappContractPromise(amount_in_mc, nonce){
+function deployDappContractPromise(amount_in_mc, nonce, subChainBase, chain3_){
     return new Promise((resolve, reject) => {
         deployTransaction = {
             from: install_account,
@@ -257,7 +241,7 @@ function deployDappContractPromise(amount_in_mc, nonce){
             nonce: nonce
         };
 
-        chain3.mc.sendTransaction(deployTransaction, (e, transactionHash) => {
+        chain3_.mc.sendTransaction(deployTransaction, (e, transactionHash) => {
             if (!e) {
                 resolve(transactionHash);
             } else {
@@ -273,7 +257,7 @@ function deploySubChainBaseContractPromise(){
         deployTransaction = {
             from: install_account,
             data: '0x' + subChainBaseBin,
-            gas: "10000000"
+            gas: "9000000"
         };
         subChainBaseContract.new(
             subChainProtocolBase.address,
@@ -304,7 +288,7 @@ function registerSCSSubChainProtocolBasePromise(scsid) {
         registerTransaction = {
             from: install_account,
 		    to: subChainProtocolBase.address,
-		    gas: "10000000",
+		    gas: "9000000",
 		    data: subChainProtocolBase.register.getData("0x" + scsid),
             value: chain3.toSha(bmin, 'mc')
         };
@@ -324,7 +308,7 @@ function registerSCSSubChainBaseAsMonitorPromise(scsid) {
         registerTransaction = {
             from: install_account,
 		    to: subChainBase.address,
-		    gas: "10000000",
+		    gas: "9000000",
 		    data: subChainBase.registerAsMonitor.getData("0x" + scsid, "scs_monitor:8545"),
             value: chain3.toSha(1, 'mc')
         };
@@ -344,7 +328,7 @@ function registerOpenPromise(scsid) {
         registerOpenTransaction = {
             from: install_account,
 		    to: subChainBase.address,
-		    gas: "10000000",
+		    gas: "9000000",
 		    data: subChainBase.registerOpen.getData()
         };
         chain3.mc.sendTransaction(registerOpenTransaction, (e, transactionHash) => {
@@ -415,7 +399,7 @@ function registerAsVnodeProxy(vnode, via, link, rpclink) {
         registerAsVnodeProxyTransaction = {
             from: install_account,
 		    to: vnodeProtocolBase.address,
-		    gas: "10000000",
+		    gas: "9000000",
 		    data: vnodeProtocolBase.register.getData(vnode, via, link, rpclink),
             value: chain3.toSha(bmin, 'mc')
         };

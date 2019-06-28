@@ -16,7 +16,7 @@ contract SubChainBase {
     enum ProposalFlag {noState, pending, disputed, approved, rejected, expired, pendingAccept}
     enum ProposalCheckStatus {undecided, approval, expired}
     enum ConsensusStatus {initStage, workingStage, failure}
-    enum SCSRelayStatus {registerOpen, registerClose, createProposal, disputeProposal, approveProposal, registerAdd, regAsMonitor, regAsBackup, updateLastFlushBlk, distributeProposal, reset, uploadRedeemData, requestEnterAndRedeem, requestRelease, rngEnabled, rngGroupConfig, distributeProposalAndRNGGroupConfig}
+    enum SCSRelayStatus {registerOpen, registerClose, createProposal, disputeProposal, approveProposal, registerAdd, regAsMonitor, regAsBackup, updateLastFlushBlk, distributeProposal, reset, uploadRedeemData, requestEnterAndRedeem, requestRelease}
     enum SubChainStatus {open, pending, close}
 
     struct Proposal {
@@ -171,8 +171,6 @@ contract SubChainBase {
     uint public totalExchange;
     uint public totalOperation;
     uint public totalBond;
-
-    int public rngThreshold = -1;
 
     //events
     event ReportStatus(string message);
@@ -370,10 +368,9 @@ contract SubChainBase {
     }
 
     //v,r,s are the signature of msg hash(scsaddress+subchainAddr)
-    function registerAsSCS(address beneficiary, uint8 v, bytes32 r, bytes32 s, bytes32 publickey) public returns (bool) {
+    function registerAsSCS(address beneficiary, uint8 v, bytes32 r, bytes32 s) public returns (bool) {
         require(subchainstatus == uint(SubChainStatus.open));
         require(getSCSRole(msg.sender) == 4);
-        require(publickey.length == 32);
         if (registerFlag != 1) {
             //ReportStatus("Register not open");
             return false;
@@ -1099,11 +1096,7 @@ contract SubChainBase {
             withdrawal();
         }
 
-        if (nodesChanged) {
-          SCS_RELAY.notifySCS(address(this), uint(SCSRelayStatus.distributeProposalAndRNGGroupConfig));
-        } else {
-          SCS_RELAY.notifySCS(address(this), uint(SCSRelayStatus.distributeProposal));
-        }
+        SCS_RELAY.notifySCS(address(this), uint(SCSRelayStatus.distributeProposal));
     }
 
     function requestEnterAndRedeemAction(bytes32 hash) public returns (bool) {
@@ -1170,7 +1163,6 @@ contract SubChainBase {
             totalOperation = 0;
         }
 
-        //SCS_RELAY.notifySCS(address(this), uint(SCSRelayStatus.rngGroupConfig));
         return true;
     }
 

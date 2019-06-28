@@ -10,6 +10,7 @@ RUN mkdir /vnode
 
 # install moac vnode
 COPY config/vnode/vnodeconfig.json /vnode/vnodeconfig.json
+COPY config/vnode/vnodeconfig-with-no-subnet.json /vnode/vnodeconfig-with-no-subnet.json
 COPY config/vnode/vnode.genesis.json /vnode/genesis.json
 COPY bin/$version/vnode/moac /usr/local/sbin/
 COPY config/vnode/0.bootnode.key /vnode/0.bootnode.key

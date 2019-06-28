@@ -38,12 +38,12 @@ services:
       default:
         ipv4_address: 172.20.0.13
 
-  ####################### vnode 4  #######################
+####################### vnode 4  #######################
   vnode4:
     image: yifan:vnode-dev
     ports:
-        - "52162:8545"
-    command: moac --networkid 95125 --vnodeconfig vnodeconfig.json --datadir=/vnode --ethash.dagdir /vnode/.ethash --verbosity 4 --rpc --rpcaddr 0.0.0.0 --mine --minerthreads 1 --rpcapi chain3,mc,net,vnode,personal --ipcpath=/root/.moac/moac.ipc --bootnodesv4 enode://c2d8455aa7b8d0198e36e9f9df71282b2e32122bdf46de3fa218dad900a69ab1289289a67536ea93bfe6e1d7b0044821d0985f2a364e7144c74a5fbeb7e9dc6c@172.20.0.11:30333 --nodekey /vnode/3.bootnode.key 2>&1
+        - "52161:8545"
+    command: moac --networkid 95125 --vnodeconfig vnodeconfig.json --datadir=/vnode --ethash.dagdir /vnode/.ethash --verbosity 4 --rpc --rpcaddr 0.0.0.0 --mine --minerthreads 1 --rpcapi chain3,mc,net,vnode,personal --ipcpath=/root/.moac/moac.ipc --bootnodesv4 enode://c2d8455aa7b8d0198e36e9f9df71282b2e32122bdf46de3fa218dad900a69ab1289289a67536ea93bfe6e1d7b0044821d0985f2a364e7144c74a5fbeb7e9dc6c@172.20.0.11:30333 --nodekey /vnode/4.bootnode.key 2>&1
     depends_on:
       - vnode1
     networks:
@@ -54,8 +54,8 @@ services:
   vnode5:
     image: yifan:vnode-dev
     ports:
-        - "52163:8545"
-    command: moac --networkid 95125 --vnodeconfig vnodeconfig.json --datadir=/vnode --ethash.dagdir /vnode/.ethash --verbosity 4 --rpc --rpcaddr 0.0.0.0 --mine --minerthreads 1 --rpcapi chain3,mc,net,vnode,personal --ipcpath=/root/.moac/moac.ipc --bootnodesv4 enode://c2d8455aa7b8d0198e36e9f9df71282b2e32122bdf46de3fa218dad900a69ab1289289a67536ea93bfe6e1d7b0044821d0985f2a364e7144c74a5fbeb7e9dc6c@172.20.0.11:30333 --nodekey /vnode/3.bootnode.key 2>&1
+        - "52161:8545"
+    command: moac --networkid 95125 --vnodeconfig vnodeconfig.json --datadir=/vnode --ethash.dagdir /vnode/.ethash --verbosity 4 --rpc --rpcaddr 0.0.0.0 --mine --minerthreads 1 --rpcapi chain3,mc,net,vnode,personal --ipcpath=/root/.moac/moac.ipc --bootnodesv4 enode://c2d8455aa7b8d0198e36e9f9df71282b2e32122bdf46de3fa218dad900a69ab1289289a67536ea93bfe6e1d7b0044821d0985f2a364e7144c74a5fbeb7e9dc6c@172.20.0.11:30333 --nodekey /vnode/5.bootnode.key 2>&1
     depends_on:
       - vnode1
     networks:
@@ -66,8 +66,8 @@ services:
   vnode6:
     image: yifan:vnode-dev
     ports:
-        - "52164:8545"
-    command: moac --networkid 95125 --vnodeconfig vnodeconfig.json --datadir=/vnode --ethash.dagdir /vnode/.ethash --verbosity 4 --rpc --rpcaddr 0.0.0.0 --mine --minerthreads 1 --rpcapi chain3,mc,net,vnode,personal --ipcpath=/root/.moac/moac.ipc --bootnodesv4 enode://c2d8455aa7b8d0198e36e9f9df71282b2e32122bdf46de3fa218dad900a69ab1289289a67536ea93bfe6e1d7b0044821d0985f2a364e7144c74a5fbeb7e9dc6c@172.20.0.11:30333 --nodekey /vnode/3.bootnode.key 2>&1
+        - "52161:8545"
+    command: moac --networkid 95125 --vnodeconfig vnodeconfig.json --datadir=/vnode --ethash.dagdir /vnode/.ethash --verbosity 4 --rpc --rpcaddr 0.0.0.0 --mine --minerthreads 1 --rpcapi chain3,mc,net,vnode,personal --ipcpath=/root/.moac/moac.ipc --bootnodesv4 enode://c2d8455aa7b8d0198e36e9f9df71282b2e32122bdf46de3fa218dad900a69ab1289289a67536ea93bfe6e1d7b0044821d0985f2a364e7144c74a5fbeb7e9dc6c@172.20.0.11:30333 --nodekey /vnode/6.bootnode.key 2>&1
     depends_on:
       - vnode1
     networks:
@@ -80,12 +80,12 @@ services:
     image: yifan:scs-dev
     command: wait-for-it.sh vnode1:50062 --strict -- scsserver --password 123456 --userconfig userconfig.json --datadir /scs/1 --rpcaddr 0.0.0.0 --rpcport 12345 --rpccorsdomain "*" --rpcdebug
     ports:
-        - "52165:12345"
+        - "52162:12345"
     depends_on:
       - vnode1
     networks:
       default:
-        ipv4_address: 172.20.0.21
+        ipv4_address: 172.20.0.17
 
   ####################### SCS 2 #######################
   scs2:
@@ -93,12 +93,12 @@ services:
     image: yifan:scs-dev
     command: wait-for-it.sh vnode2:50062 --strict -- scsserver --password 123456 --userconfig userconfig.json --datadir /scs/2 --rpcaddr 0.0.0.0 --rpcport 12345 --rpccorsdomain "*" --rpcdebug
     ports:
-        - "52166:12345"
+        - "52163:12345"
     depends_on:
       - vnode1
     networks:
       default:
-        ipv4_address: 172.20.0.22
+        ipv4_address: 172.20.0.18
 
   ####################### SCS 3 #######################
   scs3:
@@ -106,12 +106,12 @@ services:
     image: yifan:scs-dev
     command: wait-for-it.sh vnode3:50062 --strict -- scsserver --password 123456 --userconfig userconfig.json --datadir /scs/3 --rpcaddr 0.0.0.0 --rpcport 12345 --rpccorsdomain "*" --rpcdebug
     ports:
-        - "52167:12345"
+        - "52164:12345"
     depends_on:
       - vnode1
     networks:
       default:
-        ipv4_address: 172.20.0.23
+        ipv4_address: 172.20.0.19
 
 networks:
   default:
