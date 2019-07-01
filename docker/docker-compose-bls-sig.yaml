@@ -117,7 +117,7 @@ services:
   scs4:
     working_dir: /scs/4
     image: yifan:scs-dev
-    command: wait-for-it.sh vnode3:50062 --strict -- scsserver --password 123456 --userconfig userconfig.json --datadir /scs/4 --rpcaddr 0.0.0.0 --rpcport 12345 --rpccorsdomain "*" --rpcdebug
+    command: wait-for-it.sh vnode4:50062 --strict -- scsserver --password 123456 --userconfig userconfig.json --datadir /scs/4 --rpcaddr 0.0.0.0 --rpcport 12345 --rpccorsdomain "*" --rpcdebug
     ports:
         - "52168:12345"
     depends_on:
@@ -130,7 +130,7 @@ services:
   scs5:
     working_dir: /scs/5
     image: yifan:scs-dev
-    command: wait-for-it.sh vnode3:50062 --strict -- scsserver --password 123456 --userconfig userconfig.json --datadir /scs/5 --rpcaddr 0.0.0.0 --rpcport 12345 --rpccorsdomain "*" --rpcdebug
+    command: wait-for-it.sh vnode5:50062 --strict -- scsserver --password 123456 --userconfig userconfig.json --datadir /scs/5 --rpcaddr 0.0.0.0 --rpcport 12345 --rpccorsdomain "*" --rpcdebug
     ports:
         - "52169:12345"
     depends_on:
@@ -143,7 +143,7 @@ services:
   scs6:
     working_dir: /scs/6
     image: yifan:scs-dev
-    command: wait-for-it.sh vnode3:50062 --strict -- scsserver --password 123456 --userconfig userconfig.json --datadir /scs/6 --rpcaddr 0.0.0.0 --rpcport 12345 --rpccorsdomain "*" --rpcdebug
+    command: wait-for-it.sh vnode6:50062 --strict -- scsserver --password 123456 --userconfig userconfig.json --datadir /scs/6 --rpcaddr 0.0.0.0 --rpcport 12345 --rpccorsdomain "*" --rpcdebug
     ports:
         - "52170:12345"
     depends_on:
