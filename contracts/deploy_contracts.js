@@ -162,10 +162,10 @@ async function main() {
         }
         }*/
 
-    for (i = 0; i< 15; i++) {
-        seconds = 40;
+    for (i = 0; i< 300; i++) {
+        seconds = 20;
         console_log("Sleep for " + seconds + " seconds " + green_check_mark);
-        await sleep(40*1000);
+        await sleep(seconds*1000);
         console_log("Sleep for " + seconds + " seconds done " + green_check_mark);
 
         subnetP2P = !subnetP2P;

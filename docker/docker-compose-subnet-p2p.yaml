@@ -113,6 +113,44 @@ services:
       default:
         ipv4_address: 172.20.0.23
 
+  ####################### SCS 4 #######################
+  scs4:
+    working_dir: /scs/4
+    image: yifan:scs-dev
+    command: wait-for-it.sh vnode4:50062 --strict -- scsserver --password 123456 --userconfig userconfig.json --datadir /scs/4 --rpcaddr 0.0.0.0 --rpcport 12345 --rpccorsdomain "*" --rpcdebug
+    ports:
+        - "52168:12345"
+    depends_on:
+      - vnode4
+    networks:
+      default:
+        ipv4_address: 172.20.0.24
+
+  ####################### SCS 5 #######################
+  scs5:
+    working_dir: /scs/5
+    image: yifan:scs-dev
+    command: wait-for-it.sh vnode5:50062 --strict -- scsserver --password 123456 --userconfig userconfig.json --datadir /scs/5 --rpcaddr 0.0.0.0 --rpcport 12345 --rpccorsdomain "*" --rpcdebug
+    ports:
+        - "52169:12345"
+    depends_on:
+      - vnode5
+    networks:
+      default:
+        ipv4_address: 172.20.0.25
+  ####################### SCS 6 #######################
+  scs6:
+    working_dir: /scs/6
+    image: yifan:scs-dev
+    command: wait-for-it.sh vnode6:50062 --strict -- scsserver --password 123456 --userconfig userconfig.json --datadir /scs/6 --rpcaddr 0.0.0.0 --rpcport 12345 --rpccorsdomain "*" --rpcdebug
+    ports:
+        - "52170:12345"
+    depends_on:
+      - vnode6
+    networks:
+      default:
+        ipv4_address: 172.20.0.26
+
 networks:
   default:
     external:
