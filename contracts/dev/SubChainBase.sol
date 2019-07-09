@@ -172,12 +172,15 @@ contract SubChainBase {
     uint public totalOperation;
     uint public totalBond;
 
+    // flag for use subnet p2p
+    bool public isSubnetP2PEnabled;
+
     //events
     event ReportStatus(string message);
     event TransferAmount(address addr, uint amount);
 
     //constructor
-    function SubChainBase(address proto, address vnodeProtocolBaseAddr, uint min, uint max, uint thousandth, uint flushRound, uint256 tokensupply, uint256 exchangerate, uint threshold) public {
+    function SubChainBase(address proto, address vnodeProtocolBaseAddr, uint min, uint max, uint thousandth, uint flushRound, uint256 tokensupply, uint256 exchangerate, uint threshold, bool subnetP2P) public {
         require(min == 1 || min == 3 || min == 5 || min == 7);
         require(max == 11 || max == 21 || max == 31 || max == 51 || max == 99);
         require(flushRound >= 1  && flushRound <= 100);
@@ -193,6 +196,7 @@ contract SubChainBase {
         protocol = proto; //address
         consensusFlag = uint(ConsensusStatus.initStage);
         owner = msg.sender;
+        isSubnetP2PEnabled = subnetP2P;
 
         protocnt.setSubchainExpireBlock(flushInRound*5);
         lastFlushBlk = 2 ** 256 - 1;
@@ -216,6 +220,13 @@ contract SubChainBase {
         if (owner == address(0)) {
             owner = msg.sender;
         }
+    }
+
+    function updateSubnetP2PStatus(bool flag) public {
+      require(owner == msg.sender);
+
+      // set the flat to either true or false
+      isSubnetP2PEnabled = flag;
     }
 
     function getFlushStatus() public view returns (bool) {

@@ -1561,6 +1561,10 @@ contract SubChainBase {
         }
     }
 
+    function complainRNGParams() public {
+      
+    }
+
     function uploadRNGConfig(bytes publicShares, bytes privateShares) public {
       // only active member can upload rng config
       //if (rngNodeMemberships[msg.sender] != uint(RngMembership.active)) {

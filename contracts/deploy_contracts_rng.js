@@ -23,6 +23,7 @@ flushRound = dcbase.flushRound;
 tokensupply = dcbase.tokensupply;
 exchangerate = dcbase.exchangerate;
 addFundAmount = dcbase.addFundAmount;
+
 scs_amount = dcbase.scs_amount;
 scsids = dcbase.scsids;
 scsmonitorids = dcbase.scsmonitorids;
@@ -118,6 +119,12 @@ async function main() {
     addfund =  await addFundPromise(addFundAmount);
     console.log("Added fund " + addFundAmount + " mc to subchain addr: " + subChainBase.address + " "+ green_check_mark);
 
+
+
+
+
+
+
     registerOpenResult = await registerOpenPromise();
     console.log("SubChainBase register open, hash: " + registerOpenResult + " " + green_check_mark);
 
@@ -126,7 +133,6 @@ async function main() {
     while(true) {
         bc = await getBlockNumber();
         sleep(1000);
-        //console.log("2 Current bc: ", bc, "wait until bc: ", (_bc + 3));
         if (bc > _bc + 6) {
             break;
         }

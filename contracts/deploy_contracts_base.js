@@ -28,6 +28,7 @@ let flushRound = 50;
 let tokensupply = 3;
 let exchangerate = 1;
 let addFundAmount = 50;
+let subnetP2P = true;
 
 scs_amount = 1000;
 scsids = [
@@ -50,7 +51,7 @@ vnodeProtocolBaseContract = fs.readFileSync(vnodeProtocolBaseSolfile, 'utf8');
 vnodeProtocolBaseOutput = solc.compile(vnodeProtocolBaseContract, 1);
 vnodeProtocolBaseAbi = vnodeProtocolBaseOutput.contracts[':VnodeProtocolBase'].interface;
 vnodeProtocolBaseBin = vnodeProtocolBaseOutput.contracts[':VnodeProtocolBase'].bytecode;
-console.log("VnodeProtocolBase Contract compiled, size = " + vnodeProtocolBaseBin.length + " " + green_check_mark);
+console_log("VnodeProtocolBase Contract compiled, size = " + vnodeProtocolBaseBin.length + " " + green_check_mark);
 
 // compile dappbase
 dappBaseFile = version + "/" + "dappbase.sol";
@@ -58,7 +59,7 @@ dappBaseContract = fs.readFileSync(dappBaseFile, 'utf8');
 dappBaseOutput = solc.compile(dappBaseContract, 1);
 dappBaseAbi = dappBaseOutput.contracts[':DappBase'].interface;
 dappBaseBin = dappBaseOutput.contracts[':DappBase'].bytecode;
-console.log("dappBase Contract compiled, size = " + dappBaseBin.length + " " + green_check_mark);
+console_log("dappBase Contract compiled, size = " + dappBaseBin.length + " " + green_check_mark);
 
 // compile dapp
 dappFile = version + "/" + "dapp.sol";
@@ -66,7 +67,7 @@ dappContract = fs.readFileSync(dappFile, 'utf8');
 dappOutput = solc.compile(dappContract, 1);
 dappAbi = dappOutput.contracts[':helloWorld'].interface;
 dappBin = dappOutput.contracts[':helloWorld'].bytecode;
-console.log("dapp Contract compiled, size = " + dappBin.length + " " + green_check_mark);
+console_log("dapp Contract compiled, size = " + dappBin.length + " " + green_check_mark);
 
 // compile subchainprotocolbase
 subChainProtocolBaseProtocol = "pos";
@@ -76,7 +77,7 @@ subChainProtocolBaseContract = fs.readFileSync(subChainProtocolBaseSolfile, 'utf
 subChainProtocolBaseOutput = solc.compile(subChainProtocolBaseContract, 1);
 subChainProtocolBaseAbi = subChainProtocolBaseOutput.contracts[':SubChainProtocolBase'].interface;
 subChainProtocolBaseBin = subChainProtocolBaseOutput.contracts[':SubChainProtocolBase'].bytecode;
-console.log("SubChainProtocolBase Contract compiled, size = " + subChainProtocolBaseBin.length + " " + green_check_mark);
+console_log("SubChainProtocolBase Contract compiled, size = " + subChainProtocolBaseBin.length + " " + green_check_mark);
 
 // compile subchainbase
 subChainBaseFileName = "SubChainBase.sol";
@@ -101,12 +102,19 @@ subChainBaseOutput = solc.compile(
 );
 
 if (subChainBaseOutput.errors.length > 0) {
-    //console.log(subChainBaseOutput.errors);
+    //console_log(subChainBaseOutput.errors);
 }
 subChainBaseAbi = subChainBaseOutput.contracts[subChainBaseFileName + ':SubChainBase'].interface;
-//console.log(subChainBaseAbi);
+//console_log(subChainBaseAbi);
 subChainBaseBin = subChainBaseOutput.contracts[subChainBaseFileName + ':SubChainBase'].bytecode;
-console.log("SubChainBase Contract compiled, size = " + subChainBaseBin.length + " " + green_check_mark);
+console_log("SubChainBase Contract compiled, size = " + subChainBaseBin.length + " " + green_check_mark);
+
+function console_log(s) {
+    var t = new Date().toISOString().
+        replace(/T/, ' ').
+        replace(/\..+/, '');
+    console.log("[" + t + "]: " + s);
+}
 
 // For add fund to scsids
 function sendMCPromise(chain3_, src, dest, amount_in_mc) {
@@ -267,6 +275,7 @@ module.exports = {
     tokensupply: 3,
     exchangerate: 1,
     addFundAmount: 50,
+    subnetP2P: true,
     scs_amount: 1000,
     scsmonitorids: scsmonitorids,
     sendMCPromise: sendMCPromise,
@@ -279,6 +288,7 @@ module.exports = {
     vnodeProtocolBaseAbi: vnodeProtocolBaseAbi,
     subChainBaseAbi: subChainBaseAbi,
     dappBaseAbi: dappBaseAbi,
-    subChainProtocolBaseContract: subChainProtocolBaseContract
+    subChainProtocolBaseContract: subChainProtocolBaseContract,
+    console_log: console_log
 };
 

@@ -23,6 +23,7 @@ flushRound = dcbase.flushRound;
 tokensupply = dcbase.tokensupply;
 exchangerate = dcbase.exchangerate;
 addFundAmount = dcbase.addFundAmount;
+subnetP2P = dcbase.subnetP2P;
 scs_amount = dcbase.scs_amount;
 scsids = dcbase.scsids;
 scsmonitorids = dcbase.scsmonitorids;
@@ -30,6 +31,7 @@ getResetRNGGroupPromise = dcbase.getResetRNGGroupPromise;
 deploySubChainProtocolBaseContractPromise = dcbase.deploySubChainProtocolBaseContractPromise;
 deployVnodeProtocolBaseContractPromise = dcbase.deployVnodeProtocolBaseContractPromise;
 deployDappBaseContractPromise = dcbase.deployDappBaseContractPromise;
+console_log = dcbase.console_log;
 
 hostport = "http://"+ "172.20.0.11" + ":" + "8545";
 chain3.setProvider(new chain3.providers.HttpProvider(hostport));
@@ -45,16 +47,16 @@ registerSCSSubChainProtocolBasePromise = dcbase.registerSCSSubChainProtocolBaseP
 async function main() {
     // deploy two contracts: vnodeprotocolbase, subchainprotocolbase
     vnodeProtocolBase  = await deployVnodeProtocolBaseContractPromise(vnodeProtocolBaseContract);
-    console.log('VnodeProtocolBase Contract deployed! address: ' + vnodeProtocolBase.address + " " + green_check_mark);
+    console_log('VnodeProtocolBase Contract deployed! address: ' + vnodeProtocolBase.address + " " + green_check_mark);
     subChainProtocolBase = await deploySubChainProtocolBaseContractPromise(subChainProtocolBaseContract);
-    console.log("SubChainProtocolBase Contract deployed! address: "+ subChainProtocolBase.address + " " + green_check_mark);
+    console_log("SubChainProtocolBase Contract deployed! address: "+ subChainProtocolBase.address + " " + green_check_mark);
 
     // send scsid some mc
     allscsids = scsids.concat(scsmonitorids);
     for (i = 0; i < allscsids.length; i++) {
         scsid = allscsids[i];
         await sendMCPromise(chain3, install_account, scsid, scs_amount);
-        console.log("Sent " + scs_amount + " mc to scsid " + scsid + " " + green_check_mark);
+        console_log("Sent " + scs_amount + " mc to scsid " + scsid + " " + green_check_mark);
     }
 
     // register vnode proxy
@@ -62,7 +64,7 @@ async function main() {
     while(true) {
         vnodeCount = parseInt(vnodeProtocolBase.vnodeList(install_account).toString());
         if (vnodeCount > 0) {
-            console.log("Registered vnode proxy: " + install_account + " with vnode pool " + green_check_mark);
+            console_log("Registered vnode proxy: " + install_account + " with vnode pool " + green_check_mark);
             break;
         }
     }
@@ -79,10 +81,10 @@ async function main() {
         allPerforming = true;
         for (i = 0; i < scsids.length; i++) {
             scsid = scsids[i];
-            //console.log(subChainProtocolBase.scsList("0x" + scsid));
+            //console_log(subChainProtocolBase.scsList("0x" + scsid));
             if (subChainProtocolBase.isPerforming("0x" + scsid)) {
                 if (performingSCS.indexOf(scsid) == -1) {
-                    console.log("Registered scs: " + scsid + " with pool " + green_check_mark);
+                    console_log("Registered scs: " + scsid + " with pool " + green_check_mark);
                     performingSCS.push(scsid);
                 }
             } else {
@@ -99,81 +101,97 @@ async function main() {
     _bc = await getBlockNumber();
     while(true) {
         bc = await getBlockNumber();
-        //console.log("1 Current bc: ", bc, "wait until bc: ", (_bc + 3));
-        sleep(1000);
-        if (bc > _bc + 3) {
+        console_log("Current bc: " + bc + " wait until bc: " + (_bc + 3) + " " + green_check_mark);
+        await sleep(5000);
+        if (bc >= _bc + 3) {
             break;
         }
     }
 
-    subChainBase = await deploySubChainBaseContractPromise();
-    console.log("SubChainBase Contract deployed! address: "+ subChainBase.address + " " + green_check_mark);
+    subChainBase = await deploySubChainBaseContractPromise(false);
+    console_log("SubChainBase Contract deployed! address: "+ subChainBase.address + " " + green_check_mark);
 
     /*
     subChainBase.allEvents(
         {fromBlock: 0},
-        (error, event) => { console.log(event); }
+        (error, event) => { console_log(event); }
     );*/
 
     addfund =  await addFundPromise(addFundAmount);
-    console.log("Added fund " + addFundAmount + " mc to subchain addr: " + subChainBase.address + " "+ green_check_mark);
+    console_log(
+        "Added fund " + addFundAmount + " mc to subchain addr: " + subChainBase.address + " "+ green_check_mark);
+
+    subnetP2P = false;
+    updateSubnetP2PStatus = await updateSubnetP2PStatusPromise(subnetP2P);
+    console_log(
+        "Subnet P2P status: " + subnetP2P + ", address: " + subChainBase.address + " "+ green_check_mark);
 
     registerOpenResult = await registerOpenPromise();
-    console.log("SubChainBase register open, hash: " + registerOpenResult + " " + green_check_mark);
+    console_log("SubChainBase register open, hash: " + registerOpenResult + " " + green_check_mark);
 
     // wait for 6 blocks for all scs to send register tx
     _bc = await getBlockNumber();
     while(true) {
         bc = await getBlockNumber();
-        sleep(1000);
-        //console.log("2 Current bc: ", bc, "wait until bc: ", (_bc + 3));
-        if (bc > _bc + 6) {
+        console_log("Current bc: " + bc + " wait until bc: " + (_bc + 6) + " " + green_check_mark);
+        await sleep(5000);
+        if (bc >= _bc + 6) {
             break;
         }
     }
 
     //registerClosePromise
     registerCloseResult = await registerClosePromise();
-    console.log("SubChainBase register close, hash: " + registerCloseResult + " " + green_check_mark);
+    console_log("SubChainBase register close, hash: " + registerCloseResult + " " + green_check_mark);
 
     //register monitor
     for (i = 0; i < scsmonitorids.length; i++) {
         scsid = scsmonitorids[i];
         result = await registerSCSSubChainBaseAsMonitorPromise(scsid);
-        console.log("Registered scs " + scsid + " as monitor " + "hash: " + result + " " + green_check_mark);
+        console_log("Registered scs " + scsid + " as monitor " + "hash: " + result + " " + green_check_mark);
     }
 
-
-    // wait for 3 blocks before deploy dappbase
-    _bc = await getBlockNumber();
+    // wait for 90 blocks before change subnetp2p flag
+    /*_bc = await getBlockNumber();
     while(true) {
         bc = await getBlockNumber();
+        console_log("Current bc: ", bc, "wait until bc: ", (_bc + 90));
         sleep(1000);
-        //console.log("3 Current bc: ", bc, "wait until bc: ", (_bc + 3));
-        if (bc > _bc + 3) {
+        if (bc > _bc + 90) {
             break;
         }
+        }*/
+
+    for (i = 0; i< 15; i++) {
+        seconds = 40;
+        console_log("Sleep for " + seconds + " seconds " + green_check_mark);
+        await sleep(40*1000);
+        console_log("Sleep for " + seconds + " seconds done " + green_check_mark);
+
+        subnetP2P = !subnetP2P;
+        updateSubnetP2PStatus = await updateSubnetP2PStatusPromise(subnetP2P);
+        console_log("Subnet P2P status: " + subnetP2P + ", address: " + subChainBase.address + " "+ green_check_mark);
     }
 
-
+    /*
     nonce = 0;
     dappBaseContract = await deployDappBaseContractPromise(
         tokensupply/exchangerate, nonce, subChainBase, chain3
     );
-    console.log("DappBase Contract deployed! address: "+ dappBaseContract.address + " " + green_check_mark);
+    console_log("DappBase Contract deployed! address: "+ dappBaseContract.address + " " + green_check_mark);
 
     nonce += 1;
     dappContract = await deployDappContractPromise(
         3, nonce, subChainBase, chain3
     );
-    console.log("Dapp Contract deployed! address: "+ dappContract.address + " " + green_check_mark);
+    console_log("Dapp Contract deployed! address: "+ dappContract.address + " " + green_check_mark);
 
-    /*
     // wait for 6 blocks before query for rng node count
     _bc = await getBlockNumber();
     while(true) {
         bc = await getBlockNumber();
-        sleep(1000);
+        console_log("Current bc: ", bc, "wait until bc: ", (_bc + 6));
+        await sleep(1000);
         if (bc > _bc + 6) {
             break;
         }
@@ -181,27 +199,27 @@ async function main() {
 
     /*
     result = await getRNGNodeCountPromise();
-    console.log("RNG enabled with " + result + " nodes." + green_check_mark);
+    console_log("RNG enabled with " + result + " nodes." + green_check_mark);
 
     // wait for 50 blocks before query for reset rng
     while(true) {
         _bc = await getBlockNumber();
         while(true) {
             bc = await getBlockNumber();
-            sleep(1000);
+            console_log("Current bc: ", bc, "wait until bc: ", (_bc + 50));
+            await sleep(1000);
             if (bc > _bc + 50) {
                 break;
             }
         }
 
         result = await getResetRNGGroupPromise();
-        console.log("RNG reset with " + result + " nodes." + green_check_mark);
+        console_log("RNG reset with " + result + " nodes." + green_check_mark);
         }*/
 
 }
 
 main();
-
 
 // For deploy vnodeprotocolbase
 function deployVnodeProtocolBaseContractPromise() {
@@ -252,7 +270,7 @@ function deployDappContractPromise(amount_in_mc, nonce, subChainBase, chain3_){
 }
 
 // For deploy subchainbase
-function deploySubChainBaseContractPromise(){
+function deploySubChainBaseContractPromise(subnetP2P){
     return new Promise((resolve, reject) => {
         deployTransaction = {
             from: install_account,
@@ -269,6 +287,7 @@ function deploySubChainBaseContractPromise(){
             tokensupply,
             exchangerate,
             threshold,
+            subnetP2P,
             deployTransaction,
             (e, contract) => {
                 if (e) {
@@ -351,6 +370,25 @@ function registerClosePromise() {
 		    data: subChainBase.registerClose.getData()
         };
         chain3.mc.sendTransaction(registerCloseTransaction, (e, transactionHash) => {
+            if (!e) {
+                resolve(transactionHash);
+            } else {
+                reject(e);
+            }
+        });
+    });
+}
+
+// call subchainbase updateSubnetP2PStatus()
+function updateSubnetP2PStatusPromise(flag) {
+    return new Promise((resolve, reject) => {
+        updateSubnetP2PStatusTransaction = {
+            from: install_account,
+		    to: subChainBase.address,
+		    gas: "1000000",
+		    data: subChainBase.updateSubnetP2PStatus.getData(flag)
+        };
+        chain3.mc.sendTransaction(updateSubnetP2PStatusTransaction, (e, transactionHash) => {
             if (!e) {
                 resolve(transactionHash);
             } else {
