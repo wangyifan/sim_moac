@@ -4,7 +4,7 @@
  - npm
  - docker
  - docker-compose
-
+ - 在hub.docker.com注册后，本机执行docker login命令，使用相同的用户名密码登录
 
 ## 墨客Dapp开发环境的一键发链(私链)步骤
 
