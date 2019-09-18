@@ -29,6 +29,15 @@ COPY config/vnode/9.bootnode.key /vnode/9.bootnode.key
 COPY config/vnode/10.bootnode.key /vnode/10.bootnode.key
 COPY config/vnode/11.bootnode.key /vnode/11.bootnode.key
 COPY config/vnode/12.bootnode.key /vnode/12.bootnode.key
+COPY config/vnode/13.bootnode.key /vnode/13.bootnode.key
+COPY config/vnode/14.bootnode.key /vnode/14.bootnode.key
+COPY config/vnode/15.bootnode.key /vnode/15.bootnode.key
+COPY config/vnode/16.bootnode.key /vnode/16.bootnode.key
+COPY config/vnode/17.bootnode.key /vnode/17.bootnode.key
+COPY config/vnode/18.bootnode.key /vnode/18.bootnode.key
+COPY config/vnode/19.bootnode.key /vnode/19.bootnode.key
+COPY config/vnode/20.bootnode.key /vnode/20.bootnode.key
+
 
 WORKDIR /vnode
 

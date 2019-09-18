@@ -121,10 +121,12 @@ async function main() {
     console_log(
         "Added fund " + addFundAmount + " mc to subchain addr: " + subChainBase.address + " "+ green_check_mark);
 
+    /*
     subnetP2P = false;
     updateSubnetP2PStatus = await updateSubnetP2PStatusPromise(subnetP2P);
     console_log(
         "Subnet P2P status: " + subnetP2P + ", address: " + subChainBase.address + " "+ green_check_mark);
+    */
 
     registerOpenResult = await registerOpenPromise();
     console_log("SubChainBase register open, hash: " + registerOpenResult + " " + green_check_mark);
@@ -162,6 +164,7 @@ async function main() {
         }
         }*/
 
+    /*
     for (i = 0; i< 300; i++) {
         seconds = 20;
         console_log("Sleep for " + seconds + " seconds " + green_check_mark);
@@ -171,7 +174,7 @@ async function main() {
         subnetP2P = !subnetP2P;
         updateSubnetP2PStatus = await updateSubnetP2PStatusPromise(subnetP2P);
         console_log("Subnet P2P status: " + subnetP2P + ", address: " + subChainBase.address + " "+ green_check_mark);
-    }
+    }*/
 
     /*
     nonce = 0;

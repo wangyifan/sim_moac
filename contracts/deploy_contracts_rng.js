@@ -100,7 +100,6 @@ async function main() {
     _bc = await getBlockNumber();
     while(true) {
         bc = await getBlockNumber();
-        //console.log("1 Current bc: ", bc, "wait until bc: ", (_bc + 3));
         sleep(1000);
         if (bc > _bc + 3) {
             break;
@@ -110,20 +109,8 @@ async function main() {
     subChainBase = await deploySubChainBaseContractPromise();
     console.log("SubChainBase Contract deployed! address: "+ subChainBase.address + " " + green_check_mark);
 
-    /*
-    subChainBase.allEvents(
-        {fromBlock: 0},
-        (error, event) => { console.log(event); }
-    );*/
-
     addfund =  await addFundPromise(addFundAmount);
     console.log("Added fund " + addFundAmount + " mc to subchain addr: " + subChainBase.address + " "+ green_check_mark);
-
-
-
-
-
-
 
     registerOpenResult = await registerOpenPromise();
     console.log("SubChainBase register open, hash: " + registerOpenResult + " " + green_check_mark);
@@ -155,12 +142,10 @@ async function main() {
     while(true) {
         bc = await getBlockNumber();
         sleep(1000);
-        //console.log("3 Current bc: ", bc, "wait until bc: ", (_bc + 3));
         if (bc > _bc + 3) {
             break;
         }
     }
-
 
     nonce = 0;
     dappBaseContract = await deployDappBaseContractPromise(
@@ -173,36 +158,6 @@ async function main() {
         3, nonce, subChainBase, chain3
     );
     console.log("Dapp Contract deployed! address: "+ dappContract.address + " " + green_check_mark);
-
-    /*
-    // wait for 6 blocks before query for rng node count
-    _bc = await getBlockNumber();
-    while(true) {
-        bc = await getBlockNumber();
-        sleep(1000);
-        if (bc > _bc + 6) {
-            break;
-        }
-    }*/
-
-    /*
-    result = await getRNGNodeCountPromise();
-    console.log("RNG enabled with " + result + " nodes." + green_check_mark);
-
-    // wait for 50 blocks before query for reset rng
-    while(true) {
-        _bc = await getBlockNumber();
-        while(true) {
-            bc = await getBlockNumber();
-            sleep(1000);
-            if (bc > _bc + 50) {
-                break;
-            }
-        }
-
-        result = await getResetRNGGroupPromise();
-        console.log("RNG reset with " + result + " nodes." + green_check_mark);
-        }*/
 
 }
 
@@ -263,7 +218,7 @@ function deploySubChainBaseContractPromise(){
         deployTransaction = {
             from: install_account,
             data: '0x' + subChainBaseBin,
-            gas: "10000000"
+            gas: "9000000"
         };
         subChainBaseContract.new(
             subChainProtocolBase.address,

@@ -1,7 +1,7 @@
 FROM frolvlad/alpine-glibc:alpine-3.8_glibc-2.28
 LABEL MAINTAINER="Yifan Wang <yifan.wang@moac.io>"
 
-ARG version=dev
+ARG version
 
 # install tc
 # RUN apk add iproute2 && ln -s /usr/lib/tc /lib/tc
