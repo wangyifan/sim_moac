@@ -6,7 +6,7 @@ ARG version
 RUN mkdir /vnode
 
 # install tc
-# RUN apk add iproute2 && ln -s /usr/lib/tc /lib/tc
+RUN apk add iproute2 && ln -s /usr/lib/tc /lib/tc
 # install bash
 RUN apk add bash
 

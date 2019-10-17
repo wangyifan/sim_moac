@@ -100,10 +100,10 @@ subChainBaseOutput = solc.compile(
 );
 
 if (subChainBaseOutput.errors.length > 0) {
-    //console.log(subChainBaseOutput.errors);
+    console.log(subChainBaseOutput.errors);
 }
 subChainBaseAbi = subChainBaseOutput.contracts[subChainBaseFileName + ':SubChainBase'].interface;
-//console.log(subChainBaseAbi);
+console.log(subChainBaseAbi);
 subChainBaseBin = subChainBaseOutput.contracts[subChainBaseFileName + ':SubChainBase'].bytecode;
 console.log("SubChainBase Contract compiled, size = " + subChainBaseBin.length + " " + green_check_mark);
 

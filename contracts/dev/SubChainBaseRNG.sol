@@ -1381,9 +1381,31 @@ contract SubChainBase {
         }
     }
 
+
     function complainRNGParams(uint complainee, string content) public {
+        uint n = getActiveRNGMemberCount() / 3 + 1;
         uint complainer = rngNodeIndexs[msg.sender];
-        rngComplains[lastFlushBlk][complainer] = Complain(complainee, content);
+
+        //rngComplains[lastFlushBlk][complainer] = Complain(complainee, content);
+        bool complained = rngComplainer[lastFlushBlk][complainer]
+        if complained != true {
+            rngComplainer[lastFlushBlk][complainer] = true;
+            rngComplains[lastFlushBlk][complainee]++;
+
+            if (rngComplains[lastFlushBlk][complainee] >= n) {
+              rngBlacklist[complainee] = true;
+            }
+
+            SCS_RELAY.notifySCS(address(this), uint(SCSRelayStatus.complained));
+        }
+    }
+
+    function getComplains() public return (uint[] complainees, uint[] votes){
+
+    }
+
+    function jurisdictionComplain() public {
+
     }
 
     function uploadRNGConfig(bytes publicShares, bytes privateShares) public {
