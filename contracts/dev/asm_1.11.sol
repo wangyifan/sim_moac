@@ -4,19 +4,8 @@ pragma experimental ABIEncoderV2;
 import "./SubChainProtocolBase.sol";
 
 contract SCSRelay {
-    // 0-registeropen
-    // 1-registerclose
-    // 2-createproposal
-    // 3-disputeproposal
-    // 4-approveproposal
-    // 5-registeradd
+    // 0-registeropen, 1-registerclose, 2-createproposal, 3-disputeproposal, 4-approveproposal, 5-registeradd
     function notifySCS(address cnt, uint msgtype) public returns (bool success);
-}
-
-contract VssBase {
-    function registerVSS(address sender, bytes32 publickey) public;
-    function unregisterVSS(address sender) public;
-    function activateVSS(address sender) public;
 }
 
 contract SubChainBase {
@@ -37,11 +26,7 @@ contract SubChainBase {
       reset,
       uploadRedeemData,
       requestEnterAndRedeem,
-      requestRelease,
-      rngEnabled,
-      rngGroupConfig,
-      distributeProposalAndRNGGroupConfig,
-      rngReveal
+      requestRelease
     }
     enum SubChainStatus {open, pending, close}
 
@@ -203,14 +188,12 @@ contract SubChainBase {
     uint public totalOperation;
     uint public totalBond;
 
-    address public vssbase;
-
     //events
     event ReportStatus(string message);
     event TransferAmount(address addr, uint amount);
 
     //constructor
-    function SubChainBase(address proto, address vnodeProtocolBaseAddr, uint min, uint max, uint thousandth, uint flushRound, uint256 tokensupply, uint256 exchangerate, address vssbaseAddr) public {
+    function SubChainBase(address proto, address vnodeProtocolBaseAddr, uint min, uint max, uint thousandth, uint flushRound, uint256 tokensupply, uint256 exchangerate) public {
         require(min == 1 || min == 3 || min == 5 || min == 7);
         require(max == 11 || max == 21 || max == 31 || max == 51 || max == 99);
         require(flushRound >= 40  && flushRound <= 500);
@@ -238,8 +221,6 @@ contract SubChainBase {
         randIndex[1] = uint8(1);
         indexAutoRetire = 0;
         subchainstatus = uint(SubChainStatus.open);
-
-        vssbase = vssbaseAddr;
     }
 
     function() public payable {
@@ -251,10 +232,6 @@ contract SubChainBase {
         if (owner == address(0)) {
             owner = msg.sender;
         }
-    }
-
-    function getVssBase() public view returns (address) {
-      return vssbase;
     }
 
     function getFlushStatus() public view returns (bool) {
@@ -407,7 +384,7 @@ contract SubChainBase {
     }
 
     //v,r,s are the signature of msg hash(scsaddress+subchainAddr)
-    function registerAsSCS(address beneficiary, uint8 v, bytes32 r, bytes32 s, bytes32 publickey) public returns (bool) {
+    function registerAsSCS(address beneficiary, uint8 v, bytes32 r, bytes32 s) public returns (bool) {
         require(subchainstatus == uint(SubChainStatus.open));
         require(getSCSRole(msg.sender) == 4);
         if (registerFlag != 1) {
@@ -443,11 +420,6 @@ contract SubChainBase {
         nodeList.push(msg.sender);
         nodeCount++;
         nodePerformance[msg.sender] = NODE_INIT_PERFORMANCE;
-
-        // put the scs in rng group
-        VssBase vssbaseContract = VssBase(vssbase);
-        vssbaseContract.registerVSS(msg.sender, publickey);
-        vssbaseContract.activateVSS(msg.sender);
 
         if (beneficiary == address(0)) {
             scsBeneficiary[msg.sender] = msg.sender;
@@ -598,7 +570,6 @@ contract SubChainBase {
         require(subchainstatus == uint(SubChainStatus.open));
         require(msg.sender == owner);
         registerFlag = 0;
-        VssBase vssbaseContract = VssBase(vssbase);
 
         if (nodeCount < minMember) {
             SubChainProtocolBase protocnt = SubChainProtocolBase(protocol);
@@ -610,7 +581,6 @@ contract SubChainBase {
                     cur,
                     penaltyBond
                 );
-                vssbaseContract.unregisterVSS(cur);
                 delete nodeList[i - 1];
             }
 
@@ -806,7 +776,6 @@ contract SubChainBase {
         proposalHashInProgress = curhash;
         pendingFlushIndex = indexInlist;
         currentRefundGas[msg.sender] += (gasinit - msg.gas + 21486 ) * tx.gasprice;
-
         return true;
     }
 
@@ -1093,7 +1062,7 @@ contract SubChainBase {
             withdrawal();
         }
 
-        SCS_RELAY.notifySCS(address(this), uint(SCSRelayStatus.distributeProposalAndRNGGroupConfig));
+        SCS_RELAY.notifySCS(address(this), uint(SCSRelayStatus.distributeProposal));
     }
 
     function requestEnterAndRedeemAction(bytes32 hash) public returns (bool) {
@@ -1200,8 +1169,6 @@ contract SubChainBase {
     function withdrawal() private {
         subchainstatus = uint(SubChainStatus.close);
         registerFlag = 0;
-        VssBase vssbaseContract = VssBase(vssbase);
-
         //release fund
         SubChainProtocolBase protocnt = SubChainProtocolBase(protocol);
         //release already enrolled scs
@@ -1212,7 +1179,6 @@ contract SubChainBase {
                 cur,
                 penaltyBond
             );
-            vssbaseContract.unregisterVSS(cur);
             delete nodeList[i-1];
         }
         nodeCount = 0;
@@ -1223,7 +1189,6 @@ contract SubChainBase {
                 cur,
                 penaltyBond
             );
-            vssbaseContract.unregisterVSS(cur);
             delete nodesToJoin[i-1];
             nodesToJoin.length --;
         }
@@ -1276,14 +1241,10 @@ contract SubChainBase {
 
     function applyJoinNodes() private {
         uint i = 0;
-        VssBase vssbaseContract = VssBase(vssbase);
         for (i = joinCntNow; i > 0; i--) {
             if( nodePerformance[nodesToJoin[i-1]] == NODE_INIT_PERFORMANCE) {
                 nodeList.push(nodesToJoin[i-1]);
                 nodeCount++;
-
-                // activate the node with rng
-                vssbaseContract.activateVSS(nodesToJoin[i-1]);
 
                 //delete node
                 nodesToJoin[i-1] = nodesToJoin[nodesToJoin.length-1];
@@ -1303,7 +1264,6 @@ contract SubChainBase {
     // nodetype 0: bad node, 1: volunteer leaving node
     function applyRemoveNodes(uint nodetype) private {
         SubChainProtocolBase protocnt = SubChainProtocolBase(protocol);
-        VssBase vssbaseContract = VssBase(vssbase);
 
         uint count = nodesToDispel.length;
         if (nodetype == 1) {
@@ -1344,7 +1304,6 @@ contract SubChainBase {
                 //swap with last element
                 // remove node from list
                 nodeCount--;
-                vssbaseContract.unregisterVSS(nodeList[i-1]);
                 nodeList[i-1] = nodeList[nodeCount];
                 delete nodeList[nodeCount];
                 nodeList.length--;

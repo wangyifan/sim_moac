@@ -12,10 +12,11 @@ RUN apk add bash
 
 # install moac vnode
 COPY config/vnode/vnodeconfig.json /vnode/vnodeconfig.json
-COPY config/vnode/vnodeconfig-with-force-subnet-p2p.json /vnode/vnodeconfig-with-force-subnet-p2p.json
 COPY config/vnode/vnode.genesis.json /vnode/genesis.json
 COPY bin/$version/vnode/moac /usr/local/sbin/
 COPY bin/tools/wait-for-it.sh  /usr/local/sbin/
+COPY bin/tools/disable_network.sh /usr/local/sbin/
+COPY bin/tools/resume_network.sh /usr/local/sbin/
 COPY config/vnode/0.bootnode.key /vnode/0.bootnode.key
 COPY config/vnode/1.bootnode.key /vnode/1.bootnode.key
 COPY config/vnode/2.bootnode.key /vnode/2.bootnode.key

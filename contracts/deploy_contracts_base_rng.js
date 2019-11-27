@@ -23,7 +23,7 @@ let subChainBase = null;
 let minMember = 1;
 let maxMember = 31;
 let thousandth = 1000;
-let threshold = 3;
+let threshold = 4;
 let flushRound = 50;
 let tokensupply = 3;
 let exchangerate = 1;
@@ -78,6 +78,16 @@ subChainProtocolBaseAbi = subChainProtocolBaseOutput.contracts[':SubChainProtoco
 subChainProtocolBaseBin = subChainProtocolBaseOutput.contracts[':SubChainProtocolBase'].bytecode;
 console.log("SubChainProtocolBase Contract compiled, size = " + subChainProtocolBaseBin.length + " " + green_check_mark);
 
+// compile vssbase
+vssbaseSolfile = version + "/" + "VssBase.sol";
+vssbaseContract = fs.readFileSync(vssbaseSolfile, 'utf8');
+vssbaseOutput = solc.compile(vssbaseContract, 1);
+console.log(vssbaseOutput);
+vssbaseAbi = vssbaseOutput.contracts[':VssBase'].interface;
+console.log(vssbaseAbi);
+vssbaseBin = vssbaseOutput.contracts[':VssBase'].bytecode;
+console.log("Vssbase Contract compiled, size = " + vssbaseBin.length + " " + green_check_mark);
+
 // compile subchainbase
 subChainBaseFileName = "SubChainBaseRNG.sol";
 subChainBaseSolfiles = [subChainBaseFileName, "SubChainProtocolBase.sol"];
@@ -100,10 +110,10 @@ subChainBaseOutput = solc.compile(
 );
 
 if (subChainBaseOutput.errors.length > 0) {
-    console.log(subChainBaseOutput.errors);
+    //console.log(subChainBaseOutput.errors);
 }
 subChainBaseAbi = subChainBaseOutput.contracts[subChainBaseFileName + ':SubChainBase'].interface;
-console.log(subChainBaseAbi);
+//console.log(subChainBaseAbi);
 subChainBaseBin = subChainBaseOutput.contracts[subChainBaseFileName + ':SubChainBase'].bytecode;
 console.log("SubChainBase Contract compiled, size = " + subChainBaseBin.length + " " + green_check_mark);
 
@@ -121,6 +131,7 @@ function sendMCPromise(chain3_, src, dest, amount_in_mc) {
             if (!e) {
                 resolve(transactionHash);
             } else {
+                console.log("sendMCPromise reject: " + e);
                 reject(e);
             }
         });
@@ -130,6 +141,8 @@ function sendMCPromise(chain3_, src, dest, amount_in_mc) {
 // For register scs to subchainbaseprotocol pool
 function registerSCSSubChainProtocolBasePromise(chain3_, subChainProtocolBase_, scsid) {
     return new Promise((resolve, reject) => {
+        data_ = subChainProtocolBase_.register.getData("0x" + scsid);
+        console.log("register subchain protocol base [data]: " + data_);
         registerTransaction = {
             from: install_account,
 		    to: subChainProtocolBase_.address,
@@ -141,6 +154,7 @@ function registerSCSSubChainProtocolBasePromise(chain3_, subChainProtocolBase_, 
             if (!e) {
                 resolve(transactionHash);
             } else {
+                console.log("registerSCSSubChainProtocolBasePromise reject: " + e);
                 reject(e);
             }
         });
@@ -149,6 +163,8 @@ function registerSCSSubChainProtocolBasePromise(chain3_, subChainProtocolBase_, 
 
 function getResetRNGGroupPromise(subchainbase, chain3) {
     return new Promise((resolve, reject) => {
+        data_ = subchainbase.resetRNGGroup.getData();
+        console.log("vssbase reset rng [data]: " + data_);
         transaction = {
             from: install_account,
 		    to: subchainbase.address,
@@ -159,6 +175,7 @@ function getResetRNGGroupPromise(subchainbase, chain3) {
             if (!e) {
                 resolve(transactionHash);
             } else {
+                console.log("getResetRNGGroupPromise reject: " + e);
                 reject(e);
             }
         });
@@ -181,6 +198,32 @@ function deploySubChainProtocolBaseContractPromise(subChainProtocolBaseContract)
             deployTransaction,
             (e, contract) => {
                 if (e) {
+                    console.log("deploySubChainProtocolBaseContractPromise reject: " + e);
+                    reject(e);
+                }
+
+                if (contract && typeof contract.address !== 'undefined') {
+                    resolve(contract);
+                }
+            });
+    });
+}
+
+// For deploy vnodeprotocolbase
+function deployVssBaseContractPromise(vssBaseContract, threshold) {
+    return new Promise((resolve, reject) => {
+        deployTransaction = {
+            from: install_account,
+            data: '0x' + vssbaseBin,
+            gas: "9000000"
+        };
+
+        vssBaseContract.new(
+            threshold,
+            deployTransaction,
+            (e, contract) => {
+                if (e) {
+                    console.log("deployVssBaseContractPromise reject: " + e);
                     reject(e);
                 }
 
@@ -205,6 +248,7 @@ function deployVnodeProtocolBaseContractPromise(vnodeProtocolBaseContract) {
             deployTransaction,
             (e, contract) => {
                 if (e) {
+                    console.log("deployVnodeProtocolBaseContractPromise reject: " + e);
                     reject(e);
                 }
 
@@ -233,6 +277,7 @@ function deployDappBaseContractPromise(amount_in_mc, nonce, subChainBase, chain3
             if (!e) {
                 resolve(transactionHash);
             } else {
+                console.log("deployDappBaseContractPromise reject: " + e);
                 reject(e);
             }
         });
@@ -261,7 +306,7 @@ module.exports = {
     minMember: 1,
     maxMember: 31,
     thousandth: 1000,
-    threshold: 3,
+    threshold: 4,
     flushRound: 50,
     tokensupply: 3,
     exchangerate: 1,
@@ -272,12 +317,14 @@ module.exports = {
     deploySubChainProtocolBaseContractPromise: deploySubChainProtocolBaseContractPromise,
     deployVnodeProtocolBaseContractPromise: deployVnodeProtocolBaseContractPromise,
     deployDappBaseContractPromise: deployDappBaseContractPromise,
+    deployVssBaseContractPromise: deployVssBaseContractPromise,
     registerSCSSubChainProtocolBasePromise: registerSCSSubChainProtocolBasePromise,
     getResetRNGGroupPromise: getResetRNGGroupPromise,
     subChainProtocolBaseAbi: subChainProtocolBaseAbi,
     vnodeProtocolBaseAbi: vnodeProtocolBaseAbi,
     subChainBaseAbi: subChainBaseAbi,
     dappBaseAbi: dappBaseAbi,
-    subChainProtocolBaseContract: subChainProtocolBaseContract
+    subChainProtocolBaseContract: subChainProtocolBaseContract,
+    vssBaseAbi: vssbaseAbi,
 };
 
