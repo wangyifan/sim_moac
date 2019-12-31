@@ -3,3 +3,5 @@ moac-vnode
 node_modules
 *~
 bin/dev
+package-lock.json
+*/.node-xmlhttprequest*

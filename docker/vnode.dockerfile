@@ -4,6 +4,7 @@ MAINTAINER "Yifan Wang <yifan.wang@moac.io>"
 ARG version
 
 RUN mkdir /vnode
+RUN mkdir /vnode/keystore
 
 # install tc
 RUN apk add iproute2 && ln -s /usr/lib/tc /lib/tc
@@ -38,7 +39,16 @@ COPY config/vnode/17.bootnode.key /vnode/17.bootnode.key
 COPY config/vnode/18.bootnode.key /vnode/18.bootnode.key
 COPY config/vnode/19.bootnode.key /vnode/19.bootnode.key
 COPY config/vnode/20.bootnode.key /vnode/20.bootnode.key
-
+COPY config/scs/1/scskeystore/UTC--2019-01-09T22-37-13.142682054Z--a63a7764d01a6b11ba628f06b00a1828e5955a7f /vnode/keystore/
+COPY config/scs/2/scskeystore/UTC--2019-01-09T22-39-12.143224279Z--43c375d09e8a528770c6e1c76014cc9f4f9139a3 /vnode/keystore/
+COPY config/scs/3/scskeystore/UTC--2019-01-09T22-39-50.132032650Z--8d26cd8257288a9f3fcb3c7a4b15ade3cf932925 /vnode/keystore/
+COPY config/scs/4/scskeystore/UTC--2019-01-30T07-31-15.829217612Z--632774bf61ffc8873e43f3ce68cf3f169300efa3 /vnode/keystore/
+COPY config/scs/5/scskeystore/UTC--2019-01-30T07-32-38.675101996Z--d7e1cf982f75563f166726a5814c7fa3c1948068 /vnode/keystore/
+COPY config/scs/6/scskeystore/UTC--2019-01-30T07-33-48.539675359Z--30601cba96b98f22d5c46bb8a8b0b298b8017ef2 /vnode/keystore/
+COPY config/scs/7/scskeystore/UTC--2019-01-30T07-34-07.266735245Z--c24c73cfb25e444fb20c3405a8327808303f4040 /vnode/keystore/
+COPY config/scs/8/scskeystore/UTC--2019-01-30T07-34-25.523025594Z--78c013c83884b9b88fb067ed0d49c02a4421ce2a /vnode/keystore/
+COPY config/scs/9/scskeystore/UTC--2019-01-30T07-34-39.951753469Z--0d12d784ba0cb4d4d053f1e2d34b58bb1c4587f5 /vnode/keystore/
+COPY config/scs/10/scskeystore/UTC--2019-01-30T07-34-52.602208067Z--5198d17356857f68bbb58aa8b73494d5513887c3 /vnode/keystore/
 
 WORKDIR /vnode
 

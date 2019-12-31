@@ -49,6 +49,7 @@ sendMCPromise = dcbase.sendMCPromise;
 registerSCSSubChainProtocolBasePromise = dcbase.registerSCSSubChainProtocolBasePromise;
 
 async function main() {
+
     // deploy two contracts: vnodeprotocolbase, subchainprotocolbase
     vnodeProtocolBase  = await deployVnodeProtocolBaseContractPromise(vnodeProtocolBaseContract);
     console.log('VnodeProtocolBase Contract deployed! address: ' + vnodeProtocolBase.address + " " + green_check_mark);
@@ -109,13 +110,13 @@ async function main() {
     }
     console.log("Wait block: " + _bc);
     while(true) {
-        sleep(1000);
+        await sleep(1000);
         try {
             bc = await getBlockNumber();
         } catch (e) {
             //console.error(e);
         }
-        sleep(1000);
+        await sleep(1000);
         if (bc > _bc + 3) {
             console.log("Wait block: " + bc);
             break;
@@ -133,13 +134,13 @@ async function main() {
     }
     console.log("Wait block: " + _bc);
     while(true) {
-        sleep(1000);
+        await sleep(1000);
         try {
             bc = await getBlockNumber();
         } catch (e) {
             //console.error(e);
         }
-        sleep(1000);
+        await sleep(1000);
         if (bc > _bc + 3) {
             console.log("Wait block: " + bc);
             break;
@@ -157,13 +158,13 @@ async function main() {
     }
     console.log("Wait block: " + _bc);
     while(true) {
-        sleep(1000);
+        await sleep(1000);
         try {
             bc = await getBlockNumber();
         } catch (e) {
             //console.error(e);
         }
-        sleep(1000);
+        await sleep(1000);
         if (bc > _bc + 3) {
             console.log("Wait block: " + bc);
             break;
@@ -181,13 +182,13 @@ async function main() {
     }
     console.log("Wait block: " + _bc);
     while(true) {
-        sleep(1000);
+        await sleep(1000);
         try {
             bc = await getBlockNumber();
         } catch (e) {
             //console.error(e);
         }
-        sleep(1000);
+        await sleep(1000);
         if (bc > _bc + 3) {
             console.log("Wait block: " + bc);
             break;
@@ -208,13 +209,13 @@ async function main() {
     }
     console.log("Wait block: " + _bc);
     while(true) {
-        sleep(1000);
+        await sleep(1000);
         try {
             bc = await getBlockNumber();
         } catch (e) {
             //console.error(e);
         }
-        sleep(1000);
+        await sleep(1000);
         if (bc > _bc + 6) {
             console.log("Wait block: " + bc);
             break;
@@ -233,13 +234,13 @@ async function main() {
     }
     console.log("Wait block: " + _bc);
     while(true) {
-        sleep(1000);
+        await sleep(1000);
         try {
             bc = await getBlockNumber();
         } catch (e) {
             //console.error(e);
         }
-        sleep(1000);
+        await sleep(1000);
         if (bc > _bc + 6) {
             console.log("Wait block: " + bc);
             break;
@@ -269,21 +270,20 @@ async function main() {
     }
     console.log("Wait block: " + _bc);
     while(true) {
-        sleep(1000);
+        await sleep(1000);
         try {
             bc = await getBlockNumber();
         } catch (e) {
             //console.error(e);
         }
-        sleep(1000);
+        await sleep(1000);
         if (bc > _bc + 3) {
             console.log("Wait block: " + bc);
             break;
         }
     }
 
-    rngConfigVersion = vssBase.getRNGConfigVersion();
-    console.log("rng config version " + rngConfigVersion);
+    console.log("vss config version " + vssBase.VssConfigVersion);
 
     nonce = 0;
     dappBaseContract = await deployDappBaseContractPromise(
@@ -296,6 +296,106 @@ async function main() {
         3, nonce, subChainBase, chain3
     );
     console.log("Dapp Contract deployed! address: "+ dappContract.address + " " + green_check_mark);
+
+    // wait for 3000 blocks
+    waitLength = 3000;
+    try {
+        _bc = await getBlockNumber();
+    } catch (e) {
+        //console.error(e);
+    }
+    console.log("Wait block: " + _bc);
+    while(true) {
+        await sleep(1000);
+        try {
+            bc = await getBlockNumber();
+        } catch (e) {
+            //console.error(e);
+        }
+        await sleep(1000);
+        if (bc > _bc + waitLength) {
+            console.log("Wait block: " + bc);
+            break;
+        }
+        try {
+            const maxIndex = await vssBase.revealIndex();
+            console.log("vssBase.revealIndex: " + maxIndex);
+            console.log("Wait block: " + bc);
+            console.log("current status:");
+            const curFlushIndex = await subChainBase.curFlushIndex();
+            const pendingFlushIndex = await subChainBase.pendingFlushIndex();
+            const lastFlushBlk = await subChainBase.lastFlushBlk();
+            const nodeToReleaseCount = await subChainBase.nodeToReleaseCount();
+            const nodeCount = await subChainBase.nodeCount();
+            const lastNodeChangeConfigVersion = await vssBase.lastNodeChangeConfigVersion();
+
+            for (i = Math.max(maxIndex - 7, 0); i < maxIndex; i++) {
+                const sv = await vssBase.slashingVotes.call(i);
+                const rv = await vssBase.slashingRejects.call(i);
+                console.log("\tvssBase.slashingVotes: " + i + " => " + sv
+                            + " vssBase.slashingRejects: " + i + " => " + rv
+                           );
+            }
+
+            console.log("");
+            console.log("\tsubchainBase.curFlushIndex: " + curFlushIndex);
+            console.log("\tsubchainBase.pendingFlushIndex: " + pendingFlushIndex);
+            console.log("\tsubchainBase.lastFlushBlk: " + lastFlushBlk);
+            console.log("\tsubchainBase.nodeToReleaseCount: " + nodeToReleaseCount);
+            console.log("\tsubchainBase.nodeCount: " + nodeCount);
+            console.log("");
+            console.log("\tvssBase.lastNodeChangeConfigVersion: " + lastNodeChangeConfigVersion);
+            console.log("");
+
+            extra_scsids = ["30601cba96b98f22d5c46bb8a8b0b298b8017ef2"];
+
+            for (i = 0; i < scsids.length; i++) {
+                scsid = scsids[i];
+                performance = await subChainBase.nodePerformance.call("0x"+scsid);
+                role = await getSCSRolePromise("0x" + scsid, chain3);
+                console.log("\tnode performance [" + scsid +"] => " + performance + " role => " + role);
+            }
+
+            for (i = 0; i < extra_scsids.length; i++) {
+                scsid = extra_scsids[i];
+                performance = await subChainBase.nodePerformance.call("0x"+scsid);
+                role = await getSCSRolePromise("0x" + scsid, chain3);
+                console.log("\tnode performance [" + scsid +"] => " + performance + " role => " + role);
+            }
+
+            console.log("");
+            for (i = 0; i < scsids.length; i++) {
+                scsid = scsids[i];
+                upload = await vssBase.lastConfigUpload.call("0x"+scsid);
+                console.log("\tlast config uploaded[" + scsid +"] => " + upload);
+            }
+
+
+            for (i = 0; i < extra_scsids.length; i++) {
+                scsid = extra_scsids[i];
+                upload = await vssBase.lastConfigUpload.call("0x"+scsid);
+                console.log("\tlast config uploaded[" + scsid +"] => " + upload);
+            }
+
+            console.log("");
+            for (i = 0; i < scsids.length; i++) {
+                scsid = scsids[i];
+                membership = await vssBase.vssNodeMemberships.call("0x"+scsid);
+                console.log("\tvss node memberships[" + scsid +"] => " + membership);
+            }
+
+
+            for (i = 0; i < extra_scsids.length; i++) {
+                scsid = extra_scsids[i];
+                membership = await vssBase.vssNodeMemberships.call("0x"+scsid);
+                console.log("\tvss node memberships[" + scsid +"] => " + membership);
+            }
+
+            console.log("---------------------------------------------");
+        } catch (e) {
+            console.log(e);
+        }
+    }
 }
 
 main();
@@ -562,7 +662,7 @@ function addFundPromise(amount_in_mc) {
     });
 }
 
-// For subchainbase register close
+// get blocknumber
 function getBlockNumber() {
     return new Promise((resolve, reject) => {
         chain3.mc.getBlockNumber((e, blocknumber) => {
@@ -618,4 +718,21 @@ function getRNGNodeCountPromise() {
 
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// call getSCSRole
+function getSCSRolePromise(scsid, chain3) {
+    return new Promise((resolve, reject) => {
+        getscsroleTransaction = {
+		    to: subChainBase.address,
+		    data: subChainBase.getSCSRole.getData(scsid)
+        };
+        chain3.mc.call(getscsroleTransaction, (e, result) => {
+            if (!e) {
+                resolve(result);
+            } else {
+                reject(e);
+            }
+        });
+    });
 }

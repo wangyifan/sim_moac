@@ -36,7 +36,7 @@ scsids = [
     "8d26cd8257288a9f3fcb3c7a4b15ade3cf932925", // scs 3
     "632774bf61ffc8873e43f3ce68cf3f169300efa3", // scs 4
     "d7e1cf982f75563f166726a5814c7fa3c1948068", // scs 5
-    "30601cba96b98f22d5c46bb8a8b0b298b8017ef2", // scs 6
+    //"30601cba96b98f22d5c46bb8a8b0b298b8017ef2", // scs 6
     //"c24c73cfb25e444fb20c3405a8327808303f4040", // scs 7
 ];
 
@@ -82,9 +82,9 @@ console.log("SubChainProtocolBase Contract compiled, size = " + subChainProtocol
 vssbaseSolfile = version + "/" + "VssBase.sol";
 vssbaseContract = fs.readFileSync(vssbaseSolfile, 'utf8');
 vssbaseOutput = solc.compile(vssbaseContract, 1);
-console.log(vssbaseOutput);
+//console.log(vssbaseOutput);
 vssbaseAbi = vssbaseOutput.contracts[':VssBase'].interface;
-console.log(vssbaseAbi);
+//console.log(vssbaseAbi);
 vssbaseBin = vssbaseOutput.contracts[':VssBase'].bytecode;
 console.log("Vssbase Contract compiled, size = " + vssbaseBin.length + " " + green_check_mark);
 
@@ -288,8 +288,8 @@ module.exports = {
     install_account: install_account,
     scsids: scsids,
     scsmonitorids: scsmonitorids,
-    vnodeLink: "vnode:50062",
-    vnodeRpc: "vnode:8545",
+    vnodeLink: "vnode1:50062",
+    vnodeRpc: "vnode1:8545",
     version: "dev",
     password: "123456",
     bmin: 2,

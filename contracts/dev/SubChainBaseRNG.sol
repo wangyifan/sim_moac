@@ -37,11 +37,10 @@ contract SubChainBase {
       reset,
       uploadRedeemData,
       requestEnterAndRedeem,
-      requestRelease,
-      rngEnabled,
-      rngGroupConfig,
-      distributeProposalAndRNGGroupConfig,
-      rngReveal
+      requestReleaseImmediateAndVSSGroupConfig,
+      vssEnabled,
+      vssGroupConfig,
+      distributeProposalAndVSSGroupConfig
     }
     enum SubChainStatus {open, pending, close}
 
@@ -121,13 +120,14 @@ contract SubChainBase {
 
     bytes32 public proposalHashInProgress;
     bytes32 public proposalHashApprovedLast;  //index: 7
-    uint internal curFlushIndex;
-    uint internal pendingFlushIndex;
+
+    uint public curFlushIndex;
+    uint public  pendingFlushIndex;
 
     bytes public funcCode;
     bytes internal state;
 
-    uint internal lastFlushBlk;
+    uint public lastFlushBlk;
 
     address internal owner;
 
@@ -253,6 +253,11 @@ contract SubChainBase {
         }
     }
 
+    function setVssBase(address newVssBase) public {
+        require(owner == msg.sender);
+        vssbase = newVssBase;
+    }
+
     function getVssBase() public view returns (address) {
       return vssbase;
     }
@@ -288,6 +293,13 @@ contract SubChainBase {
 
     function isMemberValid(address addr) public view returns (bool) {
         return nodePerformance[addr] > 0;
+    }
+
+    function vssSlash(address addr) public {
+        require(msg.sender == vssbase);
+        if (nodePerformance[addr] > 0) {
+            nodePerformance[addr]--;
+        }
     }
 
     function getVnodeInfo() public view returns (VnodeInfo) {
@@ -444,7 +456,7 @@ contract SubChainBase {
         nodeCount++;
         nodePerformance[msg.sender] = NODE_INIT_PERFORMANCE;
 
-        // put the scs in rng group
+        // put the scs in vss group and activate
         VssBase vssbaseContract = VssBase(vssbase);
         vssbaseContract.registerVSS(msg.sender, publickey);
         vssbaseContract.activateVSS(msg.sender);
@@ -460,7 +472,7 @@ contract SubChainBase {
     }
 
     //v,r,s are the signature of msg hash(scsaddress+subchainAddr)
-    function registerAsBackup(address beneficiary, uint8 v, bytes32 r, bytes32 s) public returns (bool) {
+    function registerAsBackup(address beneficiary, uint8 v, bytes32 r, bytes32 s, bytes32 publickey) public returns (bool) {
         require(subchainstatus == uint(SubChainStatus.open));
         require(getSCSRole(msg.sender) == 4);
         if (registerFlag != 2) {
@@ -489,7 +501,6 @@ contract SubChainBase {
                 return false;
             }
         }
-
         for (i = 0; i < nodesToJoin.length; i++) {
             if (nodesToJoin[i] == msg.sender) {
                 return false;
@@ -504,7 +515,11 @@ contract SubChainBase {
         nodesToJoin.push(msg.sender);
         joinCntNow++;
         //set to performance to 0 since backup node has no block synced yet.
-        nodePerformance[msg.sender] = 0;//NODE_INIT_PERFORMANCE;
+        nodePerformance[msg.sender] = 0; //NODE_INIT_PERFORMANCE;
+
+        // put the scs in vss group but not yet activate it
+        VssBase vssbaseContract = VssBase(vssbase);
+        vssbaseContract.registerVSS(msg.sender, publickey);
 
         if (beneficiary == address(0)) {
             scsBeneficiary[msg.sender] = msg.sender;
@@ -576,11 +591,15 @@ contract SubChainBase {
             penaltyBond
         );
 
+        // remove from vssbase
+        VssBase vssbaseContract = VssBase(vssbase);
+        vssbaseContract.unregisterVSS(cur);
+
         nodeCount--;
         nodeList[index] = nodeList[nodeCount];
         delete nodeList[nodeCount];
         nodeList.length--;
-        SCS_RELAY.notifySCS(address(this), uint(SCSRelayStatus.requestRelease));
+        SCS_RELAY.notifySCS(address(this), uint(SCSRelayStatus.requestReleaseImmediateAndVSSGroupConfig));
 
         return true;
     }
@@ -1017,11 +1036,12 @@ contract SubChainBase {
             }
         }
 
+        bool nodesChanged = false;
         //remove bad nodes
-        applyRemoveNodes(0);
+        nodesChanged = applyRemoveNodes(0);
 
         //remove node to release
-        applyRemoveNodes(1);
+        nodesChanged = nodesChanged || applyRemoveNodes(1);
 
         //update randIndex
         bytes32 randseed = sha256(hash, block.number);
@@ -1030,7 +1050,7 @@ contract SubChainBase {
 
         //if some nodes want to join in
         if (registerFlag == 2) {
-            applyJoinNodes();
+            nodesChanged = nodesChanged || applyJoinNodes();
         }
 
         //if need toauto retire nodes
@@ -1047,7 +1067,7 @@ contract SubChainBase {
         //notify v-node
         if (prop.redeemAddr.length == 0) {
             revenueDistribution(hash);
-            flushEnd(hash);
+            flushEnd(hash, nodesChanged);
         } else {
             SCS_RELAY.notifySCS(address(this), uint(SCSRelayStatus.approveProposal));
         }
@@ -1072,7 +1092,7 @@ contract SubChainBase {
         return true;
     }
 
-    function flushEnd(bytes32 hash ) private {
+    function flushEnd(bytes32 hash, bool nodesChanged) private {
         Proposal storage prop = proposals[hash];
 
         //setflag
@@ -1093,7 +1113,11 @@ contract SubChainBase {
             withdrawal();
         }
 
-        SCS_RELAY.notifySCS(address(this), uint(SCSRelayStatus.distributeProposalAndRNGGroupConfig));
+        if (nodesChanged == true) {
+            SCS_RELAY.notifySCS(address(this), uint(SCSRelayStatus.distributeProposalAndVSSGroupConfig));
+        } else {
+            SCS_RELAY.notifySCS(address(this), uint(SCSRelayStatus.distributeProposal));
+        }
     }
 
     function requestEnterAndRedeemAction(bytes32 hash) public returns (bool) {
@@ -1145,7 +1169,7 @@ contract SubChainBase {
         }
         if (res) {
             revenueDistribution(hash);
-            flushEnd(hash);
+            flushEnd(hash, false);
         } else {
             SCS_RELAY.notifySCS(address(this), uint(SCSRelayStatus.requestEnterAndRedeem));
         }
@@ -1274,15 +1298,17 @@ contract SubChainBase {
         return true;
     }
 
-    function applyJoinNodes() private {
+    function applyJoinNodes() private returns (bool) {
         uint i = 0;
+        bool nodesChanged = false;
         VssBase vssbaseContract = VssBase(vssbase);
         for (i = joinCntNow; i > 0; i--) {
             if( nodePerformance[nodesToJoin[i-1]] == NODE_INIT_PERFORMANCE) {
                 nodeList.push(nodesToJoin[i-1]);
                 nodeCount++;
+                nodesChanged = true;
 
-                // activate the node with rng
+                // activate the node with vss
                 vssbaseContract.activateVSS(nodesToJoin[i-1]);
 
                 //delete node
@@ -1297,13 +1323,16 @@ contract SubChainBase {
             joinCntMax = 0;
             registerFlag = 0;
         }
+
+        return nodesChanged;
     }
 
     // reuse this code for remove bad node or other volunteerly leaving node
     // nodetype 0: bad node, 1: volunteer leaving node
-    function applyRemoveNodes(uint nodetype) private {
+    function applyRemoveNodes(uint nodetype) private returns (bool) {
         SubChainProtocolBase protocnt = SubChainProtocolBase(protocol);
         VssBase vssbaseContract = VssBase(vssbase);
+        bool nodesChanged = false;
 
         uint count = nodesToDispel.length;
         if (nodetype == 1) {
@@ -1311,7 +1340,7 @@ contract SubChainBase {
         }
 
         if (count == 0) {
-            return;
+            return nodesChanged;
         }
 
         // all nodes set 0 at initial, set node to be removed as 1.
@@ -1348,6 +1377,7 @@ contract SubChainBase {
                 nodeList[i-1] = nodeList[nodeCount];
                 delete nodeList[nodeCount];
                 nodeList.length--;
+                nodesChanged = true;
             }
         }
 
@@ -1359,6 +1389,8 @@ contract SubChainBase {
             //clear release count
             nodeToReleaseCount = 0;
         }
+
+        return nodesChanged;
     }
 
     // ATO new
