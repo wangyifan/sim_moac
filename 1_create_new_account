@@ -1,0 +1,4 @@
+./moac account new --datadir /var/lib/moac/config/
+
+# create inside docker container in volume
+# docker run -it --mount source=docker_scs-data-volume,target=/vnode/data yifan:vnode moac --datadir /vnode/data account new

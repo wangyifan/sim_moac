@@ -1,0 +1,28 @@
+version: '3.1'
+
+# create the network if it does not exist
+# docker network create --internal --gateway 172.20.0.1 --subnet 172.20.0.0/16 docker_moac_vnode_network
+
+services:
+  ####################### vnode 1  #######################
+  vnode:
+    image: yifan:vnode
+    command: moac --networkid 95125 --vnodeconfig /vnode/config/vnodeconfig.json --keystore /vnode/config/keystore --datadir=/vnode/data --ethash.dagdir /vnode/data/.ethash --verbosity 4 --rpc --rpcaddr 0.0.0.0 --mine --minerthreads 1 --rpcapi chain3,mc,net,vnode,personal,admin,miner --nodekey /vnode/config/bootnode.key 2>&1
+    network_mode: host
+    volumes:
+      - /var/lib/moac/config/:/vnode/config/
+      - vnode-data-volume:/vnode/data/
+
+  scs:
+    image: yifan:scs
+    command: wait-for-it.sh localhost:50062 --strict -- scsserver --password 123456 --datadir /scs/data --userconfig /scs/config --rpcaddr 0.0.0.0 --rpcport 8546 --rpccorsdomain "*" --rpcdebug
+    network_mode: host
+    depends_on:
+      - vnode
+    volumes:
+      - /var/lib/moac/config:/scs/config/
+      - scs-data-volume:/scs/data/
+
+volumes:
+  vnode-data-volume:
+  scs-data-volume:

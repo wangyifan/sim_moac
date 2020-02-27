@@ -1,0 +1,20 @@
+version: '3.1'
+
+# create the network if it does not exist
+# docker network create --internal --gateway 172.20.0.1 --subnet 172.20.0.0/16 docker_moac_vnode_network
+
+services:
+  ####################### vnode 1  #######################
+  vnode1:
+    image: yifan:vnode
+    ports:
+        - "52159:8545"
+    command: moac --networkid 95125 --vnodeconfig /vnode/vnodeconfig.json --datadir=/vnode --ethash.dagdir /vnode/.ethash --verbosity 4 --rpc --rpcaddr 0.0.0.0 --mine --minerthreads 1 --rpcapi chain3,mc,net,vnode,personal,admin,miner --ipcpath=/root/.moac/moac.ipc --nodekey /vnode/1.bootnode.key 2>&1
+    networks:
+      default:
+        ipv4_address: 172.20.0.11
+
+networks:
+  default:
+    external:
+      name: docker_moac_vnode_network

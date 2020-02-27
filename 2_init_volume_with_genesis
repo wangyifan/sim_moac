@@ -1,0 +1,2 @@
+docker volume create docker_vnode-data-volume
+docker run -it --mount source=vnode-data-volume,target=/vnode/data yifan:vnode moac init --datadir /vnode/data /vnode/genesis.json
