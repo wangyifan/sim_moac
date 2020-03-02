@@ -34,6 +34,6 @@ COPY bin/tools/wait-for-it.sh  /usr/local/sbin/
 # COPY config/scs/monitor /scs/monitor
 COPY bin/$version/scs/scsserver /usr/local/sbin/
 
-WORKDIR /scs
+WORKDIR /scs/data
 
 CMD ["echo", "This is moac scs server."]

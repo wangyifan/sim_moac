@@ -36,7 +36,7 @@ deployVnodeProtocolBaseContractPromise = dcbase.deployVnodeProtocolBaseContractP
 deployDappBaseContractPromise = dcbase.deployDappBaseContractPromise;
 deployVssBaseContractPromise = dcbase.deployVssBaseContractPromise;
 
-hostport = "http://"+ "172.20.0.11" + ":" + "8545";
+hostport = "http://"+ "127.0.0.1" + ":" + "18545";
 chain3.setProvider(new chain3.providers.HttpProvider(hostport));
 chain3.personal.unlockAccount(install_account, password, unlock_forever);
 vnodeProtocolBaseContract = chain3.mc.contract(JSON.parse(vnodeProtocolBaseAbi));

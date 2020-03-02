@@ -15,9 +15,9 @@ RUN mkdir /vnode/data
 
 # install moac vnode
 # COPY config/vnode/vnodeconfig.json /vnode/vnodeconfig.json
-COPY config/vnode/miner.config /vnode/vnodeconfig.json
+# COPY config/vnode/miner.config /vnode/vnodeconfig.json
 # COPY config/vnode/miner.config /vnode/config/vnodeconfig.json
-COPY config/vnode/vnode.genesis.json /vnode/genesis.json
+# COPY config/vnode/vnode.genesis.json /vnode/genesis.json
 COPY bin/$version/vnode/moac /usr/local/sbin/
 COPY bin/tools/wait-for-it.sh  /usr/local/sbin/
 COPY bin/tools/disable_network.sh /usr/local/sbin/

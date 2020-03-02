@@ -3,12 +3,9 @@ const Chain3 = require("chain3");
 const solc = require("solc");
 
 // global setting
-let install_account = "0xa35add395b804c3faacf7c7829638e42ffa1d051";
 let vnodeLink = "vnode:50062";
 let vnodeRpc = "vnode:8545";
-//let version = "1.0.6";
 let version = "dev";
-let password = "123456";
 let bmin = 2;
 let unlock_forever = 0;
 let chain3 = new Chain3();
@@ -23,19 +20,25 @@ let subChainBase = null;
 let minMember = 1;
 let maxMember = 31;
 let thousandth = 1000;
-let threshold = 4;
 let flushRound = 50;
 let tokensupply = 3;
 let exchangerate = 1;
 let addFundAmount = 50;
 
+let password = "1234567";
+let threshold = 2;
+let install_account = "0x64c2f81956ce75ef85e81534164f29a22d8a9d71";
+
 scs_amount = 1000;
 scsids = [
-    "a63a7764d01a6b11ba628f06b00a1828e5955a7f", // scs 1
-    "43c375d09e8a528770c6e1c76014cc9f4f9139a3", // scs 2
-    "8d26cd8257288a9f3fcb3c7a4b15ade3cf932925", // scs 3
-    "632774bf61ffc8873e43f3ce68cf3f169300efa3", // scs 4
-    "d7e1cf982f75563f166726a5814c7fa3c1948068", // scs 5
+    "cf63506c6aea6fd30f602b3a565c29eb8a3fabe9",
+    "18f1a9a6db02bfe950730f3734a38c354640ef64",
+    "014e2cb023b445728abb134ee5ef9b72505814ec",
+    //"a63a7764d01a6b11ba628f06b00a1828e5955a7f", // scs 1
+    //"43c375d09e8a528770c6e1c76014cc9f4f9139a3", // scs 2
+    //"8d26cd8257288a9f3fcb3c7a4b15ade3cf932925", // scs 3
+    //"632774bf61ffc8873e43f3ce68cf3f169300efa3", // scs 4
+    //"d7e1cf982f75563f166726a5814c7fa3c1948068", // scs 5
     //"30601cba96b98f22d5c46bb8a8b0b298b8017ef2", // scs 6
     //"c24c73cfb25e444fb20c3405a8327808303f4040", // scs 7
 ];
@@ -291,7 +294,7 @@ module.exports = {
     vnodeLink: "vnode1:50062",
     vnodeRpc: "vnode1:8545",
     version: "dev",
-    password: "123456",
+    password: password,
     bmin: 2,
     unlock_forever: 0,
     chain3: new Chain3(),
@@ -306,7 +309,7 @@ module.exports = {
     minMember: 1,
     maxMember: 31,
     thousandth: 1000,
-    threshold: 4,
+    threshold: threshold,
     flushRound: 50,
     tokensupply: 3,
     exchangerate: 1,
