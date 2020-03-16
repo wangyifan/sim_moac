@@ -36,7 +36,10 @@ deployVnodeProtocolBaseContractPromise = dcbase.deployVnodeProtocolBaseContractP
 deployDappBaseContractPromise = dcbase.deployDappBaseContractPromise;
 deployVssBaseContractPromise = dcbase.deployVssBaseContractPromise;
 
-hostport = "http://"+ "127.0.0.1" + ":" + "18545";
+// for docker deployment
+//hostport = "http://"+ "127.0.0.1" + ":" + "18545";
+
+hostport = "http://"+ "172.20.0.11" + ":" + "8545";
 chain3.setProvider(new chain3.providers.HttpProvider(hostport));
 chain3.personal.unlockAccount(install_account, password, unlock_forever);
 vnodeProtocolBaseContract = chain3.mc.contract(JSON.parse(vnodeProtocolBaseAbi));
@@ -285,6 +288,29 @@ async function main() {
 
     console.log("vss config version " + vssBase.VssConfigVersion);
 
+    // wait for 120 blocks before deploy dappbase
+    try {
+        _bc = await getBlockNumber();
+    } catch (e) {
+        //console.error(e);
+    }
+    console.log("Wait block: " + _bc);
+    while(true) {
+        await sleep(1000);
+        try {
+            bc = await getBlockNumber();
+            console.log("Wait block: " + bc);
+        } catch (e) {
+            //console.error(e);
+        }
+        await sleep(1000);
+        if (bc > _bc + 120) {
+            console.log("Wait block: " + bc);
+            break;
+        }
+    }
+
+
     nonce = 0;
     dappBaseContract = await deployDappBaseContractPromise(
         tokensupply/exchangerate, nonce, subChainBase, chain3
@@ -297,7 +323,7 @@ async function main() {
     );
     console.log("Dapp Contract deployed! address: "+ dappContract.address + " " + green_check_mark);
 
-    // wait for 3000 blocks
+    // wait for 3000 ms
     waitLength = 3000;
     try {
         _bc = await getBlockNumber();
@@ -305,6 +331,7 @@ async function main() {
         //console.error(e);
     }
     console.log("Wait block: " + _bc);
+
     while(true) {
         await sleep(1000);
         try {
@@ -462,6 +489,8 @@ function deploySubChainBaseContractPromise(vssbaseaddr){
         subChainBaseContract.new(
             subChainProtocolBase.address,
             vnodeProtocolBase.address,
+            //vnodeProtocolBase.address, // ercaddr
+            //1, // ercrate
             minMember,
             maxMember,
             thousandth,

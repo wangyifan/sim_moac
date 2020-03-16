@@ -35,6 +35,7 @@ contract TestCoin {
     function decimals() public view returns (uint256);
 }
 
+
 contract VssBase {
     function registerVSS(address sender, bytes32 publickey) public;
     function unregisterVSS(address sender) public;
@@ -249,7 +250,7 @@ contract SubChainBase {
         ERCRate = ercRate;
         TestCoin erc20 = TestCoin(ERCAddr);
         ERCDecimals = erc20.decimals();
-         if (ERCDecimals > 18) {
+        if (ERCDecimals > 18) {
             revert();
         }
         ERCDecimals = 18 - ERCDecimals;
@@ -563,6 +564,7 @@ contract SubChainBase {
         }
 
         SCS_RELAY.notifySCS(address(this), uint(SCSRelayStatus.regAsBackup));
+
         return true;
     }
 
@@ -1023,11 +1025,10 @@ contract SubChainBase {
         }
 
         //check if ready to accept
-        uint chk = checkProposalStatus(hash);
-        if (chk == uint(ProposalCheckStatus.undecided)) {
+        if (checkProposalStatus(hash) == uint(ProposalCheckStatus.undecided)) {
             return false;
         }
-        else if (chk == uint(ProposalCheckStatus.expired)) {
+        else if (checkProposalStatus(hash) == uint(ProposalCheckStatus.expired)) {
             prop.flag = uint(ProposalFlag.expired);  //expired.
             //reduce proposer's performance
             address by = prop.proposedBy;
@@ -1101,11 +1102,7 @@ contract SubChainBase {
         //notify v-node
         if (prop.redeemAddr.length == 0) {
             revenueDistribution(hash);
-            if (nodesChanged == true) {
-                flushEndTrue(hash);
-            } else {
-                flushEndFalse(hash);
-            }
+            flushEnd(hash, nodesChanged);
         } else {
             SCS_RELAY.notifySCS(address(this), uint(SCSRelayStatus.approveProposal));
         }
@@ -1130,7 +1127,7 @@ contract SubChainBase {
         return true;
     }
 
-    function flushEndBase(bytes32 hash) private {
+    function flushEnd(bytes32 hash, bool nodesChanged) private {
         Proposal storage prop = proposals[hash];
 
         //setflag
@@ -1151,16 +1148,12 @@ contract SubChainBase {
             withdrawal();
         }
 
-    }
+        if (nodesChanged == true) {
+            SCS_RELAY.notifySCS(address(this), uint(SCSRelayStatus.distributeProposalAndVSSGroupConfig));
+        } else {
+            SCS_RELAY.notifySCS(address(this), uint(SCSRelayStatus.distributeProposal));
+        }
 
-    function flushEndTrue(bytes32 hash) private {
-        flushEndBase(hash);
-        SCS_RELAY.notifySCS(address(this), uint(SCSRelayStatus.distributeProposalAndVSSGroupConfig));
-    }
-
-    function flushEndFalse(bytes32 hash) private {
-        flushEndBase(hash);
-        SCS_RELAY.notifySCS(address(this), uint(SCSRelayStatus.distributeProposal));
     }
 
     function requestEnterAndRedeemAction(bytes32 hash) public returns (bool) {
@@ -1219,7 +1212,7 @@ contract SubChainBase {
         }
         if (res) {
             revenueDistribution(hash);
-            flushEndFalse(hash);
+            flushEnd(hash, false);
         } else {
             SCS_RELAY.notifySCS(address(this), uint(SCSRelayStatus.requestEnterAndRedeem));
         }

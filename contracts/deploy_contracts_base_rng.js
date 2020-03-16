@@ -25,23 +25,33 @@ let tokensupply = 3;
 let exchangerate = 1;
 let addFundAmount = 50;
 
-let password = "1234567";
-let threshold = 2;
-let install_account = "0x64c2f81956ce75ef85e81534164f29a22d8a9d71";
+// for docker deployment
+//let password = "1234567";
+//let threshold = 2;
+//let install_account = "0x64c2f81956ce75ef85e81534164f29a22d8a9d71";
+
+install_account = "0xa35add395b804c3faacf7c7829638e42ffa1d051";
+password = "123456";
+threshold = 3;
 
 scs_amount = 1000;
 scsids = [
-    "cf63506c6aea6fd30f602b3a565c29eb8a3fabe9",
-    "18f1a9a6db02bfe950730f3734a38c354640ef64",
-    "014e2cb023b445728abb134ee5ef9b72505814ec",
-    //"a63a7764d01a6b11ba628f06b00a1828e5955a7f", // scs 1
-    //"43c375d09e8a528770c6e1c76014cc9f4f9139a3", // scs 2
-    //"8d26cd8257288a9f3fcb3c7a4b15ade3cf932925", // scs 3
-    //"632774bf61ffc8873e43f3ce68cf3f169300efa3", // scs 4
-    //"d7e1cf982f75563f166726a5814c7fa3c1948068", // scs 5
-    //"30601cba96b98f22d5c46bb8a8b0b298b8017ef2", // scs 6
-    //"c24c73cfb25e444fb20c3405a8327808303f4040", // scs 7
+    //"cf63506c6aea6fd30f602b3a565c29eb8a3fabe9",
+    //"18f1a9a6db02bfe950730f3734a38c354640ef64",
+    //"014e2cb023b445728abb134ee5ef9b72505814ec",
+    "a63a7764d01a6b11ba628f06b00a1828e5955a7f", // scs 1
+    "43c375d09e8a528770c6e1c76014cc9f4f9139a3", // scs 2
+    "8d26cd8257288a9f3fcb3c7a4b15ade3cf932925", // scs 3
+    "632774bf61ffc8873e43f3ce68cf3f169300efa3", // scs 4
+    "d7e1cf982f75563f166726a5814c7fa3c1948068", // scs 5
+    "30601cba96b98f22d5c46bb8a8b0b298b8017ef2", // scs 6
+    "c24c73cfb25e444fb20c3405a8327808303f4040", // scs 7
 ];
+
+subChainBaseFileName = "SubChainBaseRNG.sol";
+//subChainBaseFileName = "SubChainBaseRNG_V2.sol";
+//subChainBaseFileName = "SubChainBaseRNG_ORI.sol";
+
 
 scsmonitorids = [
     "0b52dde836cb80a5d13c68784c338f42e1860922"  // monitor
@@ -92,7 +102,6 @@ vssbaseBin = vssbaseOutput.contracts[':VssBase'].bytecode;
 console.log("Vssbase Contract compiled, size = " + vssbaseBin.length + " " + green_check_mark);
 
 // compile subchainbase
-subChainBaseFileName = "SubChainBaseRNG.sol";
 subChainBaseSolfiles = [subChainBaseFileName, "SubChainProtocolBase.sol"];
 subChainBaseInput = {};
 subChainBaseSolfiles.forEach(fileName => {
@@ -118,6 +127,7 @@ if (subChainBaseOutput.errors.length > 0) {
 subChainBaseAbi = subChainBaseOutput.contracts[subChainBaseFileName + ':SubChainBase'].interface;
 //console.log(subChainBaseAbi);
 subChainBaseBin = subChainBaseOutput.contracts[subChainBaseFileName + ':SubChainBase'].bytecode;
+//console.log(subChainBaseBin);
 console.log("SubChainBase Contract compiled, size = " + subChainBaseBin.length + " " + green_check_mark);
 
 // For add fund to scsids
