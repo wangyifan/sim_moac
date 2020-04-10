@@ -36,7 +36,7 @@ deployVnodeProtocolBaseContractPromise = dcbase.deployVnodeProtocolBaseContractP
 deployDappBaseContractPromise = dcbase.deployDappBaseContractPromise;
 deployVssBaseContractPromise = dcbase.deployVssBaseContractPromise;
 
-// for docker deployment
+// for docker product deployment
 //hostport = "http://"+ "127.0.0.1" + ":" + "18545";
 
 hostport = "http://"+ "172.20.0.11" + ":" + "8545";
@@ -288,7 +288,7 @@ async function main() {
 
     console.log("vss config version " + vssBase.VssConfigVersion);
 
-    // wait for 120 blocks before deploy dappbase
+    // wait for 12 blocks before deploy dappbase
     try {
         _bc = await getBlockNumber();
     } catch (e) {
@@ -304,7 +304,7 @@ async function main() {
             //console.error(e);
         }
         await sleep(1000);
-        if (bc > _bc + 120) {
+        if (bc > _bc + 12) {
             console.log("Wait block: " + bc);
             break;
         }
@@ -328,7 +328,6 @@ async function main() {
     try {
         _bc = await getBlockNumber();
     } catch (e) {
-        //console.error(e);
     }
     console.log("Wait block: " + _bc);
 
@@ -375,6 +374,7 @@ async function main() {
             console.log("");
 
             extra_scsids = ["30601cba96b98f22d5c46bb8a8b0b298b8017ef2"];
+            //extra_scsids = [];
 
             for (i = 0; i < scsids.length; i++) {
                 scsid = scsids[i];

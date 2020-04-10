@@ -17,6 +17,7 @@ contract VssBase {
     function registerVSS(address sender, bytes32 publickey) public;
     function unregisterVSS(address sender) public;
     function activateVSS(address sender) public;
+    function deactivateVSS(address sender) public;
 }
 
 contract SubChainBase {
@@ -299,6 +300,12 @@ contract SubChainBase {
         require(msg.sender == vssbase);
         if (nodePerformance[addr] > 0) {
             nodePerformance[addr]--;
+        }
+
+        // if it is not valid, deactivate in vss
+        if (!isMemberValid(addr)) {
+            VssBase vssbaseContract = VssBase(vssbase);
+            vssbaseContract.unregisterVSS(addr);
         }
     }
 

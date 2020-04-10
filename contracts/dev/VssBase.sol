@@ -84,8 +84,14 @@ contract VssBase{
     mapping(address => int) public lastSlashingVoted;
     // mapping from sig sha to slash index
     mapping(bytes32 => int) public revealedSigMapping;
-    // mapping from scs to its last config upload
+    // mapping from scs to the version number of its last config upload
     mapping(address => int) public lastConfigUpload;
+    // mapping from scs to the block number of its last config upload
+    mapping(address => int) public lastConfigUploadByBlock;
+    // mapping from violator address to (inccident id => number of votes)
+    mapping(address => mapping(int => uint)) public slowNodeVotes;
+    // mapping from violator address to (inccident id => whether voted or not)
+    mapping(address => mapping(int => mapping(address => bool))) public slowNodeVoted;
 
     address public owner;
     address public caller; // this should set to the related subchainbase address
@@ -95,6 +101,8 @@ contract VssBase{
     int public vssConfigVersion = 0;
     int public revealIndex = 0;
     int public lastNodeChangeConfigVersion = 0;
+    int public lastNodeChangeBlock = 0;
+    int public slowNodeThreshold = 30; // number of blocks
 
     enum VssMembership {noreg, active, inactive} // noreg: node never seen before
 
@@ -121,12 +129,22 @@ contract VssBase{
     }
 
     function unregisterVSS(address sender) public {
-        require(caller == msg.sender);
+        require(caller == msg.sender) ;
         lastSender = msg.sender;
 
         if (vssNodeMemberships[sender] == uint(VssMembership.active)) {
             vssNodeMemberships[sender] = uint(VssMembership.inactive);
             lastNodeChangeConfigVersion = vssConfigVersion;
+            lastNodeChangeBlock = int(block.number);
+        }
+    }
+
+    function deactivateVSS(address sender) public {
+        require(caller == msg.sender) ;
+
+        if (vssNodeMemberships[sender] == uint(VssMembership.active)) {
+            vssNodeMemberships[sender] = uint(VssMembership.inactive);
+            vssConfigVersion++;
         }
     }
 
@@ -141,12 +159,14 @@ contract VssBase{
             vssNodeCount++;
             vssNodeMemberships[sender] = uint(VssMembership.active);
             lastNodeChangeConfigVersion = vssConfigVersion;
+            lastNodeChangeBlock = int(block.number);
         }
 
         // if it is a node we know before, just re-active it
         if (vssNodeMemberships[sender] == uint(VssMembership.inactive)) {
             vssNodeMemberships[sender] = uint(VssMembership.active);
             lastNodeChangeConfigVersion = vssConfigVersion;
+            lastNodeChangeBlock = int(block.number);
         }
     }
 
@@ -160,8 +180,10 @@ contract VssBase{
         vssPrivateShares[msg.sender] = privateShares;
         vssConfigVersion++;
         lastConfigUpload[msg.sender] = vssConfigVersion;
+        lastConfigUploadByBlock[msg.sender] = int(block.number);
     }
 
+    // vote the vss config to be ready
     function vote(int configVersion) public {
         // must be active member and can not vote twice
         require(vssNodeMemberships[msg.sender] == uint(VssMembership.active));
@@ -171,7 +193,30 @@ contract VssBase{
         voters[configVersion][msg.sender] = true;
     }
 
-    // use reveal to upload shares sent by other member nodes
+    // use reportSlowNode to report node that's slow in uploading new config after node change
+    function reportSlowNode(address violator) public {
+        // must be active member to report
+        require(vssNodeMemberships[msg.sender] == uint(VssMembership.active));
+
+        int currentBlockNumber = int(block.number);
+        int nodeUploadBlockNumber = lastConfigUploadByBlock[violator];
+        // if it's behind node change config version and is too far ( > slowNodeThreshold) away
+        if (lastConfigUpload[violator] < lastNodeChangeConfigVersion && (currentBlockNumber - lastNodeChangeBlock) > slowNodeThreshold) {
+            // one node can only report once for one inccident
+            if (slowNodeVoted[violator][nodeUploadBlockNumber][msg.sender] == false) {
+                slowNodeVotes[violator][nodeUploadBlockNumber] += 1;
+                slowNodeVoted[violator][nodeUploadBlockNumber][msg.sender] = true;
+            }
+
+            // if more than threshold nodes report, then slash the violator
+            if (slowNodeVotes[violator][nodeUploadBlockNumber] > uint(vssThreshold)) {
+                SubChainBase subchainbaseContract = SubChainBase(caller);
+                subchainbaseContract.vssSlash(violator);
+            }
+        }
+    }
+
+    // use reveal to upload bad shares sent by other member nodes
     function reveal(address violator, bytes pubShare, bytes pubSig, bytes priShare, bytes priSig, bytes revealedPri) public {
         // must be active member to call reveal
         require(vssNodeMemberships[msg.sender] == uint(VssMembership.active));
@@ -202,6 +247,7 @@ contract VssBase{
         return reveals[index];
     }
 
+    // index is the id for the slashing round
     function slashing(int index, bool slash) public {
         // must be active member to call slashing
         require(vssNodeMemberships[msg.sender] == uint(VssMembership.active));
@@ -236,6 +282,10 @@ contract VssBase{
 
     function getLastSlashVoted(address addr) public view returns(int) {
         return  lastSlashingVoted[addr];
+    }
+
+    function getBlockNumber() public view returns(int) {
+        return int(block.number);
     }
 
     function isConfigReady(int configVersion) public view returns(bool) {
