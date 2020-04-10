@@ -305,7 +305,7 @@ contract SubChainBase {
         // if it is not valid, deactivate in vss
         if (!isMemberValid(addr)) {
             VssBase vssbaseContract = VssBase(vssbase);
-            vssbaseContract.unregisterVSS(addr);
+            vssbaseContract.deactivateVSS(addr);
         }
     }
 
