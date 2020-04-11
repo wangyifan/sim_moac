@@ -111,6 +111,12 @@ contract VssBase{
         owner = msg.sender;
     }
 
+    function setThreshold(int newThreshold) public {
+        require(owner == msg.sender);
+        vssThreshold = newThreshold;
+        vssConfigVersion++;
+    }
+
     function setCaller(address callerAddr) public {
         require(owner == msg.sender);
         caller = callerAddr;
@@ -122,14 +128,14 @@ contract VssBase{
     }
 
     function registerVSS(address sender, bytes32 publickey) public {
-        require(caller == msg.sender);
+        require(caller == msg.sender || owner == msg.sender);
 
         lastSender = msg.sender;
         vssPublicKeys[sender] = publickey;
     }
 
     function unregisterVSS(address sender) public {
-        require(caller == msg.sender) ;
+        require(caller == msg.sender || owner == msg.sender) ;
         lastSender = msg.sender;
 
         if (vssNodeMemberships[sender] == uint(VssMembership.active)) {
@@ -140,7 +146,7 @@ contract VssBase{
     }
 
     function deactivateVSS(address sender) public {
-        require(caller == msg.sender) ;
+        require(caller == msg.sender || owner == msg.sender) ;
 
         if (vssNodeMemberships[sender] == uint(VssMembership.active)) {
             vssNodeMemberships[sender] = uint(VssMembership.inactive);
@@ -149,7 +155,7 @@ contract VssBase{
     }
 
     function activateVSS(address sender) public {
-        require(caller == msg.sender);
+        require(caller == msg.sender || owner == msg.sender);
         lastSender = msg.sender;
 
         // if it is a node we never seen before which is noreg

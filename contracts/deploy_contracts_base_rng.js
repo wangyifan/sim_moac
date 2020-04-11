@@ -93,7 +93,7 @@ vssbaseContract = fs.readFileSync(vssbaseSolfile, 'utf8');
 vssbaseOutput = solc.compile(vssbaseContract, 1);
 //console.log(vssbaseOutput);
 vssbaseAbi = vssbaseOutput.contracts[':VssBase'].interface;
-console.log(vssbaseAbi);
+//console.log(vssbaseAbi);
 vssbaseBin = vssbaseOutput.contracts[':VssBase'].bytecode;
 console.log("Vssbase Contract compiled, size = " + vssbaseBin.length + " " + green_check_mark);
 
