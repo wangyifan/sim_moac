@@ -299,7 +299,7 @@ contract SubChainBase {
     function vssSlash(address addr) public {
         require(msg.sender == vssbase);
         if (nodePerformance[addr] > 0) {
-            nodePerformance[addr]--;
+            nodePerformance[addr] = 0;
         }
 
         // if it is not valid, deactivate in vss
@@ -1473,5 +1473,9 @@ contract SubChainBase {
         holdingPool.amount.push(token);
         holdingPool.time.push(now);
         return true;
+    }
+
+    function getBlockNumber() public view returns (int) {
+        return int(block.number);
     }
 }

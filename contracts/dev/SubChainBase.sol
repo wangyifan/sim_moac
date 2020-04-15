@@ -1462,4 +1462,8 @@ contract SubChainBase {
         holdingPool.time.push(now);
         return true;
     }
+
+    function getBlockNumber() public view returns(int) {
+        return int(block.number);
+    }
 }

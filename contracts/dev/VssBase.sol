@@ -215,7 +215,7 @@ contract VssBase{
             }
 
             // if more than threshold nodes report, then slash the violator
-            if (slowNodeVotes[violator][nodeUploadBlockNumber] > uint(vssThreshold)) {
+            if (slowNodeVotes[violator][nodeUploadBlockNumber] >= uint(vssThreshold)) {
                 SubChainBase subchainbaseContract = SubChainBase(caller);
                 subchainbaseContract.vssSlash(violator);
             }
@@ -288,10 +288,6 @@ contract VssBase{
 
     function getLastSlashVoted(address addr) public view returns(int) {
         return  lastSlashingVoted[addr];
-    }
-
-    function getBlockNumber() public view returns(int) {
-        return int(block.number);
     }
 
     function isConfigReady(int configVersion) public view returns(bool) {
