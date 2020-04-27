@@ -171,7 +171,7 @@ contract VssBase{
     int public revealIndex = 0;
     int public lastNodeChangeConfigVersion = 0;
     int public lastNodeChangeBlock = 0;
-    int public slowNodeThreshold = 30; // number of blocks
+    int public slowNodeThreshold = 50; // number of blocks
 
     enum VssMembership {noreg, active, inactive} // noreg: node never seen before
 
@@ -194,6 +194,11 @@ contract VssBase{
     function setOwner(address newOwner) public {
         require(owner == msg.sender);
         owner = newOwner;
+    }
+
+    function setSlowNodeThreshold(int newThreshold) public {
+        require(owner == msg.sender);
+        slowNodeThreshold = newThreshold;
     }
 
     function registerVSS(address sender, bytes32 publickey) public {
