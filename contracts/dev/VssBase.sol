@@ -4,6 +4,75 @@ pragma experimental ABIEncoderV2;
 // System smart contract for verifiable secret sharing
 // MOAC Inc 2017 ~ 2019
 
+/*
+======= VssBase.sol:SCSRelay =======
+Function signatures:
+219dc4a0: notifySCS(address,uint256)
+
+======= VssBase.sol:SubChainBase =======
+Function signatures:
+50859fd9: getSCSRole(address)
+11f79f7c: vssSlash(address)
+
+======= VssBase.sol:VssBase =======
+Function signatures:
+d89da49c: GetCaller()
+9f1e5f0e: GetLastSender()
+e4c1de98: activateVSS(address)
+fc9c8d39: caller()
+de79b856: deactivateVSS(address)
+029471e0: getActiveVSSMemberCount()
+ed0c88ef: getActiveVSSMemberList()
+7e2a1ed3: getLastSlashVoted(address)
+9496db22: getPrivateShares(address)
+80c3fe62: getPublicShares(address)
+8b051563: getRevealedShare(int256)
+50859fd9: getSCSRole(address)
+fc054aa8: getVSSNodeIndex(address)
+2a292dc7: getVSSNodesIndexs(address[])
+2512b947: getVSSNodesPubkey(address[])
+91e4d7f7: isConfigReady(int256)
+9d6e8c6c: isSlashed(int256)
+2a56ce43: lastConfigUpload(address)
+b5ef046e: lastConfigUploadByBlock(address)
+7d0f6c77: lastNodeChangeBlock()
+514cac35: lastNodeChangeConfigVersion()
+256fec88: lastSender()
+7457b355: lastSlashingVoted(address)
+8da5cb5b: owner()
+eefb4227: registerVSS(address,bytes32)
+7ce54cc8: reportSlowNode(address)
+1a1efdaf: resetVSSGroup()
+282c0b8f: reveal(address,bytes,bytes,bytes,bytes,bytes)
+99ba5a92: revealIndex()
+0b927b32: revealed(bytes32)
+307f201a: revealedReporter(int256)
+59495523: revealedSigMapping(bytes32)
+51ed07e4: revealedViolator(int256)
+778ada10: reveals(int256)
+beb92f55: setCaller(address)
+13af4035: setOwner(address)
+ef0fb558: setThreshold(int256)
+1c2c6b4d: slashed(int256)
+56a09939: slashing(int256,bool)
+5e296853: slashingRejects(int256)
+3430cadd: slashingVoters(int256,address)
+94a629be: slashingVotes(int256)
+3ed4f116: slowNodeThreshold()
+dbccad54: slowNodeVoted(address,int256,address)
+6911af65: slowNodeVotes(address,int256)
+f06dc92d: unregisterVSS(address)
+ca6c8a31: uploadVSSConfig(bytes,bytes)
+3891c320: vote(int256)
+9c081852: voters(int256,address)
+d0bef4ae: votes(int256)
+bbc3d237: vssConfigVersion()
+cc30a60f: vssNodeCount()
+98b72f98: vssNodeMemberships(address)
+984624ba: vssThreshold()
+*/
+
+
 contract SCSRelay {
     // 0-registeropen
     // 1-registerclose
