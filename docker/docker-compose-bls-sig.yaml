@@ -8,8 +8,10 @@ services:
   vnode1:
     image: yifan:vnode-dev
     ports:
-        - "52159:8545"
+      - "52159:8545"
     command: moac --networkid 95125 --vnodeconfig vnodeconfig.json --datadir=/vnode --ethash.dagdir /vnode/.ethash --verbosity 4 --rpc --rpcaddr 0.0.0.0 --mine --minerthreads 1 --rpcapi chain3,mc,net,vnode,personal --ipcpath=/root/.moac/moac.ipc --nodekey /vnode/1.bootnode.key 2>&1
+    volumes:
+      - "/etc/localtime:/etc/localtime:ro"
     networks:
       default:
         ipv4_address: 172.20.0.11
@@ -18,8 +20,10 @@ services:
   vnode2:
     image: yifan:vnode-dev
     ports:
-        - "52160:8545"
+      - "52160:8545"
     command: moac --networkid 95125 --vnodeconfig vnodeconfig.json --datadir=/vnode --ethash.dagdir /vnode/.ethash --verbosity 4 --rpc --rpcaddr 0.0.0.0 --rpcapi chain3,mc,net,vnode,personal --ipcpath=/root/.moac/moac.ipc --bootnodesv4 enode://c2d8455aa7b8d0198e36e9f9df71282b2e32122bdf46de3fa218dad900a69ab1289289a67536ea93bfe6e1d7b0044821d0985f2a364e7144c74a5fbeb7e9dc6c@172.20.0.11:30333 --nodekey /vnode/2.bootnode.key 2>&1
+    volumes:
+      - "/etc/localtime:/etc/localtime:ro"
     depends_on:
       - vnode1
     networks:
@@ -32,6 +36,8 @@ services:
     ports:
         - "52161:8545"
     command: moac --networkid 95125 --vnodeconfig vnodeconfig.json --datadir=/vnode --ethash.dagdir /vnode/.ethash --verbosity 4 --rpc --rpcaddr 0.0.0.0 --rpcapi chain3,mc,net,vnode,personal --ipcpath=/root/.moac/moac.ipc --bootnodesv4 enode://c2d8455aa7b8d0198e36e9f9df71282b2e32122bdf46de3fa218dad900a69ab1289289a67536ea93bfe6e1d7b0044821d0985f2a364e7144c74a5fbeb7e9dc6c@172.20.0.11:30333 --nodekey /vnode/3.bootnode.key 2>&1
+    volumes:
+      - "/etc/localtime:/etc/localtime:ro"
     depends_on:
       - vnode1
     networks:
@@ -42,8 +48,10 @@ services:
   vnode4:
     image: yifan:vnode-dev
     ports:
-        - "52162:8545"
+      - "52162:8545"
     command: moac --networkid 95125 --vnodeconfig vnodeconfig.json --datadir=/vnode --ethash.dagdir /vnode/.ethash --verbosity 4 --rpc --rpcaddr 0.0.0.0  --rpcapi chain3,mc,net,vnode,personal --ipcpath=/root/.moac/moac.ipc --bootnodesv4 enode://c2d8455aa7b8d0198e36e9f9df71282b2e32122bdf46de3fa218dad900a69ab1289289a67536ea93bfe6e1d7b0044821d0985f2a364e7144c74a5fbeb7e9dc6c@172.20.0.11:30333 --nodekey /vnode/4.bootnode.key 2>&1
+    volumes:
+      - "/etc/localtime:/etc/localtime:ro"
     depends_on:
       - vnode1
     networks:
@@ -56,6 +64,8 @@ services:
     ports:
         - "52163:8545"
     command: moac --networkid 95125 --vnodeconfig vnodeconfig.json --datadir=/vnode --ethash.dagdir /vnode/.ethash --verbosity 4 --rpc --rpcaddr 0.0.0.0  --rpcapi chain3,mc,net,vnode,personal --ipcpath=/root/.moac/moac.ipc --bootnodesv4 enode://c2d8455aa7b8d0198e36e9f9df71282b2e32122bdf46de3fa218dad900a69ab1289289a67536ea93bfe6e1d7b0044821d0985f2a364e7144c74a5fbeb7e9dc6c@172.20.0.11:30333 --nodekey /vnode/5.bootnode.key 2>&1
+    volumes:
+      - "/etc/localtime:/etc/localtime:ro"
     depends_on:
       - vnode1
     networks:
@@ -68,6 +78,8 @@ services:
     ports:
         - "52164:8545"
     command: moac --networkid 95125 --vnodeconfig vnodeconfig.json --datadir=/vnode --ethash.dagdir /vnode/.ethash --verbosity 4 --rpc --rpcaddr 0.0.0.0  --rpcapi chain3,mc,net,vnode,personal --ipcpath=/root/.moac/moac.ipc --bootnodesv4 enode://c2d8455aa7b8d0198e36e9f9df71282b2e32122bdf46de3fa218dad900a69ab1289289a67536ea93bfe6e1d7b0044821d0985f2a364e7144c74a5fbeb7e9dc6c@172.20.0.11:30333 --nodekey /vnode/6.bootnode.key 2>&1
+    volumes:
+      - "/etc/localtime:/etc/localtime:ro"
     depends_on:
       - vnode1
     networks:
@@ -79,6 +91,8 @@ services:
     working_dir: /scs/1
     image: yifan:scs-dev
     command: wait-for-it.sh vnode1:50062 --strict -- scsserver --password 123456  --datadir /scs/1 --rpcaddr 0.0.0.0 --rpcport 12345 --rpccorsdomain "*" --rpcdebug
+    volumes:
+      - "/etc/localtime:/etc/localtime:ro"
     ports:
         - "52165:12345"
     depends_on:
@@ -92,6 +106,8 @@ services:
     working_dir: /scs/2
     image: yifan:scs-dev
     command: wait-for-it.sh vnode2:50062 --strict -- scsserver --password 123456  --datadir /scs/2 --rpcaddr 0.0.0.0 --rpcport 12345 --rpccorsdomain "*" --rpcdebug
+    volumes:
+      - "/etc/localtime:/etc/localtime:ro"
     ports:
         - "52166:12345"
     depends_on:
@@ -105,6 +121,8 @@ services:
     working_dir: /scs/3
     image: yifan:scs-dev
     command: wait-for-it.sh vnode3:50062 --strict -- scsserver --password 123456  --datadir /scs/3 --rpcaddr 0.0.0.0 --rpcport 12345 --rpccorsdomain "*" --rpcdebug
+    volumes:
+      - "/etc/localtime:/etc/localtime:ro"
     ports:
         - "52167:12345"
     depends_on:
@@ -118,6 +136,8 @@ services:
     working_dir: /scs/4
     image: yifan:scs-dev
     command: wait-for-it.sh vnode4:50062 --strict -- scsserver --password 123456  --datadir /scs/4 --rpcaddr 0.0.0.0 --rpcport 12345 --rpccorsdomain "*" --rpcdebug
+    volumes:
+      - "/etc/localtime:/etc/localtime:ro"
     ports:
         - "52168:12345"
     depends_on:
@@ -131,6 +151,8 @@ services:
     working_dir: /scs/5
     image: yifan:scs-dev
     command: wait-for-it.sh vnode5:50062 --strict -- scsserver --password 123456 --datadir /scs/5 --rpcaddr 0.0.0.0 --rpcport 12345 --rpccorsdomain "*" --rpcdebug
+    volumes:
+      - "/etc/localtime:/etc/localtime:ro"
     ports:
         - "52169:12345"
     depends_on:
@@ -144,6 +166,8 @@ services:
     working_dir: /scs/6
     image: yifan:scs-dev
     command: wait-for-it.sh vnode6:50062 --strict -- scsserver --password 123456 --datadir /scs/6 --rpcaddr 0.0.0.0 --rpcport 12345 --rpccorsdomain "*" --rpcdebug
+    volumes:
+      - "/etc/localtime:/etc/localtime:ro"
     ports:
         - "52170:12345"
     depends_on:
