@@ -355,10 +355,6 @@ contract SubChainBase {
     uint public totalExchange;
     uint public totalOperation;
     uint public totalBond;
-
-    // reserve for future usage
-    mapping(bytes32 => mapping(int => byte[])) public generalAttributes;
-
     address public vssbase;
 
     //events
@@ -412,11 +408,6 @@ contract SubChainBase {
     function setVssBase(address newVssBase) public {
         require(owner == msg.sender);
         vssbase = newVssBase;
-    }
-
-    function setGeneralAttributes(bytes32 namespace, int key, byte[] value) {
-        require(owner == msg.sender);
-        generalAttributes[namespace][key] = value;
     }
 
     function getVssBase() public view returns (address) {

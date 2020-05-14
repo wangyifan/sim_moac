@@ -32,7 +32,7 @@ let addFundAmount = 50;
 
 install_account = "0xa35add395b804c3faacf7c7829638e42ffa1d051";
 password = "123456";
-threshold = 3;
+threshold = 4;
 
 scs_amount = 1000;
 scsids = [
