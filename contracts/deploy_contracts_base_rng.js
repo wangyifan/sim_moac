@@ -62,7 +62,8 @@ vnodeProtocolBaseBin = vnodeProtocolBaseOutput.contracts[':VnodeProtocolBase'].b
 console.log("VnodeProtocolBase Contract compiled, size = " + vnodeProtocolBaseBin.length + " " + green_check_mark);
 
 // compile dappbase
-dappBaseFile = version + "/" + "dappbase.sol";
+// dappBaseFile = version + "/" + "dappbase.sol";
+dappBaseFile = version + "/" + "DappBasePublic.sol";
 dappBaseContract = fs.readFileSync(dappBaseFile, 'utf8');
 dappBaseOutput = solc.compile(dappBaseContract, 1);
 dappBaseAbi = dappBaseOutput.contracts[':DappBase'].interface;
@@ -275,11 +276,12 @@ function deployDappBaseContractPromise(amount_in_mc, nonce, subChainBase, chain3
             from: install_account,
             value: chain3.toSha(amount_in_mc,'mc'),
             to: subChainBase.address,
-            data: '0x' + dappBaseBin,
             gas: "0",
+            gasPrice: chain3.mc.gasPrice,
             shardingFlag: "0x3",
-            via: install_account,
-            nonce: nonce
+            data: '0x' + dappBaseBin,
+            nonce: nonce,
+            via: install_account
         };
 
         chain3_.mc.sendTransaction(deployTransaction, (e, transactionHash) => {
