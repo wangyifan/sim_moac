@@ -272,6 +272,12 @@ function deployVnodeProtocolBaseContractPromise(vnodeProtocolBaseContract) {
 // For deploy dappbase
 function deployDappBaseContractPromise(amount_in_mc, nonce, subChainBase, chain3_){
     return new Promise((resolve, reject) => {
+        dappBaseContract = chain3.mc.contract(JSON.parse(dappBaseAbi));
+        data = dappBaseContract.new.getData(
+            "testcoin",
+            false,
+            {data:dappBaseBin});
+
         deployTransaction = {
             from: install_account,
             value: chain3.toSha(amount_in_mc,'mc'),
@@ -279,7 +285,7 @@ function deployDappBaseContractPromise(amount_in_mc, nonce, subChainBase, chain3
             gas: "0",
             gasPrice: chain3.mc.gasPrice,
             shardingFlag: "0x3",
-            data: '0x' + dappBaseBin,
+            data: '0x' + data,
             nonce: nonce,
             via: install_account
         };
