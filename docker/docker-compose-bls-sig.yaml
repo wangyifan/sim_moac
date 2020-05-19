@@ -176,6 +176,21 @@ services:
       default:
         ipv4_address: 172.20.0.26
 
+  ####################### SCS Monitor #######################
+  scs_monitor:
+    working_dir: /scs/monitor
+    image: yifan:scs-dev
+    command: wait-for-it.sh vnode1:50062 --strict -- scsserver --password 123456 --datadir /scs/monitor --rpcaddr 0.0.0.0 --rpcport 12345 --rpccorsdomain "*" --rpcdebug
+    volumes:
+      - "/etc/localtime:/etc/localtime:ro"
+    ports:
+        - "52171:12345"
+    depends_on:
+      - vnode1
+    networks:
+      default:
+        ipv4_address: 172.20.0.27
+
 networks:
   default:
     external:

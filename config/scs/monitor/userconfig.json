@@ -1,6 +1,6 @@
 {
-    "VnodeProxyCfg": "vnode:20001",
-    "VnodeServiceCfg": "vnode:50062",
+    "VnodeProxyCfg": "vnode1:20001",
+    "VnodeServiceCfg": "vnode1:50062",
     "Beneficiary": "0x3563e38cc436bd6835da191228115fe7869a382c",
     "VnodechainId": 95125,
     "Capability": 10,
