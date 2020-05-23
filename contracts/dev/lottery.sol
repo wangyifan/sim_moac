@@ -1,7 +1,7 @@
 pragma solidity ^0.4.8;
 
-contract precompileBLS {
-    function f() public returns(bytes32);
+contract SCSRandom {
+    function random(uint256 blockNumber) public view returns(bytes32 r);
 }
 
 contract Lottery {
@@ -9,6 +9,7 @@ contract Lottery {
   address owner;
   enum LotteryState { Accepting, Finished }
   LotteryState state;
+  SCSRandom internal constant SCS_RANDOM = SCSRandom(0x0000000000000000000000000000000000000020);
 
   function Lottery() public {
       owner = msg.sender;
@@ -44,9 +45,7 @@ contract Lottery {
   }
 
   function random() private view returns (uint8) {
-      precompileBLS bls = precompileBLS(0x20);
-      // get the 256-bit random number
-      bytes32 r = bls.f();
+      bytes32 r = SCS_RANDOM.random(block.number);
       // return its first 8 bits, range from 0-255
       return uint8(r[0]);
   }

@@ -272,7 +272,7 @@ function deployVnodeProtocolBaseContractPromise(vnodeProtocolBaseContract) {
 // For deploy dappbase
 function deployDappBaseContractPromise(amount_in_mc, nonce, subChainBase, chain3_){
     return new Promise((resolve, reject) => {
-        dappBaseContract = chain3.mc.contract(JSON.parse(dappBaseAbi));
+        dappBaseContract = chain3_.mc.contract(JSON.parse(dappBaseAbi));
         data = dappBaseContract.new.getData(
             "testcoin",
             false,

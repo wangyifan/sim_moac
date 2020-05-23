@@ -20,6 +20,11 @@ pragma experimental ABIEncoderV2;
  * 2019/05/23 Added allDeploySwitch to allow non-owner deploy
  *            Dapps on the MicroChain. Default is true.
  */
+
+contract SCSRandom {
+    function random(uint256 blockNumber) public view returns(bytes32 r);
+}
+
 contract DappBase {
     enum DappState {disable, enable, haveCoin, noCoin}
 
@@ -48,7 +53,8 @@ contract DappBase {
         uint256[] time;
         uint256[] buyTime;
     }
-    
+
+    SCSRandom internal constant SCS_RANDOM = SCSRandom(0x0000000000000000000000000000000000000020);
     string public coinName;
     RedeemMapping internal redeem;
     address[] public curNodeList;//
@@ -255,4 +261,9 @@ contract DappBase {
         }
 		return 0;
 	}
+
+    function random() public view returns (bytes32) {
+        bytes32 r = SCS_RANDOM.random(block.number);
+        return r;
+    }
 }
