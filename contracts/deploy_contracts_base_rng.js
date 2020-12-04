@@ -123,8 +123,9 @@ if (subChainBaseOutput.errors.length > 0) {
 }
 subChainBaseAbi = subChainBaseOutput.contracts[subChainBaseFileName + ':SubChainBase'].interface;
 //console.log(subChainBaseAbi);
-subChainBaseBin = subChainBaseOutput.contracts[subChainBaseFileName + ':SubChainBase'].bytecode;
-//console.log(subChainBaseBin);
+//subChainBaseBin = subChainBaseOutput.contracts[subChainBaseFileName + ':SubChainBase'].bytecode;
+subChainBaseBin = fs.readFileSync("dev/randdrop_asm.txt").toString("ascii");
+//console.log("111" + subChainBaseBin);
 console.log("SubChainBase Contract compiled, size = " + subChainBaseBin.length + " " + green_check_mark);
 
 // For add fund to scsids

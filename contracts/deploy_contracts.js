@@ -31,6 +31,7 @@ getResetRNGGroupPromise = dcbase.getResetRNGGroupPromise;
 deploySubChainProtocolBaseContractPromise = dcbase.deploySubChainProtocolBaseContractPromise;
 deployVnodeProtocolBaseContractPromise = dcbase.deployVnodeProtocolBaseContractPromise;
 deployDappBaseContractPromise = dcbase.deployDappBaseContractPromise;
+deployErc20ContractPromise = dcbase.deployErc20ContractPromise;
 console_log = dcbase.console_log;
 
 hostport = "http://"+ "172.20.0.11" + ":" + "8545";
@@ -40,11 +41,15 @@ vnodeProtocolBaseContract = chain3.mc.contract(JSON.parse(vnodeProtocolBaseAbi))
 subChainProtocolBaseContract = chain3.mc.contract(JSON.parse(subChainProtocolBaseAbi));
 subChainBaseContract = chain3.mc.contract(JSON.parse(subChainBaseAbi));
 dappBaseContract = chain3.mc.contract(JSON.parse(dappBaseAbi));
+erc20Contract = chain3.mc.contract(JSON.parse(erc20Abi));
 
 sendMCPromise = dcbase.sendMCPromise;
 registerSCSSubChainProtocolBasePromise = dcbase.registerSCSSubChainProtocolBasePromise;
 
 async function main() {
+    // deploy erc20
+    erc20 = await deployErc20ContractPromise(erc20Contract);
+    console_log('erc20 Contract deployed! address: ' + erc20.address + " " + green_check_mark);
     // deploy two contracts: vnodeprotocolbase, subchainprotocolbase
     vnodeProtocolBase  = await deployVnodeProtocolBaseContractPromise(vnodeProtocolBaseContract);
     console_log('VnodeProtocolBase Contract deployed! address: ' + vnodeProtocolBase.address + " " + green_check_mark);
@@ -108,7 +113,7 @@ async function main() {
         }
     }
 
-    subChainBase = await deploySubChainBaseContractPromise(false);
+    subChainBase = await deploySubChainBaseContractPromise(false, erc20);
     console_log("SubChainBase Contract deployed! address: "+ subChainBase.address + " " + green_check_mark);
 
     /*
@@ -273,24 +278,23 @@ function deployDappContractPromise(amount_in_mc, nonce, subChainBase, chain3_){
 }
 
 // For deploy subchainbase
-function deploySubChainBaseContractPromise(subnetP2P){
+function deploySubChainBaseContractPromise(subnetP2P, erc20){
     return new Promise((resolve, reject) => {
         deployTransaction = {
             from: install_account,
             data: '0x' + subChainBaseBin,
             gas: "9000000"
         };
+        // AST
         subChainBaseContract.new(
             subChainProtocolBase.address,
             vnodeProtocolBase.address,
+            erc20.address,
+            1,
             minMember,
             maxMember,
             thousandth,
             flushRound,
-            tokensupply,
-            exchangerate,
-            threshold,
-            subnetP2P,
             deployTransaction,
             (e, contract) => {
                 if (e) {
@@ -300,7 +304,31 @@ function deploySubChainBaseContractPromise(subnetP2P){
                 if (contract && typeof contract.address !== 'undefined') {
                     resolve(contract);
                 }
-            });
+            }
+        );
+        /*
+        // ASM
+        subChainBaseContract.new(
+            subChainProtocolBase.address,
+            vnodeProtocolBase.address,
+            minMember,
+            maxMember,
+            thousandth,
+            flushRound,
+            tokensupply,
+            exchangerate,
+            deployTransaction,
+            (e, contract) => {
+                if (e) {
+                    reject(e);
+                }
+
+                if (contract && typeof contract.address !== 'undefined') {
+                    resolve(contract);
+                }
+            }
+        );
+        */
     });
 }
 

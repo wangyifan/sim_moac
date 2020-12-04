@@ -39,7 +39,7 @@ deployVssBaseContractPromise = dcbase.deployVssBaseContractPromise;
 // for docker product deployment
 //hostport = "http://"+ "127.0.0.1" + ":" + "18545";
 
-hostport = "http://"+ "172.20.0.11" + ":" + "8545";
+hostport = "http://"+ "172.20.1.11" + ":" + "8545";
 chain3.setProvider(new chain3.providers.HttpProvider(hostport));
 chain3.personal.unlockAccount(install_account, password, unlock_forever);
 vnodeProtocolBaseContract = chain3.mc.contract(JSON.parse(vnodeProtocolBaseAbi));
@@ -264,30 +264,7 @@ async function main() {
         console.log("Registered scs " + scsid + " as monitor " + "hash: " + result + " " + green_check_mark);
     }
 
-
-    // wait for 3 blocks before deploy dappbase
-    try {
-        _bc = await getBlockNumber();
-    } catch (e) {
-        //console.error(e);
-    }
-    console.log("Wait block: " + _bc);
-    while(true) {
-        await sleep(1000);
-        try {
-            bc = await getBlockNumber();
-        } catch (e) {
-            //console.error(e);
-        }
-        await sleep(1000);
-        if (bc > _bc + 3) {
-            console.log("Wait block: " + bc);
-            break;
-        }
-    }
-
-    console.log("vss config version " + vssBase.VssConfigVersion);
-
+    /*
     // wait for 12 blocks before deploy dappbase
     try {
         _bc = await getBlockNumber();
@@ -310,18 +287,17 @@ async function main() {
         }
     }
 
-
     nonce = 0;
     dappBaseContract = await deployDappBaseContractPromise(
         tokensupply/exchangerate, nonce, subChainBase, chain3
     );
-    console.log("DappBase Contract deployed! address: "+ dappBaseContract.address + " " + green_check_mark);
+    console.log("DappBase Contract deployed!" + green_check_mark);
 
     nonce += 1;
     dappContract = await deployDappContractPromise(
         3, nonce, subChainBase, chain3
     );
-    console.log("Dapp Contract deployed! address: "+ dappContract.address + " " + green_check_mark);
+    console.log("Dapp Contract deployed!" + green_check_mark);
 
     // wait for 3000 ms
     waitLength = 3000;
@@ -330,8 +306,10 @@ async function main() {
     } catch (e) {
     }
     console.log("Wait block: " + _bc);
+    */
 
-    while(true) {
+    runStatus = false;
+    while(runStatus) {
         await sleep(1000);
         try {
             bc = await getBlockNumber();
@@ -481,11 +459,14 @@ function deployDappContractPromise(amount_in_mc, nonce, subChainBase, chain3_){
 // For deploy subchainbase
 function deploySubChainBaseContractPromise(vssbaseaddr){
     return new Promise((resolve, reject) => {
+        console.log("deploySubChainBaseContractPromise #"+ subChainBaseBin + "#");
         deployTransaction = {
             from: install_account,
             data: '0x' + subChainBaseBin,
             gas: "9000000"
         };
+
+        // randdrop
         subChainBaseContract.new(
             subChainProtocolBase.address,
             vnodeProtocolBase.address,
@@ -508,7 +489,8 @@ function deploySubChainBaseContractPromise(vssbaseaddr){
                 if (contract && typeof contract.address !== 'undefined') {
                     resolve(contract);
                 }
-            });
+            }
+        );
     });
 }
 
