@@ -1,7 +1,7 @@
 require('console-stamp')(console, 'yyyy-mm-dd HH:MM:ss');
 
 var Web3 = require('web3');
-var web3 = new Web3('http://172.20.1.11:8545');
+var web3 = new Web3('http://172.20.0.11:8545');
 var solc = require("solc");
 var fs = require("fs");
 

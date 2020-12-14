@@ -39,7 +39,7 @@ deployVssBaseContractPromise = dcbase.deployVssBaseContractPromise;
 // for docker product deployment
 //hostport = "http://"+ "127.0.0.1" + ":" + "18545";
 
-hostport = "http://"+ "172.20.1.11" + ":" + "8545";
+hostport = "http://"+ "172.20.0.11" + ":" + "8545";
 chain3.setProvider(new chain3.providers.HttpProvider(hostport));
 chain3.personal.unlockAccount(install_account, password, unlock_forever);
 vnodeProtocolBaseContract = chain3.mc.contract(JSON.parse(vnodeProtocolBaseAbi));
