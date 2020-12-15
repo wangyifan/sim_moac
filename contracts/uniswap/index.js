@@ -123,8 +123,8 @@ async function main() {
     );
     console.log("uniswap factory deployed: " + uniswapFactoryInstance.options.address + " " + green_check_mark);
 
-    token1 = "0x516F65a1a00171F33daea9a8D036C796d66A3061";
-    token2 = "0x25E12C88C14a4fD7326386F88FA04De68Af5079F";
+    token1 = "0xd2861C34e7720A6E4D22ac1Fa77422f01add13E8";
+    token2 = "0x91228250705AF76cB0f7EbC128d27d532F36cfF9";
     pairAddr = await uniswapFactoryInstance.methods.createPair(token1, token2).send({from: '0xa35add395b804c3faacf7c7829638e42ffa1d051', gas: '8000000'});
     console.log(pairAddr);
 }

@@ -16,7 +16,7 @@ let GREEN = "\033[0;32m";
 let NC = "\033[0m";
 let green_check_mark = GREEN + check_mark + NC;
 let subchainaddr = "0x67cdfb5fa248ca7e84840cf7f5ad4a09cb2fb1e7";
-let value = chain3.toSha(2,'mc'); // should equal to totalsupply * exchange rate
+let value = chain3.toSha(5,'mc'); // should equal to totalsupply * exchange rate
 
 chain3.setProvider(new chain3.providers.HttpProvider('http://localhost:52159'));
 chain3.personal.unlockAccount(install_account, password, unlock_forever);
