@@ -10,9 +10,9 @@ echo -e "${GREEN} 1) Setup npm env: ${NC}" \
 && echo -e "---------------------------------" \
 && echo -e "" \
 && echo -e "Subchain is ready!" \
-&& echo -e "vnode rpc: http://localhost:52159" \
-&& echo -e "scs 1 rpc: http://localhost:52160" \
-&& echo -e "scs 2 rpc: http://localhost:52161" \
-&& echo -e "scs 3 rpc: http://localhost:52162" \
-&& echo -e "scs monitor rpc: http://localhost:52163" \
-&& echo -e "Have Fun! ${NC}"
+&& echo -e "vnode rpc: http://172.20.0.11:8545" \
+&& echo -e "scs 1 rpc: http://172.20.0.21:12345" \
+&& echo -e "scs 2 rpc: http://172.20.0.22:12345" \
+&& echo -e "scs 3 rpc: http://172.20.0.23:12345" \
+&& echo -e "scs monitor rpc: http://172.20.0.27:12345" \
+

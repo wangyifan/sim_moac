@@ -79,10 +79,18 @@ subChainProtocolBaseAbi = subChainProtocolBaseOutput.contracts[':SubChainProtoco
 subChainProtocolBaseBin = subChainProtocolBaseOutput.contracts[':SubChainProtocolBase'].bytecode;
 console_log("SubChainProtocolBase Contract compiled, size = " + subChainProtocolBaseBin.length + " " + green_check_mark);
 
+// compile erc20
+erc20Solfile = version + "/" + "erc20.sol";
+erc20Contract = fs.readFileSync(erc20Solfile, 'utf8');
+erc20Output = solc.compile(erc20Contract, 1);
+erc20Abi = erc20Output.contracts[':TestCoin'].interface;
+erc20Bin = erc20Output.contracts[':TestCoin'].bytecode;
+console_log("erc20 Contract compiled, size = " + erc20Bin.length + " " + green_check_mark);
+
 // compile subchainbase
-subChainBaseFileName = "SubChainBase.sol";
 //subChainBaseFileName = "SubChainBase.sol";
-subChainBaseSolfiles = [subChainBaseFileName, "SubChainProtocolBase.sol"];
+subChainBaseFileName = "procwind_ast.sol";
+subChainBaseSolfiles = [subChainBaseFileName, "SCSProtocolBase.sol"];
 subChainBaseInput = {};
 subChainBaseSolfiles.forEach(fileName => {
     file = fs.readFileSync(version + "/" + fileName, 'utf8');
@@ -102,11 +110,13 @@ subChainBaseOutput = solc.compile(
 );
 
 if (subChainBaseOutput.errors.length > 0) {
-    //console_log(subChainBaseOutput.errors);
+    console_log(subChainBaseOutput.errors);
 }
 subChainBaseAbi = subChainBaseOutput.contracts[subChainBaseFileName + ':SubChainBase'].interface;
 //console_log(subChainBaseAbi);
 subChainBaseBin = subChainBaseOutput.contracts[subChainBaseFileName + ':SubChainBase'].bytecode;
+//subChainBaseBin = fs.readFileSync("dev/procwind_ast.txt").toString("ascii");
+console_log(subChainBaseBin);
 console_log("SubChainBase Contract compiled, size = " + subChainBaseBin.length + " " + green_check_mark);
 
 function console_log(s) {
@@ -187,6 +197,29 @@ function deploySubChainProtocolBaseContractPromise(subChainProtocolBaseContract)
             subChainProtocolBaseProtocol,
             bmin,
             subChainProtocolBaseProtocolType,
+            deployTransaction,
+            (e, contract) => {
+                if (e) {
+                    reject(e);
+                }
+
+                if (contract && typeof contract.address !== 'undefined') {
+                    resolve(contract);
+                }
+            });
+    });
+}
+
+// For deploy erc20
+function deployErc20ContractPromise(erc20Contract){
+    return new Promise((resolve, reject) => {
+        deployTransaction = {
+            from: install_account,
+            data: '0x' + erc20Bin,
+            gas: "9000000"
+        };
+
+        erc20Contract.new(
             deployTransaction,
             (e, contract) => {
                 if (e) {
@@ -281,12 +314,14 @@ module.exports = {
     sendMCPromise: sendMCPromise,
     deploySubChainProtocolBaseContractPromise: deploySubChainProtocolBaseContractPromise,
     deployVnodeProtocolBaseContractPromise: deployVnodeProtocolBaseContractPromise,
+    deployErc20ContractPromise: deployErc20ContractPromise,
     deployDappBaseContractPromise: deployDappBaseContractPromise,
     registerSCSSubChainProtocolBasePromise: registerSCSSubChainProtocolBasePromise,
     getResetRNGGroupPromise: getResetRNGGroupPromise,
     subChainProtocolBaseAbi: subChainProtocolBaseAbi,
     vnodeProtocolBaseAbi: vnodeProtocolBaseAbi,
     subChainBaseAbi: subChainBaseAbi,
+    erc20Abi: erc20Abi,
     dappBaseAbi: dappBaseAbi,
     subChainProtocolBaseContract: subChainProtocolBaseContract,
     console_log: console_log

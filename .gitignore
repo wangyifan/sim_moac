@@ -1,6 +1,6 @@
 moac-scs
 moac-vnode
-node_modules
+*node_modules*
 *~
 bin/dev
 package-lock.json
