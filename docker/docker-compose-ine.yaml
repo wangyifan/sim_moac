@@ -1,0 +1,111 @@
+version: '3.1'
+
+# create the network if it does not exist
+# docker network create --internal --gateway 172.20.100.1 --subnet 172.20.100.0/24 docker_ine_vnode_network
+
+services:
+  vnode1:
+    image: yifan:vnode-ine
+    ports:
+        - "52159:8545"
+    command: ine --networkid 95125 --vnodeconfig vnodeconfig.json --datadir=/vnode --ethash.dagdir /vnode/.ethash --verbosity 4 --rpc --rpcaddr 0.0.0.0 --mine --minerthreads 1 --rpcapi chain3,mc,net,vnode,personal --ipcpath=/root/.moac/moac.ipc --nodekey /vnode/1.bootnode.key --moacbase 0 2>&1
+    networks:
+      default:
+        ipv4_address: 172.20.100.11
+    deploy:
+      resources:
+        limits:
+          cpus: '0.3'
+    volumes:
+      - "/home/yifan/sim_moac/docker/volumes/dag/1:/vnode/.ethash/"
+########################## END OF VNODE 1 ################################
+  vnode2:
+    image: yifan:vnode-ine
+    ports:
+        - "52160:8545"
+    command: ine --networkid 95125 --vnodeconfig vnodeconfig.json --datadir=/vnode --ethash.dagdir /vnode/.ethash --verbosity 4 --rpc --rpcaddr 0.0.0.0 --mine --minerthreads 6 --rpcapi chain3,mc,net,vnode,personal --ipcpath=/root/.moac/moac.ipc --bootnodesv4 enode://c2d8455aa7b8d0198e36e9f9df71282b2e32122bdf46de3fa218dad900a69ab1289289a67536ea93bfe6e1d7b0044821d0985f2a364e7144c74a5fbeb7e9dc6c@172.20.100.11:30333 --nodekey /vnode/2.bootnode.key --moacbase 1 2>&1
+    depends_on:
+      - vnode1
+    networks:
+      default:
+        ipv4_address: 172.20.100.12
+    deploy:
+      resources:
+        limits:
+          cpus: '6.0'
+    volumes:
+      - "/home/yifan/sim_moac/docker/volumes/dag/2:/vnode/.ethash/"
+########################## END OF VNODE 2 ################################
+  vnode3:
+    image: yifan:vnode-ine
+    ports:
+        - "52161:8545"
+    command: ine --networkid 95125 --vnodeconfig vnodeconfig.json --datadir=/vnode --ethash.dagdir /vnode/.ethash --verbosity 4 --rpc --rpcaddr 0.0.0.0 --mine --minerthreads 1 --rpcapi chain3,mc,net,vnode,personal --ipcpath=/root/.moac/moac.ipc --bootnodesv4 enode://c2d8455aa7b8d0198e36e9f9df71282b2e32122bdf46de3fa218dad900a69ab1289289a67536ea93bfe6e1d7b0044821d0985f2a364e7144c74a5fbeb7e9dc6c@172.20.100.11:30333 --nodekey /vnode/3.bootnode.key --moacbase 2 2>&1
+    depends_on:
+      - vnode1
+    networks:
+      default:
+        ipv4_address: 172.20.100.13
+    deploy:
+      resources:
+        limits:
+          cpus: '0.3'
+    volumes:
+      - "/home/yifan/sim_moac/docker/volumes/dag/3:/vnode/.ethash/"
+########################## END OF VNODE 3 ################################
+  vnode4:
+    image: yifan:vnode-ine
+    ports:
+        - "52162:8545"
+    command: ine --networkid 95125 --vnodeconfig vnodeconfig.json --datadir=/vnode --ethash.dagdir /vnode/.ethash --verbosity 4 --rpc --rpcaddr 0.0.0.0 --mine --minerthreads 1 --rpcapi chain3,mc,net,vnode,personal --ipcpath=/root/.moac/moac.ipc --bootnodesv4 enode://c2d8455aa7b8d0198e36e9f9df71282b2e32122bdf46de3fa218dad900a69ab1289289a67536ea93bfe6e1d7b0044821d0985f2a364e7144c74a5fbeb7e9dc6c@172.20.100.11:30333 --nodekey /vnode/4.bootnode.key --moacbase 3 2>&1
+    depends_on:
+      - vnode1
+    networks:
+      default:
+        ipv4_address: 172.20.100.14
+    deploy:
+      resources:
+        limits:
+          cpus: '0.3'
+    volumes:
+      - "/home/yifan/sim_moac/docker/volumes/dag/4:/vnode/.ethash/"
+########################## END OF VNODE 4 ################################
+  vnode5:
+    image: yifan:vnode-ine
+    ports:
+        - "52163:8545"
+    command: ine --networkid 95125 --vnodeconfig vnodeconfig.json --datadir=/vnode --ethash.dagdir /vnode/.ethash --verbosity 4 --rpc --rpcaddr 0.0.0.0 --mine --minerthreads 1 --rpcapi chain3,mc,net,vnode,personal --ipcpath=/root/.moac/moac.ipc --bootnodesv4 enode://c2d8455aa7b8d0198e36e9f9df71282b2e32122bdf46de3fa218dad900a69ab1289289a67536ea93bfe6e1d7b0044821d0985f2a364e7144c74a5fbeb7e9dc6c@172.20.100.11:30333 --nodekey /vnode/5.bootnode.key --moacbase 4 2>&1
+    depends_on:
+      - vnode1
+    networks:
+      default:
+        ipv4_address: 172.20.100.15
+    deploy:
+      resources:
+        limits:
+          cpus: '0.3'
+    volumes:
+      - "/home/yifan/sim_moac/docker/volumes/dag/5:/vnode/.ethash/"
+########################## END OF VNODE 5 ################################
+  vnode6:
+    image: yifan:vnode-ine
+    ports:
+        - "52164:8545"
+    command: ine --networkid 95125 --vnodeconfig vnodeconfig.json --datadir=/vnode --ethash.dagdir /vnode/.ethash --verbosity 4 --rpc --rpcaddr 0.0.0.0 --mine --minerthreads 1 --rpcapi chain3,mc,net,vnode,personal --ipcpath=/root/.moac/moac.ipc --bootnodesv4 enode://c2d8455aa7b8d0198e36e9f9df71282b2e32122bdf46de3fa218dad900a69ab1289289a67536ea93bfe6e1d7b0044821d0985f2a364e7144c74a5fbeb7e9dc6c@172.20.100.11:30333 --nodekey /vnode/6.bootnode.key --moacbase 5 2>&1
+    depends_on:
+      - vnode1
+    networks:
+      default:
+        ipv4_address: 172.20.100.16
+    deploy:
+      resources:
+        limits:
+          cpus: '0.3'
+    volumes:
+      - "/home/yifan/sim_moac/docker/volumes/dag/6:/vnode/.ethash/"
+########################## END OF VNODE 6 ################################
+
+networks:
+  default:
+    external:
+      name: docker_ine_vnode_network

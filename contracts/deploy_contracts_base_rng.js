@@ -32,7 +32,7 @@ let addFundAmount = 50;
 
 install_account = "0xa35add395b804c3faacf7c7829638e42ffa1d051";
 password = "123456";
-threshold = 4;
+threshold = 8;
 
 scs_amount = 1000;
 scsids = [
@@ -41,8 +41,13 @@ scsids = [
     "8d26cd8257288a9f3fcb3c7a4b15ade3cf932925", // scs 3
     "632774bf61ffc8873e43f3ce68cf3f169300efa3", // scs 4
     "d7e1cf982f75563f166726a5814c7fa3c1948068", // scs 5
-    //"30601cba96b98f22d5c46bb8a8b0b298b8017ef2", // scs 6
-    //"c24c73cfb25e444fb20c3405a8327808303f4040", // scs 7
+    "30601cba96b98f22d5c46bb8a8b0b298b8017ef2", // scs 6
+    "c24c73cfb25e444fb20c3405a8327808303f4040", // scs 7
+    "78c013c83884b9b88fb067ed0d49c02a4421ce2a", // scs 8
+    "0d12d784ba0cb4d4d053f1e2d34b58bb1c4587f5", // scs 9
+    "5198d17356857f68bbb58aa8b73494d5513887c3", // scs 10
+    "66febe4b3b4282536e6a40eab65d8f91c3e906cc", // scs 11
+    "f567675ab59d93e3f6716bbf79a843840ab60d81", // scs 12
 ];
 
 subChainBaseFileName = "SubChainBaseRNG.sol";

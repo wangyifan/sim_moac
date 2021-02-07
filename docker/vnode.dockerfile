@@ -19,12 +19,6 @@ RUN apk add bash
 COPY config/vnode/vnodeconfig.json /vnode/vnodeconfig.json
 COPY config/vnode/vnode.genesis.json /vnode/genesis.json
 
-# install executables
-COPY bin/$version/vnode/moac /usr/local/sbin/
-COPY bin/tools/wait-for-it.sh  /usr/local/sbin/
-COPY bin/tools/disable_network.sh /usr/local/sbin/
-COPY bin/tools/resume_network.sh /usr/local/sbin/
-
 # copy key files over
 COPY config/vnode/0.bootnode.key /vnode/0.bootnode.key
 COPY config/vnode/1.bootnode.key /vnode/1.bootnode.key
@@ -57,6 +51,12 @@ COPY config/scs/7/scskeystore/UTC--2019-01-30T07-34-07.266735245Z--c24c73cfb25e4
 COPY config/scs/8/scskeystore/UTC--2019-01-30T07-34-25.523025594Z--78c013c83884b9b88fb067ed0d49c02a4421ce2a /vnode/keystore/
 COPY config/scs/9/scskeystore/UTC--2019-01-30T07-34-39.951753469Z--0d12d784ba0cb4d4d053f1e2d34b58bb1c4587f5 /vnode/keystore/
 COPY config/scs/10/scskeystore/UTC--2019-01-30T07-34-52.602208067Z--5198d17356857f68bbb58aa8b73494d5513887c3 /vnode/keystore/
+
+# install executables
+COPY bin/$version/vnode/moac /usr/local/sbin/
+COPY bin/tools/wait-for-it.sh  /usr/local/sbin/
+COPY bin/tools/disable_network.sh /usr/local/sbin/
+COPY bin/tools/resume_network.sh /usr/local/sbin/
 
 WORKDIR /vnode
 

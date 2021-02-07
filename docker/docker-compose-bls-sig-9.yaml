@@ -1,0 +1,242 @@
+version: '3.1'
+
+# create the network if it does not exist
+# docker network create --internal --gateway 172.20.0.1 --subnet 172.20.0.0/16 docker_moac_vnode_network
+
+services:
+  ####################### vnode 1  #######################
+  vnode1:
+    image: yifan:vnode-dev
+    ports:
+      - "52159:8545"
+    command: moac --networkid 95125 --vnodeconfig vnodeconfig.json --datadir=/vnode --ethash.dagdir /vnode/.ethash --verbosity 4 --rpc --rpcaddr 0.0.0.0 --mine --minerthreads 1 --rpcapi admin,chain3,mc,net,vnode,personal --ipcpath=/root/.moac/moac.ipc --nodekey /vnode/1.bootnode.key 2>&1
+    volumes:
+      - "/etc/localtime:/etc/localtime:ro"
+    networks:
+      default:
+        ipv4_address: 172.20.0.11
+
+  ####################### vnode 2  #######################
+  vnode2:
+    image: yifan:vnode-dev
+    ports:
+      - "52160:8545"
+    command: moac --networkid 95125 --vnodeconfig vnodeconfig.json --datadir=/vnode --ethash.dagdir /vnode/.ethash --verbosity 4 --rpc --rpcaddr 0.0.0.0 --rpcapi admin,chain3,mc,net,vnode,personal --ipcpath=/root/.moac/moac.ipc --bootnodesv4 enode://c2d8455aa7b8d0198e36e9f9df71282b2e32122bdf46de3fa218dad900a69ab1289289a67536ea93bfe6e1d7b0044821d0985f2a364e7144c74a5fbeb7e9dc6c@172.20.0.11:30333 --nodekey /vnode/2.bootnode.key 2>&1
+    volumes:
+      - "/etc/localtime:/etc/localtime:ro"
+    depends_on:
+      - vnode1
+    networks:
+      default:
+        ipv4_address: 172.20.0.12
+
+  ####################### vnode 3  #######################
+  vnode3:
+    image: yifan:vnode-dev
+    ports:
+        - "52161:8545"
+    command: moac --networkid 95125 --vnodeconfig vnodeconfig.json --datadir=/vnode --ethash.dagdir /vnode/.ethash --verbosity 4 --rpc --rpcaddr 0.0.0.0 --rpcapi admin,chain3,mc,net,vnode,personal --ipcpath=/root/.moac/moac.ipc --bootnodesv4 enode://c2d8455aa7b8d0198e36e9f9df71282b2e32122bdf46de3fa218dad900a69ab1289289a67536ea93bfe6e1d7b0044821d0985f2a364e7144c74a5fbeb7e9dc6c@172.20.0.11:30333 --nodekey /vnode/3.bootnode.key 2>&1
+    volumes:
+      - "/etc/localtime:/etc/localtime:ro"
+    depends_on:
+      - vnode1
+    networks:
+      default:
+        ipv4_address: 172.20.0.13
+
+####################### vnode 4  #######################
+  vnode4:
+    image: yifan:vnode-dev
+    ports:
+      - "52162:8545"
+    command: moac --networkid 95125 --vnodeconfig vnodeconfig.json --datadir=/vnode --ethash.dagdir /vnode/.ethash --verbosity 4 --rpc --rpcaddr 0.0.0.0  --rpcapi admin,chain3,mc,net,vnode,personal --ipcpath=/root/.moac/moac.ipc --bootnodesv4 enode://c2d8455aa7b8d0198e36e9f9df71282b2e32122bdf46de3fa218dad900a69ab1289289a67536ea93bfe6e1d7b0044821d0985f2a364e7144c74a5fbeb7e9dc6c@172.20.0.11:30333 --nodekey /vnode/4.bootnode.key 2>&1
+    volumes:
+      - "/etc/localtime:/etc/localtime:ro"
+    depends_on:
+      - vnode1
+    networks:
+      default:
+        ipv4_address: 172.20.0.14
+
+  ####################### vnode 5  #######################
+  vnode5:
+    image: yifan:vnode-dev
+    ports:
+        - "52163:8545"
+    command: moac --networkid 95125 --vnodeconfig vnodeconfig.json --datadir=/vnode --ethash.dagdir /vnode/.ethash --verbosity 4 --rpc --rpcaddr 0.0.0.0  --rpcapi admin,chain3,mc,net,vnode,personal --ipcpath=/root/.moac/moac.ipc --bootnodesv4 enode://c2d8455aa7b8d0198e36e9f9df71282b2e32122bdf46de3fa218dad900a69ab1289289a67536ea93bfe6e1d7b0044821d0985f2a364e7144c74a5fbeb7e9dc6c@172.20.0.11:30333 --nodekey /vnode/5.bootnode.key 2>&1
+    volumes:
+      - "/etc/localtime:/etc/localtime:ro"
+    depends_on:
+      - vnode1
+    networks:
+      default:
+        ipv4_address: 172.20.0.15
+
+  ####################### vnode 6  #######################
+  vnode6:
+    image: yifan:vnode-dev
+    ports:
+        - "52164:8545"
+    command: moac --networkid 95125 --vnodeconfig vnodeconfig.json --datadir=/vnode --ethash.dagdir /vnode/.ethash --verbosity 4 --rpc --rpcaddr 0.0.0.0  --rpcapi admin,chain3,mc,net,vnode,personal --ipcpath=/root/.moac/moac.ipc --bootnodesv4 enode://c2d8455aa7b8d0198e36e9f9df71282b2e32122bdf46de3fa218dad900a69ab1289289a67536ea93bfe6e1d7b0044821d0985f2a364e7144c74a5fbeb7e9dc6c@172.20.0.11:30333 --nodekey /vnode/6.bootnode.key 2>&1
+    volumes:
+      - "/etc/localtime:/etc/localtime:ro"
+    depends_on:
+      - vnode1
+    networks:
+      default:
+        ipv4_address: 172.20.0.16
+
+  ####################### SCS 1 #######################
+  scs1:
+    working_dir: /scs/1
+    image: yifan:scs-dev
+    command: wait-for-it.sh vnode1:50062 --strict -- scsserver --password 123456  --datadir /scs/1 --rpcaddr 0.0.0.0 --rpcport 12345 --rpccorsdomain "*" --rpcdebug
+    volumes:
+      - "/etc/localtime:/etc/localtime:ro"
+    ports:
+        - "52165:12345"
+    depends_on:
+      - vnode1
+    networks:
+      default:
+        ipv4_address: 172.20.0.21
+
+  ####################### SCS 2 #######################
+  scs2:
+    working_dir: /scs/2
+    image: yifan:scs-dev
+    command: wait-for-it.sh vnode2:50062 --strict -- scsserver --password 123456  --datadir /scs/2 --rpcaddr 0.0.0.0 --rpcport 12345 --rpccorsdomain "*" --rpcdebug
+    volumes:
+      - "/etc/localtime:/etc/localtime:ro"
+    ports:
+        - "52166:12345"
+    depends_on:
+      - vnode2
+    networks:
+      default:
+        ipv4_address: 172.20.0.22
+
+  ####################### SCS 3 #######################
+  scs3:
+    working_dir: /scs/3
+    image: yifan:scs-dev
+    command: wait-for-it.sh vnode3:50062 --strict -- scsserver --password 123456  --datadir /scs/3 --rpcaddr 0.0.0.0 --rpcport 12345 --rpccorsdomain "*" --rpcdebug
+    volumes:
+      - "/etc/localtime:/etc/localtime:ro"
+    ports:
+        - "52167:12345"
+    depends_on:
+      - vnode3
+    networks:
+      default:
+        ipv4_address: 172.20.0.23
+
+  ####################### SCS 4 #######################
+  scs4:
+    working_dir: /scs/4
+    image: yifan:scs-dev
+    command: wait-for-it.sh vnode4:50062 --strict -- scsserver --password 123456  --datadir /scs/4 --rpcaddr 0.0.0.0 --rpcport 12345 --rpccorsdomain "*" --rpcdebug
+    volumes:
+      - "/etc/localtime:/etc/localtime:ro"
+    ports:
+        - "52168:12345"
+    depends_on:
+      - vnode4
+    networks:
+      default:
+        ipv4_address: 172.20.0.24
+
+  ####################### SCS 5 #######################
+  scs5:
+    working_dir: /scs/5
+    image: yifan:scs-dev
+    command: wait-for-it.sh vnode5:50062 --strict -- scsserver --password 123456 --datadir /scs/5 --rpcaddr 0.0.0.0 --rpcport 12345 --rpccorsdomain "*" --rpcdebug
+    volumes:
+      - "/etc/localtime:/etc/localtime:ro"
+    ports:
+        - "52169:12345"
+    depends_on:
+      - vnode5
+    networks:
+      default:
+        ipv4_address: 172.20.0.25
+
+  ####################### SCS 6 #######################
+  scs6:
+    working_dir: /scs/6
+    image: yifan:scs-dev
+    command: wait-for-it.sh vnode6:50062 --strict -- scsserver --password 123456 --datadir /scs/6 --rpcaddr 0.0.0.0 --rpcport 12345 --rpccorsdomain "*" --rpcdebug
+    volumes:
+      - "/etc/localtime:/etc/localtime:ro"
+    ports:
+        - "52170:12345"
+    depends_on:
+      - vnode6
+    networks:
+      default:
+        ipv4_address: 172.20.0.26
+
+  ####################### SCS 7 #######################
+  scs7:
+    working_dir: /scs/7
+    image: yifan:scs-dev
+    command: wait-for-it.sh vnode1:50062 --strict -- scsserver --password 123456  --datadir /scs/7 --rpcaddr 0.0.0.0 --rpcport 12345 --rpccorsdomain "*" --rpcdebug
+    volumes:
+      - "/etc/localtime:/etc/localtime:ro"
+    ports:
+        - "52171:12345"
+    depends_on:
+      - vnode1
+    networks:
+      default:
+        ipv4_address: 172.20.0.27
+
+  ####################### SCS 8 #######################
+  scs5:
+    working_dir: /scs/8
+    image: yifan:scs-dev
+    command: wait-for-it.sh vnode2:50062 --strict -- scsserver --password 123456 --datadir /scs/8 --rpcaddr 0.0.0.0 --rpcport 12345 --rpccorsdomain "*" --rpcdebug
+    volumes:
+      - "/etc/localtime:/etc/localtime:ro"
+    ports:
+        - "52172:12345"
+    depends_on:
+      - vnode2
+    networks:
+      default:
+        ipv4_address: 172.20.0.28
+
+  ####################### SCS 9 #######################
+  scs6:
+    working_dir: /scs/9
+    image: yifan:scs-dev
+    command: wait-for-it.sh vnode3:50062 --strict -- scsserver --password 123456 --datadir /scs/9 --rpcaddr 0.0.0.0 --rpcport 12345 --rpccorsdomain "*" --rpcdebug
+    volumes:
+      - "/etc/localtime:/etc/localtime:ro"
+    ports:
+        - "52173:12345"
+    depends_on:
+      - vnode3
+    networks:
+      default:
+        ipv4_address: 172.20.0.29
+
+  ####################### SCS Monitor #######################
+  scs_monitor:
+    working_dir: /scs/monitor
+    image: yifan:scs-dev
+    command: wait-for-it.sh vnode1:50062 --strict -- scsserver --password 123456 --datadir /scs/monitor --rpcaddr 0.0.0.0 --rpcport 12345 --rpccorsdomain "*" --rpcdebug
+    volumes:
+      - "/etc/localtime:/etc/localtime:ro"
+    ports:
+        - "52174:12345"
+    depends_on:
+      - vnode1
+    networks:
+      default:
+        ipv4_address: 172.20.0.30
+
+networks:
+  default:
+    external:
+      name: docker_moac_vnode_network

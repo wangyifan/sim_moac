@@ -13,7 +13,7 @@ pragma experimental ABIEncoderV2;
  */
 
 import "./SubChainProtocolBase.sol";
-
+import "./ProposalBase.sol";
 
 contract SCSRelay {
     // 0-registeropen
@@ -43,8 +43,8 @@ contract VssBase {
 }
 
 contract SubChainBase {
-    enum ProposalFlag {noState, pending, disputed, approved, rejected, expired, pendingAccept}
-    enum ProposalCheckStatus {undecided, approval, expired}
+  //enum ProposalFlag {noState, pending, disputed, approved, rejected, expired, pendingAccept}
+  //enum ProposalCheckStatus {undecided, approval, expired}
     enum ConsensusStatus {initStage, workingStage, failure}
     enum SCSRelayStatus {
         registerOpen,
@@ -67,6 +67,7 @@ contract SubChainBase {
     }
     enum SubChainStatus {open, pending, close}
 
+    /*
     struct Proposal {
         address proposedBy;
         bytes32 lastApproved;
@@ -87,7 +88,7 @@ contract SubChainBase {
         address[] minerAddr;
         uint distributeFlag;
         address[] redeemAgreeList;
-    }
+    }*/
 
     struct VRS {
         bytes32 r;
@@ -159,7 +160,7 @@ contract SubChainBase {
 
     uint8[2] public randIndex;
     mapping(address => uint ) public nodePerformance;
-    mapping(bytes32 => Proposal) public proposals;  //index: 12
+    //mapping(bytes32 => Proposal) public proposals;
     mapping(address => uint) public currentRefundGas;
 
     uint internal registerFlag;
@@ -370,13 +371,14 @@ contract SubChainBase {
         return vnodeinfo;
     }
 
+    /*
     function getProposal(uint types) public view returns (Proposal) {
         if (types == 1) {
             return proposals[proposalHashInProgress];
         } else if (types == 2) {
             return proposals[proposalHashApprovedLast];
         }
-    }
+    }*/
 
     function getSCSRole(address scs) public view returns (uint) {
         uint i = 0;
@@ -771,7 +773,7 @@ contract SubChainBase {
         return blk;
     }
 
-
+    /*
     // create proposal
     // bytes32 hash;
     // bytes newState;
@@ -865,8 +867,9 @@ contract SubChainBase {
         currentRefundGas[msg.sender] += (gasinit - msg.gas + 21486 ) * tx.gasprice;
 
         return true;
-    }
+    } */
 
+    /*
     function UploadRedeemData(
         address[] redeemAddr,
         uint[] redeemAmt
@@ -894,8 +897,9 @@ contract SubChainBase {
 
         currentRefundGas[msg.sender] += (gasinit - msg.gas + 21486 ) * tx.gasprice;
         return true;
-    }
+    }*/
 
+    /*
     //vote on proposal
     function voteOnProposal(uint indexInlist, bytes32 hash, bool redeem) public returns (bool) {
         uint gasinit = msg.gas;
@@ -933,8 +937,9 @@ contract SubChainBase {
         prop.votecount++;
         currentRefundGas[msg.sender] += (gasinit - msg.gas + 21486) * tx.gasprice;
         return true;
-    }
+    }*/
 
+    /*
     function checkProposalStatus(bytes32 hash ) public view returns (uint) {
         if ((proposals[hash].startingBlock + 2*proposalExpiration) < block.number) {
             //expired
@@ -949,7 +954,7 @@ contract SubChainBase {
 
         //undecided
         return uint(ProposalCheckStatus.undecided);
-    }
+        }*/
 
     function revenueDistribution(bytes32 hash ) private {
         Proposal storage prop = proposals[hash];

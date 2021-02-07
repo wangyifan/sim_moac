@@ -47,7 +47,8 @@ subchainprotocolbaseaddr = "0x67013bce15a69ca00a64b3c5e74fb052907c786b";
 subChainProtocolBase = chain3.mc.contract(JSON.parse(subChainProtocolBaseAbi)).at(subchainprotocolbaseaddr);
 
 async function main() {
-    scsNodeIndex = 2;
+    //scsNodeIndex = 2;
+    scsNodeIndex = 5;
     scs_account = await subChainBase.nodeList.call(scsNodeIndex);
     chain3.personal.unlockAccount(scs_account, password, unlock_forever);
     console.log("Request release scs index:", scsNodeIndex, "addr:", scs_account);

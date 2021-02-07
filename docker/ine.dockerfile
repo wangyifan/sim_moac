@@ -1,0 +1,113 @@
+FROM frolvlad/alpine-glibc:alpine-3.8_glibc-2.28
+MAINTAINER "Yifan Wang <yifan.wang@moac.io>"
+
+ARG version
+
+RUN mkdir /vnode
+RUN mkdir /vnode/keystore
+RUN mkdir /vnode/config
+RUN mkdir /vnode/data
+
+# install tc
+RUN apk add iproute2 && ln -s /usr/lib/tc /lib/tc
+# install bash
+RUN apk add bash
+
+# install ine vnode and copy config file over
+#COPY config/vnode/miner.config /vnode/vnodeconfig.json
+#COPY config/vnode/miner.config /vnode/config/vnodeconfig.json
+COPY config/vnode/vnodeconfig.json /vnode/vnodeconfig.json
+COPY config/vnode/ine.genesis.json /vnode/genesis.json
+
+# copy key files over
+COPY config/vnode/0.bootnode.key /vnode/0.bootnode.key
+COPY config/vnode/1.bootnode.key /vnode/1.bootnode.key
+COPY config/vnode/2.bootnode.key /vnode/2.bootnode.key
+COPY config/vnode/3.bootnode.key /vnode/3.bootnode.key
+COPY config/vnode/4.bootnode.key /vnode/4.bootnode.key
+COPY config/vnode/5.bootnode.key /vnode/5.bootnode.key
+COPY config/vnode/6.bootnode.key /vnode/6.bootnode.key
+COPY config/vnode/7.bootnode.key /vnode/7.bootnode.key
+COPY config/vnode/8.bootnode.key /vnode/8.bootnode.key
+COPY config/vnode/9.bootnode.key /vnode/9.bootnode.key
+COPY config/vnode/10.bootnode.key /vnode/10.bootnode.key
+COPY config/vnode/11.bootnode.key /vnode/11.bootnode.key
+COPY config/vnode/12.bootnode.key /vnode/12.bootnode.key
+COPY config/vnode/13.bootnode.key /vnode/13.bootnode.key
+COPY config/vnode/14.bootnode.key /vnode/14.bootnode.key
+COPY config/vnode/15.bootnode.key /vnode/15.bootnode.key
+COPY config/vnode/16.bootnode.key /vnode/16.bootnode.key
+COPY config/vnode/17.bootnode.key /vnode/17.bootnode.key
+COPY config/vnode/18.bootnode.key /vnode/18.bootnode.key
+COPY config/vnode/19.bootnode.key /vnode/19.bootnode.key
+COPY config/vnode/20.bootnode.key /vnode/20.bootnode.key
+COPY config/scs/1/scskeystore/UTC--2019-01-09T22-37-13.142682054Z--a63a7764d01a6b11ba628f06b00a1828e5955a7f /vnode/keystore/
+COPY config/scs/2/scskeystore/UTC--2019-01-09T22-39-12.143224279Z--43c375d09e8a528770c6e1c76014cc9f4f9139a3 /vnode/keystore/
+COPY config/scs/3/scskeystore/UTC--2019-01-09T22-39-50.132032650Z--8d26cd8257288a9f3fcb3c7a4b15ade3cf932925 /vnode/keystore/
+COPY config/scs/4/scskeystore/UTC--2019-01-30T07-31-15.829217612Z--632774bf61ffc8873e43f3ce68cf3f169300efa3 /vnode/keystore/
+COPY config/scs/5/scskeystore/UTC--2019-01-30T07-32-38.675101996Z--d7e1cf982f75563f166726a5814c7fa3c1948068 /vnode/keystore/
+COPY config/scs/6/scskeystore/UTC--2019-01-30T07-33-48.539675359Z--30601cba96b98f22d5c46bb8a8b0b298b8017ef2 /vnode/keystore/
+COPY config/scs/7/scskeystore/UTC--2019-01-30T07-34-07.266735245Z--c24c73cfb25e444fb20c3405a8327808303f4040 /vnode/keystore/
+COPY config/scs/8/scskeystore/UTC--2019-01-30T07-34-25.523025594Z--78c013c83884b9b88fb067ed0d49c02a4421ce2a /vnode/keystore/
+COPY config/scs/9/scskeystore/UTC--2019-01-30T07-34-39.951753469Z--0d12d784ba0cb4d4d053f1e2d34b58bb1c4587f5 /vnode/keystore/
+COPY config/scs/10/scskeystore/UTC--2019-01-30T07-34-52.602208067Z--5198d17356857f68bbb58aa8b73494d5513887c3 /vnode/keystore/
+
+# install executables
+COPY bin/$version/vnode/ine /usr/local/sbin/
+COPY bin/tools/wait-for-it.sh  /usr/local/sbin/
+COPY bin/tools/disable_network.sh /usr/local/sbin/
+COPY bin/tools/resume_network.sh /usr/local/sbin/
+
+WORKDIR /vnode
+
+RUN ine init genesis.json --datadir=/vnode \
+   && echo "123456" > password \
+   && echo "393873d6bbc61b9d83ba923e08375b7bf8210a12bed4ea2016d96021e9378cc9" > pk \
+   && ine account import pk --datadir=/vnode --password password \
+   && echo "797d1b94bf8e7df4f81428950c1ab8c5067e8163c20f7d20d217f51fbb363987" > pk \
+   && ine account import pk --datadir=/vnode --password password \
+   && echo "c0f21b2a6f4e2a8d43bc915e660dcacc13a76876151208d4c67cd5cc6120fa34" > pk \
+   && ine account import pk --datadir=/vnode --password password \
+   && echo "5042894502ee04d1aa9f7ec9ac2c7722f3df095c5520f69d235ae7f29659f6c4" > pk \
+   && ine account import pk --datadir=/vnode --password password \
+   && echo "fb0f0c79d16ed967dc1e346c2863edd25a611860d7a2723d87c4c8f490212a74" > pk \
+   && ine account import pk --datadir=/vnode --password password \
+   && echo "311335a8ea375cbb33659efb955ab9f400557e74f56216ec4192bba7d806204a" > pk \
+   && ine account import pk --datadir=/vnode --password password \
+   && echo "21afe6edda0dd2005736d1d0a58867a8a16ebe402af9f883f3e20586841d40fe" > pk \
+   && ine account import pk --datadir=/vnode --password password \
+   && echo "50a6c30f527db0413d8187c843962a29fec156ce3947cbd0864f95a06830f3c9" > pk \
+   && ine account import pk --datadir=/vnode --password password \
+   && echo "8fe93b1ee0b7a4a32315e6caddaf9a85f6af797b9e8c4daa274fc3e4243a1959" > pk \
+   && ine account import pk --datadir=/vnode --password password \
+   && echo "2cdbd03f8c7dda48232712c9d0655014663c175dc17f4e0325fba0988755ae22" > pk \
+   && ine account import pk --datadir=/vnode --password password \
+   && echo "995e94366b7857fc6e01cf435a13b25ab7daca83f2a8bfbc247138a4f45a35b2" > pk \
+   && ine account import pk --datadir=/vnode --password password \
+   && echo "23fbc9e11e4590f64726790f115e15203af784ca1f592355db7198fa55335d21" > pk \
+   && ine account import pk --datadir=/vnode --password password \
+   && echo "d05b79f3b0f87c5bdfe6b00a4c17e441f041085561deb680a880587a6822eb5c" > pk \
+   && ine account import pk --datadir=/vnode --password password \
+   && echo "dfc198699d1aaeaf23bd22c23091ec47fb01e8de67c54d4c4d00c4f4513a1229" > pk \
+   && ine account import pk --datadir=/vnode --password password \
+   && echo "de2d9b96cefbc1af5c23dcdcb33391f36607dd3b8e1b0e0d188b30ebc273e851" > pk \
+   && ine account import pk --datadir=/vnode --password password \
+   && echo "8d7a57898bc3b2d4eb83e0f5c7921d9500d795fd57b03ea90b1373a35d20c7fe" > pk \
+   && ine account import pk --datadir=/vnode --password password \
+   && echo "aa942ac2fc93b52c804556d2c1e936893477265ef713914ed66fc57ede5ad39a" > pk \
+   && ine account import pk --datadir=/vnode --password password \
+   && echo "e34ddedff402daab85a258875723a6d7898b070da7b7dd1fc8f2be39949ee703" > pk \
+   && ine account import pk --datadir=/vnode --password password \
+   && echo "3800ac58ca375f1275e45197eb4aae248a8f73fe30ac0281187e93a42cde4b6c" > pk \
+   && ine account import pk --datadir=/vnode --password password \
+   && echo "2a69538e769adb80c7e34258f2d10fd4d607ab4c1e4d3bdc6d9fcc1b41a2631c" > pk \
+   && ine account import pk --datadir=/vnode --password password \
+   && rm password pk
+
+VOLUME /vnode
+
+CMD ["echo", "This is ine vnode."]
+
+# rpc port
+EXPOSE 8545
+EXPOSE 50062
