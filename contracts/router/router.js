@@ -100,8 +100,8 @@ async function main() {
     routerABI = JSON.stringify(output.contracts['UniswapV2Router02.sol']['UniswapV2Router02'].abi);
     routerBytecode = output.contracts['UniswapV2Router02.sol']['UniswapV2Router02'].evm.bytecode.object;
 
-    wmoacAddress = "0x67013bCe15A69Ca00a64B3c5E74fb052907c786b";
-    factoryAddress = "0xABE1A1A941C9666ac221B041aC1cFE6167e1F1D0";
+    wmoacAddress = "0xABE1A1A941C9666ac221B041aC1cFE6167e1F1D0";
+    factoryAddress = "0xd2861C34e7720A6E4D22ac1Fa77422f01add13E8";
 
     //////////////////////////////////////////////////////////////////////////////
     // deploy contracts

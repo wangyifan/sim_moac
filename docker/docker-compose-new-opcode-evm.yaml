@@ -1,0 +1,80 @@
+version: '3.1'
+
+# create the network if it does not exist
+# docker network create --internal --gateway 172.20.0.1 --subnet 172.20.0.0/16 docker_moac_vnode_network
+
+services:
+  ####################### vnode 1  #######################
+  vnode1:
+    image: yifan:vnode-dev
+    ports:
+        - "32159:8545"
+    command: moac  --networkid 95125 --vnodeconfig vnodeconfig.json --datadir=/vnode --ethash.dagdir /vnode/.ethash --verbosity 4 --rpc --rpcaddr 0.0.0.0 --mine --minerthreads 1 --rpcapi chain3,mc,net,vnode,personal,admin,miner --ipcpath=/root/.moac/moac.ipc --nodekey /vnode/1.bootnode.key 2>&1
+    networks:
+      default:
+        ipv4_address: 172.20.0.11
+
+  ####################### vnode 2  #######################
+  vnode2:
+    image: yifan:vnode-dev
+    ports:
+        - "32160:8545"
+    command: moac  --networkid 95125 --vnodeconfig vnodeconfig.json --datadir=/vnode --ethash.dagdir /vnode/.ethash --verbosity 4 --rpc --rpcaddr 0.0.0.0 --mine --minerthreads 1 --rpcapi chain3,mc,net,vnode,personal,admin,miner --ipcpath=/root/.moac/moac.ipc --bootnodesv4 enode://c2d8455aa7b8d0198e36e9f9df71282b2e32122bdf46de3fa218dad900a69ab1289289a67536ea93bfe6e1d7b0044821d0985f2a364e7144c74a5fbeb7e9dc6c@172.20.0.11:30333 --nodekey /vnode/2.bootnode.key 2>&1
+    depends_on:
+      - vnode1
+    networks:
+      default:
+        ipv4_address: 172.20.0.12
+
+  ####################### vnode 3  #######################
+  vnode3:
+    image: yifan:vnode-dev
+    ports:
+        - "32161:8545"
+    command: moac  --networkid 95125 --vnodeconfig vnodeconfig.json --datadir=/vnode --ethash.dagdir /vnode/.ethash --verbosity 4 --rpc --rpcaddr 0.0.0.0  --mine --minerthreads 1 --rpcapi chain3,mc,net,vnode,personal,admin,miner --ipcpath=/root/.moac/moac.ipc --bootnodesv4 enode://c2d8455aa7b8d0198e36e9f9df71282b2e32122bdf46de3fa218dad900a69ab1289289a67536ea93bfe6e1d7b0044821d0985f2a364e7144c74a5fbeb7e9dc6c@172.20.0.11:30333 --nodekey /vnode/3.bootnode.key 2>&1
+    depends_on:
+      - vnode1
+    networks:
+      default:
+        ipv4_address: 172.20.0.13
+
+  ####################### vnode 4  #######################
+  vnode4:
+    image: yifan:vnode-dev
+    ports:
+        - "32162:8545"
+    command: moac  --networkid 95125 --vnodeconfig vnodeconfig.json --datadir=/vnode --ethash.dagdir /vnode/.ethash --verbosity 4 --rpc --rpcaddr 0.0.0.0 --rpcapi chain3,mc,net,vnode,personal,admin,miner --ipcpath=/root/.moac/moac.ipc --bootnodesv4 enode://c2d8455aa7b8d0198e36e9f9df71282b2e32122bdf46de3fa218dad900a69ab1289289a67536ea93bfe6e1d7b0044821d0985f2a364e7144c74a5fbeb7e9dc6c@172.20.0.11:30333 --nodekey /vnode/4.bootnode.key 2>&1
+    depends_on:
+      - vnode1
+    networks:
+      default:
+        ipv4_address: 172.20.0.14
+
+  ####################### vnode 5  #######################
+  vnode5:
+    image: yifan:vnode-dev
+    ports:
+        - "32163:8545"
+    command: moac  --networkid 95125 --vnodeconfig vnodeconfig.json --datadir=/vnode --ethash.dagdir /vnode/.ethash --verbosity 4 --rpc --rpcaddr 0.0.0.0 --rpcapi chain3,mc,net,vnode,personal,admin,miner --ipcpath=/root/.moac/moac.ipc --bootnodesv4 enode://c2d8455aa7b8d0198e36e9f9df71282b2e32122bdf46de3fa218dad900a69ab1289289a67536ea93bfe6e1d7b0044821d0985f2a364e7144c74a5fbeb7e9dc6c@172.20.0.11:30333 --nodekey /vnode/5.bootnode.key 2>&1
+    depends_on:
+      - vnode1
+    networks:
+      default:
+        ipv4_address: 172.20.0.15
+
+  ####################### vnode 6  #######################
+  vnode6:
+    image: yifan:vnode-dev
+    ports:
+        - "32164:8545"
+    command: moac  --networkid 95125 --vnodeconfig vnodeconfig.json --datadir=/vnode --ethash.dagdir /vnode/.ethash --verbosity 4 --rpc --rpcaddr 0.0.0.0 --rpcapi chain3,mc,net,vnode,personal,admin,miner --ipcpath=/root/.moac/moac.ipc --bootnodesv4 enode://c2d8455aa7b8d0198e36e9f9df71282b2e32122bdf46de3fa218dad900a69ab1289289a67536ea93bfe6e1d7b0044821d0985f2a364e7144c74a5fbeb7e9dc6c@172.20.0.11:30333 --nodekey /vnode/6.bootnode.key 2>&1
+    depends_on:
+      - vnode1
+    networks:
+      default:
+        ipv4_address: 172.20.0.16
+
+networks:
+  default:
+    external:
+      name: docker_moac_vnode_network

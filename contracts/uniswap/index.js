@@ -1,8 +1,8 @@
 require('console-stamp')(console, 'yyyy-mm-dd HH:MM:ss');
 
 var Web3 = require('web3');
-//var web3 = new Web3('http://172.20.0.11:8545');
-var web3 = new Web3('http://127.0.0.1:8545');
+var web3 = new Web3('http://172.20.0.11:8545');
+//var web3 = new Web3('http://127.0.0.1:8545');
 var solc = require("solc");
 var fs = require("fs");
 
@@ -127,7 +127,7 @@ async function main() {
     //token1 = "0x3bD86aB1AaD5BeDcDF8Cd6f72791B91aD06d7B5a";
     //token2 = "0x67013bCe15A69Ca00a64B3c5E74fb052907c786b";
     token1 = "0x67013bCe15A69Ca00a64B3c5E74fb052907c786b";
-    token2 = "0xd2861C34e7720A6E4D22ac1Fa77422f01add13E8";
+    token2 = "0x3bD86aB1AaD5BeDcDF8Cd6f72791B91aD06d7B5a";
     pairAddr = await uniswapFactoryInstance.methods.createPair(token1, token2).send({from: '0xa35add395b804c3faacf7c7829638e42ffa1d051', gas: '8000000'});
     console.log(pairAddr);
 }

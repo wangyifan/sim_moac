@@ -9,10 +9,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "ganache-cli": "^6.12.1",
-    "openzeppelin-solidity": "^3.3.0",
-    "solc": "^0.5.16",
-    "truffle": "^5.1.55",
-    "web3": "^1.3.0"
+    "ganache-cli": "6.12.1",
+    "openzeppelin-solidity": "3.3.0",
+    "solc": "0.5.16",
+    "truffle": "5.1.55",
+    "web3": "1.3.0"
   }
 }
