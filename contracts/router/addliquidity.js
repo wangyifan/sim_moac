@@ -99,36 +99,58 @@ async function main() {
     console.log(solc.semver());
     routerABI = JSON.stringify(output.contracts['UniswapV2Router02.sol']['UniswapV2Router02'].abi);
     routerBytecode = output.contracts['UniswapV2Router02.sol']['UniswapV2Router02'].evm.bytecode.object;
+    routerAddress = "0xcCa8BAA2d1E83A38bdbcF52a9e5BbB530f50493A";
+    var token1Address = "0x67013bCe15A69Ca00a64B3c5E74fb052907c786b";
+    var token2Address = "0x3bD86aB1AaD5BeDcDF8Cd6f72791B91aD06d7B5a";
 
-    wmoacAddress = "0xABE1A1A941C9666ac221B041aC1cFE6167e1F1D0";
-    factoryAddress = "0xd2861C34e7720A6E4D22ac1Fa77422f01add13E8";
 
-    //////////////////////////////////////////////////////////////////////////////
-    // deploy contracts
     //////////////////////////////////////////////////////////////////////////////
     var install_account = "0xa35add395b804c3faacf7c7829638e42ffa1d051";
     var unlock_forever = 0;
     var password = "123456";
     web3.eth.personal.unlockAccount(install_account, password, unlock_forever);
-    var routerContract = new web3.eth.Contract(JSON.parse(routerABI));
-    var routerInstance = await deployRouter(
-        install_account, routerContract, routerBytecode, factoryAddress, wmoacAddress
-    );
-    console.log(
-        "Router deployed at: " + routerInstance.options.address + " " + green_check_mark
-    );
-}
 
-function deployRouter(install_account, routerContract, contractBytecode, factoryAddr, wmoacAddr) {
-    return routerContract.deploy(
-        {
-            data: '0x' + contractBytecode,
-            arguments: [factoryAddr, wmoacAddr]
-        }
-    ).send({
-        from: install_account,
-        gas: 7000000
-    });
+    // unlock all users
+    var user1 = "0xf34c3a04099a76dda80517373b21409391540b82";
+    var user2 = "0x903ee4f9753b3717aa6a295b02095aa0c94036d0";
+    var user3 = "0xf084d898a6329d0d9159ddccca0380d651ee1c17";
+    var user4 = "0x3563e38cc436bd6835da191228115fe7869a382c";
+    web3.eth.personal.unlockAccount(user1, password, unlock_forever);
+    web3.eth.personal.unlockAccount(user2, password, unlock_forever);
+    web3.eth.personal.unlockAccount(user3, password, unlock_forever);
+    web3.eth.personal.unlockAccount(user4, password, unlock_forever);
+
+    var blockNumber = await web3.eth.getBlockNumber();
+    var block = await web3.eth.getBlock(blockNumber);
+    var deadline = block.timestamp + 100;
+    console.log("Current block: "+blockNumber + ", timestamp: " + block.timestamp + ", deadline: " + deadline + "s");
+
+    web3.eth.handleRevert = true;
+    var routerContract = new web3.eth.Contract(JSON.parse(routerABI), routerAddress);
+
+    try {
+        routerContract.handleRevert = true;
+        result = await routerContract.methods.addLiquidity(
+            token2Address,
+            token1Address,
+            10000,
+            10000,
+            1000,
+            1000,
+            user1,
+            deadline
+        ).send({
+            from: user1,
+            gas: 3000000
+        });
+        console.log("Adding liquidity...");
+        console.log(result);
+    } catch (err) {
+        console.log("web3.eth.handleRevert =", web3.eth.handleRevert);
+        console.error(err);
+        console.log("err.message =",err.message);
+        console.log("err.reason =", JSON.stringify(err));
+    }
 }
 
 main();

@@ -97,7 +97,6 @@ async function main() {
     };
     console.log(solc.semver());
     var output = JSON.parse(solc.compile(JSON.stringify(input)));
-    console.log(output);
     routerABI = JSON.stringify(output.contracts['UniswapV2Router02.sol']['UniswapV2Router02'].abi);
     routerBytecode = output.contracts['UniswapV2Router02.sol']['UniswapV2Router02'].evm.bytecode.object;
 

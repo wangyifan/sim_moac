@@ -5,6 +5,7 @@ var web3 = new Web3('http://172.20.0.11:8545');
 //var web3 = new Web3('http://127.0.0.1:8545');
 var solc = require("solc");
 var fs = require("fs");
+const { get } = require('http');
 
 // for colorful console log
 var check_mark = "✓";
@@ -22,6 +23,7 @@ async function main() {
     //////////////////////////////////////////////////////////////////////////////
     // Compile uniswap factory and pair
     //////////////////////////////////////////////////////////////////////////////
+
     uniswapFactoryInterfaceFile = contract_dir + "/" + "IUniswapV2Factory.sol";
     uniswapFactoryInterfaceContent = fs.readFileSync(uniswapFactoryInterfaceFile, 'utf8');
 
@@ -106,43 +108,25 @@ async function main() {
 
     console.log(solc.semver());
     output = JSON.parse(solc.compile(JSON.stringify(input)));
+    pairABI = JSON.stringify(output.contracts['UniswapV2Pair.sol']['UniswapV2Pair'].abi);
     factoryABI = JSON.stringify(output.contracts['UniswapV2Factory.sol']['UniswapV2Factory'].abi);
-    factoryBytecode = output.contracts['UniswapV2Factory.sol']['UniswapV2Factory'].evm.bytecode.object;
+    factoryAddr = "0xd2861C34e7720A6E4D22ac1Fa77422f01add13E8";
+    factoryInstance = new web3.eth.Contract(JSON.parse(factoryABI), factoryAddr);
 
     //////////////////////////////////////////////////////////////////////////////
-    // deploy contracts
+    // load pair contract
     //////////////////////////////////////////////////////////////////////////////
     var install_account = "0xa35add395b804c3faacf7c7829638e42ffa1d051";
     var unlock_forever = 0;
     var password = "123456";
     web3.eth.personal.unlockAccount(install_account, password, unlock_forever);
-    var uniswapFactoryContract = new web3.eth.Contract(JSON.parse(factoryABI));
-    var uniswapFactoryInstance = await deployUniswapFactoryV2Contract(
-        install_account,
-        factoryBytecode,
-        uniswapFactoryContract
-    );
-    console.log("uniswap factory deployed: " + uniswapFactoryInstance.options.address + " " + green_check_mark);
 
-    //token1 = "0x3bD86aB1AaD5BeDcDF8Cd6f72791B91aD06d7B5a";
-    //token2 = "0x67013bCe15A69Ca00a64B3c5E74fb052907c786b";
+    // get pair(token1, token2) contract
     token1 = "0x67013bCe15A69Ca00a64B3c5E74fb052907c786b";
     token2 = "0x3bD86aB1AaD5BeDcDF8Cd6f72791B91aD06d7B5a";
-    pairAddr = await uniswapFactoryInstance.methods.createPair(token1, token2).send({from: '0xa35add395b804c3faacf7c7829638e42ffa1d051', gas: '8000000'});
-    console.log(pairAddr);
-}
-
-// For deploy uniswap factory v2
-function deployUniswapFactoryV2Contract(install_account, contractBytecode, uniswapFactoryContract){
-    return uniswapFactoryContract.deploy(
-        {
-            data: '0x' + contractBytecode,
-            arguments: [install_account]
-        }
-    ).send({
-        from: install_account,
-        gas: 9000000
-    });
+    pairAddr = await factoryInstance.methods.getPair(token1, token2).call();
+    console.log("(token1, token2) pair: " + pairAddr);
+    var pairContract = new web3.eth.Contract(JSON.parse(pairABI), pairAddr);
 }
 
 main();
