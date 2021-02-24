@@ -80,6 +80,9 @@ async function main() {
     web3.eth.personal.unlockAccount(user3, password, unlock_forever);
     web3.eth.personal.unlockAccount(user4, password, unlock_forever);
 
+    // wait 5 seonds for unlock to take effect
+    await new Promise(resolve => setTimeout(resolve, 5000));
+
     // deploy erc20 contracts
     var erc20Contract = new web3.eth.Contract(JSON.parse(erc20ABI));
     var token1 = await deployERC20(install_account, erc20Contract, erc20Bytecode, "Token 1", "tk1");
