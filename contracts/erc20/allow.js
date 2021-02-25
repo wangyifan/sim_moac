@@ -77,7 +77,7 @@ async function main() {
     web3.eth.personal.unlockAccount(user3, password, unlock_forever);
     web3.eth.personal.unlockAccount(user4, password, unlock_forever);
 
-    approveAmount = 1000000;
+    approveAmount = 10000000;
     routerContractAddress = "0xcCa8BAA2d1E83A38bdbcF52a9e5BbB530f50493A";
     var token1Address = "0x67013bCe15A69Ca00a64B3c5E74fb052907c786b";
     var token2Address = "0x3bD86aB1AaD5BeDcDF8Cd6f72791B91aD06d7B5a";

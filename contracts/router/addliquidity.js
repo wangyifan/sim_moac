@@ -133,10 +133,10 @@ async function main() {
         result = await routerContract.methods.addLiquidity(
             token2Address,
             token1Address,
-            10000,
-            10000,
-            1000,
-            1000,
+            1000000,
+            1000000,
+            100000,
+            100000,
             user1,
             deadline
         ).send({
