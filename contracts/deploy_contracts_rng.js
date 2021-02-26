@@ -463,7 +463,7 @@ function deploySubChainBaseContractPromise(vssbaseaddr){
         deployTransaction = {
             from: install_account,
             data: '0x' + subChainBaseBin,
-            gas: "9000000"
+            gas: "15000000"
         };
 
         // randdrop
