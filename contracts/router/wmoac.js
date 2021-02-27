@@ -1,7 +1,8 @@
 require('console-stamp')(console, 'yyyy-mm-dd HH:MM:ss');
 
 var Web3 = require('web3');
-var web3 = new Web3('http://172.20.0.11:8545');
+//var web3 = new Web3('http://172.20.0.11:8545');
+var web3 = new Web3('http://127.0.0.1:8545');
 var solc = require("solc");
 var fs = require("fs");
 
@@ -97,9 +98,6 @@ async function main() {
     };
     console.log(solc.semver());
     var output = JSON.parse(solc.compile(JSON.stringify(input)));
-    routerABI = JSON.stringify(output.contracts['UniswapV2Router02.sol']['UniswapV2Router02'].abi);
-    routerBytecode = output.contracts['UniswapV2Router02.sol']['UniswapV2Router02'].evm.bytecode.object;
-
     wmoacABI = JSON.stringify(output.contracts['WMOAC.sol']['WMOAC'].abi);
     wmoacBytecode = output.contracts['WMOAC.sol']['WMOAC'].evm.bytecode.object;
 
@@ -110,7 +108,7 @@ async function main() {
     var unlock_forever = 0;
     var password = "123456";
     web3.eth.personal.unlockAccount(install_account, password, unlock_forever);
-
+    console.log("account unlocked", install_account);
     var wmoacContract = new web3.eth.Contract(JSON.parse(wmoacABI));
     var wmoacInstance = await deployWMOAC(
         install_account, wmoacContract, wmoacBytecode
@@ -128,7 +126,7 @@ function deployWMOAC(install_account, wmoacContract, contractBytecode) {
         }
     ).send({
         from: install_account,
-        gas: 9000000
+        gas: 4000000
     });
 }
 

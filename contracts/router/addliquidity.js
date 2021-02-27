@@ -1,7 +1,8 @@
 require('console-stamp')(console, 'yyyy-mm-dd HH:MM:ss');
 
 var Web3 = require('web3');
-var web3 = new Web3('http://172.20.0.11:8545');
+//var web3 = new Web3('http://172.20.0.11:8545');
+var web3 = new Web3('http://127.0.0.1:8545');
 var solc = require("solc");
 var fs = require("fs");
 
@@ -99,10 +100,13 @@ async function main() {
     console.log(solc.semver());
     routerABI = JSON.stringify(output.contracts['UniswapV2Router02.sol']['UniswapV2Router02'].abi);
     routerBytecode = output.contracts['UniswapV2Router02.sol']['UniswapV2Router02'].evm.bytecode.object;
-    routerAddress = "0xcCa8BAA2d1E83A38bdbcF52a9e5BbB530f50493A";
-    var token1Address = "0x67013bCe15A69Ca00a64B3c5E74fb052907c786b";
-    var token2Address = "0x3bD86aB1AaD5BeDcDF8Cd6f72791B91aD06d7B5a";
 
+    //routerAddress = "0xcCa8BAA2d1E83A38bdbcF52a9e5BbB530f50493A";
+    //var token1Address = "0x67013bCe15A69Ca00a64B3c5E74fb052907c786b";
+    //var token2Address = "0x3bD86aB1AaD5BeDcDF8Cd6f72791B91aD06d7B5a";
+    routerAddress = "0x6274C172f15e0319E1CA2E426A0AE365B62eA64e";
+    var token1Address = "0x67cDfB5FA248Ca7E84840Cf7f5AD4A09Cb2Fb1e7";
+    var token2Address = "0x7C0d5C71A89AaF27b4221a1B0a38070179190729";
 
     //////////////////////////////////////////////////////////////////////////////
     var install_account = "0xa35add395b804c3faacf7c7829638e42ffa1d051";
@@ -122,7 +126,7 @@ async function main() {
 
     var blockNumber = await web3.eth.getBlockNumber();
     var block = await web3.eth.getBlock(blockNumber);
-    var deadline = block.timestamp + 100;
+    var deadline = block.timestamp + 10000;
     console.log("Current block: "+blockNumber + ", timestamp: " + block.timestamp + ", deadline: " + deadline + "s");
 
     web3.eth.handleRevert = true;

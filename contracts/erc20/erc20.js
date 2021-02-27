@@ -1,8 +1,8 @@
 require('console-stamp')(console, 'yyyy-mm-dd HH:MM:ss');
 
 var Web3 = require('web3');
-var web3 = new Web3('http://172.20.0.11:8545');
-//var web3 = new Web3('http://127.0.0.1:8545');
+//var web3 = new Web3('http://172.20.0.11:8545');
+var web3 = new Web3('http://127.0.0.1:8545');
 var solc = require("solc");
 var fs = require("fs");
 
@@ -154,7 +154,7 @@ function deployERC20(install_account, erc20Contract, contractBytecode, name, sym
         }
     ).send({
         from: install_account,
-        gas: 9000000
+        gas: 3000000
     });
 }
 

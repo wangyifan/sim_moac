@@ -1,8 +1,8 @@
 require('console-stamp')(console, 'yyyy-mm-dd HH:MM:ss');
 
 var Web3 = require('web3');
-var web3 = new Web3('http://172.20.0.11:8545');
-//var web3 = new Web3('http://127.0.0.1:8545');
+//var web3 = new Web3('http://172.20.0.11:8545');
+var web3 = new Web3('http://127.0.0.1:8545');
 var solc = require("solc");
 var fs = require("fs");
 const { get } = require('http');
@@ -137,8 +137,10 @@ async function main() {
     );
     console.log("uniswap factory deployed: " + uniswapFactoryInstance.options.address + " " + green_check_mark);
 
-    token1 = "0x67013bCe15A69Ca00a64B3c5E74fb052907c786b";
-    token2 = "0x3bD86aB1AaD5BeDcDF8Cd6f72791B91aD06d7B5a";
+    //token1 = "0x67013bCe15A69Ca00a64B3c5E74fb052907c786b";
+    //token2 = "0x3bD86aB1AaD5BeDcDF8Cd6f72791B91aD06d7B5a";
+    token1 = "0x67cDfB5FA248Ca7E84840Cf7f5AD4A09Cb2Fb1e7";
+    token2 = "0x7C0d5C71A89AaF27b4221a1B0a38070179190729";
     pairAddr = await uniswapFactoryInstance.methods.createPair(token1, token2).send({from: install_account, gas: '6000000'});
     console.log(pairAddr);
 
