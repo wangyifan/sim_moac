@@ -1,8 +1,8 @@
 require('console-stamp')(console, 'yyyy-mm-dd HH:MM:ss');
 
 var Web3 = require('web3');
-//var web3 = new Web3('http://172.20.0.11:8545');
-var web3 = new Web3('http://127.0.0.1:8545');
+var web3 = new Web3('http://172.20.0.11:8545');
+//var web3 = new Web3('http://127.0.0.1:8545');
 var solc = require("solc");
 var fs = require("fs");
 const { get } = require('http');
@@ -137,17 +137,23 @@ async function main() {
     );
     console.log("uniswap factory deployed: " + uniswapFactoryInstance.options.address + " " + green_check_mark);
 
-    //token1 = "0x67013bCe15A69Ca00a64B3c5E74fb052907c786b";
-    //token2 = "0x3bD86aB1AaD5BeDcDF8Cd6f72791B91aD06d7B5a";
-    token1 = "0x67cDfB5FA248Ca7E84840Cf7f5AD4A09Cb2Fb1e7";
-    token2 = "0x7C0d5C71A89AaF27b4221a1B0a38070179190729";
-    pairAddr = await uniswapFactoryInstance.methods.createPair(token1, token2).send({from: install_account, gas: '6000000'});
-    console.log(pairAddr);
+    token1 = "0x3bD86aB1AaD5BeDcDF8Cd6f72791B91aD06d7B5a";
+    token2 = "0x67013bCe15A69Ca00a64B3c5E74fb052907c786b";
+    token3 = "0xd2861C34e7720A6E4D22ac1Fa77422f01add13E8";
+    pairAddr1 = await uniswapFactoryInstance.methods.createPair(token1, token2).send({from: install_account, gas: '3000000'});
+    console.log(pairAddr1);
+    pairAddr2 = await uniswapFactoryInstance.methods.createPair(token2, token3).send({from: install_account, gas: '3000000'});
+    console.log(pairAddr2);
 
     getPairResult = await uniswapFactoryInstance.methods.getPair(token1, token2).call();
     console.log("(token1, token2) pair: " + getPairResult);
     getPairResult = await uniswapFactoryInstance.methods.getPair(token2, token1).call();
     console.log("(token2, token1) pair: " + getPairResult);
+
+    getPairResult = await uniswapFactoryInstance.methods.getPair(token2, token3).call();
+    console.log("(token2, token3) pair: " + getPairResult);
+    getPairResult = await uniswapFactoryInstance.methods.getPair(token3, token2).call();
+    console.log("(token3, token2) pair: " + getPairResult);
 }
 
 // For deploy uniswap factory v2
@@ -159,7 +165,7 @@ function deployUniswapFactoryV2Contract(install_account, contractBytecode, unisw
         }
     ).send({
         from: install_account,
-        gas: 9000000
+        gas: 7000000
     });
 }
 

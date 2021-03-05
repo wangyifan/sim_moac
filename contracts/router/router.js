@@ -1,8 +1,8 @@
 require('console-stamp')(console, 'yyyy-mm-dd HH:MM:ss');
 
 var Web3 = require('web3');
-//var web3 = new Web3('http://172.20.0.11:8545');
-var web3 = new Web3('http://127.0.0.1:8545');
+var web3 = new Web3('http://172.20.0.11:8545');
+//var web3 = new Web3('http://127.0.0.1:8545');
 var solc = require("solc");
 var fs = require("fs");
 
@@ -101,10 +101,8 @@ async function main() {
     routerABI = JSON.stringify(output.contracts['UniswapV2Router02.sol']['UniswapV2Router02'].abi);
     routerBytecode = output.contracts['UniswapV2Router02.sol']['UniswapV2Router02'].evm.bytecode.object;
 
-    //wmoacAddress = "0xABE1A1A941C9666ac221B041aC1cFE6167e1F1D0";
-    //factoryAddress = "0xd2861C34e7720A6E4D22ac1Fa77422f01add13E8";
-    wmoacAddress = "0x03D60190c33A6B716FeF08bE1C964182e495F9ff";
-    factoryAddress = "0xc373c746AB0D6DD3EE22Ae2299db469C5f89e8D2";
+    wmoacAddress = "0x2E32C6F7630ca3f06EfAbEaDa1da0Bd28aA18FEA";
+    factoryAddress = "0x91228250705AF76cB0f7EbC128d27d532F36cfF9";
 
     //////////////////////////////////////////////////////////////////////////////
     // deploy contracts

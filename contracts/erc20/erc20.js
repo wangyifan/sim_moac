@@ -1,8 +1,8 @@
 require('console-stamp')(console, 'yyyy-mm-dd HH:MM:ss');
 
 var Web3 = require('web3');
-//var web3 = new Web3('http://172.20.0.11:8545');
-var web3 = new Web3('http://127.0.0.1:8545');
+var web3 = new Web3('http://172.20.0.11:8545');
+//var web3 = new Web3('http://127.0.0.1:8545');
 var solc = require("solc");
 var fs = require("fs");
 
@@ -87,8 +87,10 @@ async function main() {
     var erc20Contract = new web3.eth.Contract(JSON.parse(erc20ABI));
     var token1 = await deployERC20(install_account, erc20Contract, erc20Bytecode, "Token 1", "tk1");
     var token2 = await deployERC20(install_account, erc20Contract, erc20Bytecode, "Token 2", "tk2");
+    var token3 = await deployERC20(install_account, erc20Contract, erc20Bytecode, "Token 3", "tk3");
     console.log("ERC20 token 1 deployed at: " + token1.options.address + " " + green_check_mark);
     console.log("ERC20 token 2 deployed at: " + token2.options.address + " " + green_check_mark);
+    console.log("ERC20 token 3 deployed at: " + token3.options.address + " " + green_check_mark);
 
     // distribute token 1
     amount = 12345678;
@@ -144,6 +146,33 @@ async function main() {
     console.log(user3 + " token2 : " + result);
     result = await token2.methods.balanceOf(user4).call();
     console.log(user4 + " token2 : " + result);
+
+    // distribute token 3
+    result = await token3.methods.mint(user1, amount).send({
+        from: user1,
+        gas: 100000
+    });
+    result = await token3.methods.mint(user2, amount).send({
+        from: user2,
+        gas: 100000
+    });
+    result = await token3.methods.mint(user3, amount).send({
+        from: user3,
+        gas: 100000
+    });
+    result = await token3.methods.mint(user4, amount).send({
+        from: user4,
+        gas: 100000
+    });
+
+    result = await token3.methods.balanceOf(user1).call();
+    console.log(user1 + " token3 : " + result);
+    result = await token3.methods.balanceOf(user2).call();
+    console.log(user2 + " token3 : " + result);
+    result = await token3.methods.balanceOf(user3).call();
+    console.log(user3 + " token3 : " + result);
+    result = await token3.methods.balanceOf(user4).call();
+    console.log(user4 + " token3 : " + result);
 }
 
 function deployERC20(install_account, erc20Contract, contractBytecode, name, symbol) {

@@ -1,8 +1,8 @@
 require('console-stamp')(console, 'yyyy-mm-dd HH:MM:ss');
 
 var Web3 = require('web3');
-//var web3 = new Web3('http://172.20.0.11:8545');
-var web3 = new Web3('http://127.0.0.1:8545');
+var web3 = new Web3('http://172.20.0.11:8545');
+//var web3 = new Web3('http://127.0.0.1:8545');
 var solc = require("solc");
 var fs = require("fs");
 
@@ -81,21 +81,24 @@ async function main() {
     await new Promise(resolve => setTimeout(resolve, 5000));
 
     approveAmount = 10000000;
-    //routerContractAddress = "0xcCa8BAA2d1E83A38bdbcF52a9e5BbB530f50493A";
-    //var token1Address = "0x67013bCe15A69Ca00a64B3c5E74fb052907c786b";
-    //var token2Address = "0x3bD86aB1AaD5BeDcDF8Cd6f72791B91aD06d7B5a";
-    routerContractAddress = "0x6274C172f15e0319E1CA2E426A0AE365B62eA64e";
-    var token1Address = "0x67cDfB5FA248Ca7E84840Cf7f5AD4A09Cb2Fb1e7";
-    var token2Address = "0x7C0d5C71A89AaF27b4221a1B0a38070179190729";
+    routerContractAddress = "0x588d57969F4211596F7808a66EFAcC7bb890C977";
+    var token1Address = "0x3bD86aB1AaD5BeDcDF8Cd6f72791B91aD06d7B5a";
+    var token2Address = "0x67013bCe15A69Ca00a64B3c5E74fb052907c786b";
+    var token3Address = "0xd2861C34e7720A6E4D22ac1Fa77422f01add13E8";
 
     var token1 = new web3.eth.Contract(JSON.parse(erc20ABI), token1Address);
     var token2 = new web3.eth.Contract(JSON.parse(erc20ABI), token2Address);
+    var token3 = new web3.eth.Contract(JSON.parse(erc20ABI), token3Address);
     // user 1 approve router for token 1 and 2
     result = await token1.methods.approve(routerContractAddress, approveAmount).send({
         from: user1,
         gas:200000
     });
     result = await token2.methods.approve(routerContractAddress, approveAmount).send({
+        from: user1,
+        gas:200000
+    });
+    result = await token3.methods.approve(routerContractAddress, approveAmount).send({
         from: user1,
         gas:200000
     });
@@ -108,6 +111,10 @@ async function main() {
         from: user2,
         gas:200000
     });
+    result = await token3.methods.approve(routerContractAddress, approveAmount).send({
+        from: user2,
+        gas:200000
+    });
     // user 3 approve router for token 1 and 2
     result = await token1.methods.approve(routerContractAddress, approveAmount).send({
         from: user3,
@@ -117,12 +124,20 @@ async function main() {
         from: user3,
         gas:200000
     });
+    result = await token3.methods.approve(routerContractAddress, approveAmount).send({
+        from: user3,
+        gas:200000
+    });
     // user 4 approve router for token 1 and 2
     result = await token1.methods.approve(routerContractAddress, approveAmount).send({
         from: user4,
         gas:200000
         });
     result = await token2.methods.approve(routerContractAddress, approveAmount).send({
+        from: user4,
+        gas:200000
+    });
+    result = await token3.methods.approve(routerContractAddress, approveAmount).send({
         from: user4,
         gas:200000
     });
@@ -138,10 +153,16 @@ async function main() {
     result7 = await token2.methods.allowance(user3, routerContractAddress).call();
     result8 = await token2.methods.allowance(user4, routerContractAddress).call();
 
+    result9 = await token3.methods.allowance(user1, routerContractAddress).call();
+    resulta = await token3.methods.allowance(user2, routerContractAddress).call();
+    resultb = await token3.methods.allowance(user3, routerContractAddress).call();
+    resultc = await token3.methods.allowance(user4, routerContractAddress).call();
+
     console.log(
         "Allowance result: \n",
         result1, result2, result3, result4, "\n",
-        result5, result6, result7, result8
+        result5, result6, result7, result8, "\n",
+        result9, resulta, resultb, resultc
     );
 }
 
