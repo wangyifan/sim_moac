@@ -98,6 +98,7 @@ async function main() {
     };
 
     console.log(solc.semver());
+    console.log("----------------------------");
     token1 = "0x3bD86aB1AaD5BeDcDF8Cd6f72791B91aD06d7B5a";
     token2 = "0x67013bCe15A69Ca00a64B3c5E74fb052907c786b";
     token3 = "0xd2861C34e7720A6E4D22ac1Fa77422f01add13E8";
@@ -130,20 +131,33 @@ async function main() {
     console.log("(token1, token2) pair: " + pairAddr);
     var pairContract = new web3.eth.Contract(JSON.parse(pairABI), pairAddr);
     var reserves = await pairContract.methods.getReserves().call();
-    console.log("reserveA, reserveB:", reserves[0], reserves[1]);
-
+    console.log("reserve1, reserve2:", reserves[0], reserves[1]);
     // router get quote
-    amountA = 2000;
-    reserveA = reserves[0];
-    reserveB = reserves[1];
-    quote = await routerInstance.methods.quote(amountA, reserveA, reserveB).call();
-    console.log("amountA", amountA, "quote", quote);
-    amountOut = await routerInstance.methods.getAmountOut(amountA, reserveA, reserveB).call();
-    console.log("amountA", amountA, "out", amountOut);
+    amount1 = 2000;
+    reserve1 = reserves[0];
+    reserve2 = reserves[1];
+    quote = await routerInstance.methods.quote(amount1, reserve1, reserve2).call();
+    console.log("amount1", amount1, "quote", quote);
+    amountOut = await routerInstance.methods.getAmountOut(amount1, reserve1, reserve2).call();
+    console.log("amount1", amount1, "out", amountOut);
+    console.log("----------------------------");
+
+    // get pair(token2, token3) contract
+    pairAddr = await factoryInstance.methods.getPair(token2, token3).call();
+    console.log("(token2, token3) pair: " + pairAddr);
+    pairContract = new web3.eth.Contract(JSON.parse(pairABI), pairAddr);
+    reserves = await pairContract.methods.getReserves().call();
+    console.log("reserve2, reserve3:", reserves[0], reserves[1]);
+    amount2 = 2000;
+    reserve2 = reserves[0];
+    reserve3 = reserves[1];
+    quote = await routerInstance.methods.quote(amount2, reserve2, reserve3).call();
+    console.log("amount2", amount2, "quote", quote);
+    amountOut = await routerInstance.methods.getAmountOut(amount2, reserve2, reserve3).call();
+    console.log("amount2", amount2, "out", amountOut);
+    console.log("----------------------------");
 
     // unlock users
-    var unlock_forever = 0;
-    var password = "123456";
     var user1 = "0xf34c3a04099a76dda80517373b21409391540b82";
     var user2 = "0x903ee4f9753b3717aa6a295b02095aa0c94036d0";
     var user3 = "0xf084d898a6329d0d9159ddccca0380d651ee1c17";
@@ -157,11 +171,13 @@ async function main() {
     var block = await web3.eth.getBlock(blockNumber);
     var deadline = block.timestamp + 10000;
     console.log("Current block: "+blockNumber + ", timestamp: " + block.timestamp + ", deadline: " + deadline + "s");
+    console.log("----------------------------");
 
-    // query token 1 & 2 for user 1
+    // query token 1,2,3 for user 1 before trade #1
     result1 = await token1Instance.methods.balanceOf(user1).call();
     result2 = await token2Instance.methods.balanceOf(user1).call();
-    console.log("user 1 => token1:", result1, "token2:", result2);
+    result3 = await token3Instance.methods.balanceOf(user1).call();
+    console.log("user 1 before => token1:", result1, "token2:", result2, "token3:", result3);
 
     // user1 trade 100 token 1 for at least 80 token 2
     amountIn = 100;
@@ -178,13 +194,43 @@ async function main() {
         from: user1,
         gas: 500000
     });
-    //console.log(result);
 
     // query token 1 & 2 for user 1
     result1After = await token1Instance.methods.balanceOf(user1).call();
     result2After = await token2Instance.methods.balanceOf(user1).call();
-    console.log("user 1 => token1:", result1After, "token2:", result2After);
-    console.log("diff token1:", result1After - result1, "token2:", result2After - result2);
+    result3After = await token3Instance.methods.balanceOf(user1).call();
+    console.log("user 1 after => token1:", result1After, "token2:", result2After, "token3:", result3After);
+    console.log("diff token1:", result1After - result1, "token2:", result2After - result2, "token3:", result3After - result3);
+
+    console.log("----------------------------");
+    // query token 1,2,3 for user 1 before trade #2
+    result1 = await token1Instance.methods.balanceOf(user1).call();
+    result2 = await token2Instance.methods.balanceOf(user1).call();
+    result3 = await token3Instance.methods.balanceOf(user1).call();
+    console.log("user 1 before => token1:", result1, "token2:", result2, "token3:", result3);
+
+    // user1 trade 100 token 1 for at least 160 token 2
+    amountIn = 100;
+    amountOutMin =160;
+    path = [token1, token2, token3];
+    fromUser = user1;
+    result = await routerInstance.methods.swapExactTokensForTokens(
+        amountIn,
+        amountOutMin,
+        path,
+        fromUser,
+        deadline
+    ).send({
+        from: user1,
+        gas: 500000
+    });
+
+    // query token 1 & 2 for user 1
+    result1After = await token1Instance.methods.balanceOf(user1).call();
+    result2After = await token2Instance.methods.balanceOf(user1).call();
+    result3After = await token3Instance.methods.balanceOf(user1).call();
+    console.log("user 1 => token1:", result1After, "token2:", result2After, "token3:", result3After);
+    console.log("diff token1:", result1After - result1, "token2:", result2After - result2, "token3:", result3After - result3);
 }
 
 main();
