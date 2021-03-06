@@ -195,7 +195,7 @@ async function main() {
         gas: 500000
     });
 
-    // query token 1 & 2 for user 1
+    // query token 1,2,3 for user 1
     result1After = await token1Instance.methods.balanceOf(user1).call();
     result2After = await token2Instance.methods.balanceOf(user1).call();
     result3After = await token3Instance.methods.balanceOf(user1).call();
@@ -209,7 +209,7 @@ async function main() {
     result3 = await token3Instance.methods.balanceOf(user1).call();
     console.log("user 1 before => token1:", result1, "token2:", result2, "token3:", result3);
 
-    // user1 trade 100 token 1 for at least 160 token 2
+    // user1 trade 100 token 1 for at least 160 token 3
     amountIn = 100;
     amountOutMin =160;
     path = [token1, token2, token3];
@@ -225,7 +225,7 @@ async function main() {
         gas: 500000
     });
 
-    // query token 1 & 2 for user 1
+    // query token 1,2,3 for user 1
     result1After = await token1Instance.methods.balanceOf(user1).call();
     result2After = await token2Instance.methods.balanceOf(user1).call();
     result3After = await token3Instance.methods.balanceOf(user1).call();
