@@ -1,8 +1,8 @@
 require('console-stamp')(console, 'yyyy-mm-dd HH:MM:ss');
 
 var Web3 = require('web3');
-var web3 = new Web3('http://172.20.0.11:8545');
-//var web3 = new Web3('http://127.0.0.1:8545');
+//var web3 = new Web3('http://172.20.0.11:8545');
+var web3 = new Web3('http://127.0.0.1:18545');
 var solc = require("solc");
 var fs = require("fs");
 
@@ -81,10 +81,14 @@ async function main() {
     await new Promise(resolve => setTimeout(resolve, 5000));
 
     approveAmount = 10000000;
-    routerContractAddress = "0x588d57969F4211596F7808a66EFAcC7bb890C977";
-    var token1Address = "0x3bD86aB1AaD5BeDcDF8Cd6f72791B91aD06d7B5a";
-    var token2Address = "0x67013bCe15A69Ca00a64B3c5E74fb052907c786b";
-    var token3Address = "0xd2861C34e7720A6E4D22ac1Fa77422f01add13E8";
+    //routerContractAddress = "0x588d57969F4211596F7808a66EFAcC7bb890C977";
+    //var token1Address = "0x3bD86aB1AaD5BeDcDF8Cd6f72791B91aD06d7B5a";
+    //var token2Address = "0x67013bCe15A69Ca00a64B3c5E74fb052907c786b";
+    //var token3Address = "0xd2861C34e7720A6E4D22ac1Fa77422f01add13E8";
+    routerContractAddress = "0x0678c50652FAeD47DC81E2d7eeEf39AFDB0ffeA3";
+    var token1Address = "0x3C222D7Cd6159e98Dd9a39057443D230F9b0AdfC";
+    var token2Address = "0xc373c746AB0D6DD3EE22Ae2299db469C5f89e8D2";
+    var token3Address = "0xD6874f1D76130Ea6DCE3d37f97d33a9022DDD94D";
 
     var token1 = new web3.eth.Contract(JSON.parse(erc20ABI), token1Address);
     var token2 = new web3.eth.Contract(JSON.parse(erc20ABI), token2Address);
