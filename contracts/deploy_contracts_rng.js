@@ -1,4 +1,5 @@
 require('console-stamp')(console, 'yyyy-mm-dd HH:MM:ss');
+var Tx = require('ethereumjs-tx').Transaction;
 
 const dcbase = require("./deploy_contracts_base_rng.js");
 install_account = dcbase.install_account;
@@ -8,7 +9,7 @@ version = dcbase.version;
 password = dcbase.password;
 bmin = dcbase.bmin;
 unlock_forever = dcbase.unlock_forever;
-chain3 = dcbase.chain3;
+convertUnit = dcbase.convertUnit;
 check_mark = dcbase.check_mark;
 RED = dcbase.RED;
 GREEN = dcbase.GREEN;
@@ -26,7 +27,6 @@ tokensupply = dcbase.tokensupply;
 exchangerate = dcbase.exchangerate;
 addFundAmount = dcbase.addFundAmount;
 vssBaseAbi = dcbase.vssBaseAbi;
-
 scs_amount = dcbase.scs_amount;
 scsids = dcbase.scsids;
 scsmonitorids = dcbase.scsmonitorids;
@@ -36,41 +36,93 @@ deployVnodeProtocolBaseContractPromise = dcbase.deployVnodeProtocolBaseContractP
 deployDappBaseContractPromise = dcbase.deployDappBaseContractPromise;
 deployVssBaseContractPromise = dcbase.deployVssBaseContractPromise;
 
-// for docker product deployment
-//hostport = "http://"+ "127.0.0.1" + ":" + "18545";
+if (dcbase.useChain3) {
+    sdk3 = dcbase.chain3;
+    sdk3Chain = sdk3.mc;
+    sdk3Personal = sdk3.personal;
+    sdk3Contract = sdk3Chain.contract;
+    console.log("using chain3 " + green_check_mark);
+} else {
+    sdk3 = dcbase.web3;
+    sdk3Chain = sdk3.eth;
+    sdk3Personal = sdk3.eth.personal;
+    sdk3Contract = sdk3Chain.Contract;
+    console.log("using web3 " + green_check_mark);
+}
 
 hostport = "http://"+ "172.20.0.11" + ":" + "8545";
-chain3.setProvider(new chain3.providers.HttpProvider(hostport));
-chain3.personal.unlockAccount(install_account, password, unlock_forever);
-vnodeProtocolBaseContract = chain3.mc.contract(JSON.parse(vnodeProtocolBaseAbi));
-subChainProtocolBaseContract = chain3.mc.contract(JSON.parse(subChainProtocolBaseAbi));
-subChainBaseContract = chain3.mc.contract(JSON.parse(subChainBaseAbi));
-dappBaseContract = chain3.mc.contract(JSON.parse(dappBaseAbi));
-vssBaseContract = chain3.mc.contract(JSON.parse(vssBaseAbi));
+sdk3.setProvider(new sdk3.providers.HttpProvider(hostport));
+sdk3Personal.unlockAccount(install_account, password, unlock_forever);
 
-sendMCPromise = dcbase.sendMCPromise;
+if (dcbase.useChain3) {
+    vnodeProtocolBaseContract = sdk3Contract(JSON.parse(vnodeProtocolBaseAbi));
+    subChainProtocolBaseContract = sdk3Contract(JSON.parse(subChainProtocolBaseAbi));
+    subChainBaseContract = sdk3Contract(JSON.parse(subChainBaseAbi));
+    dappBaseContract = sdk3Contract(JSON.parse(dappBaseAbi));
+    vssBaseContract = sdk3Contract(JSON.parse(vssBaseAbi));
+} else {
+    vnodeProtocolBaseContract = new sdk3Contract(JSON.parse(vnodeProtocolBaseAbi));
+    subChainProtocolBaseContract = new sdk3Contract(JSON.parse(subChainProtocolBaseAbi));
+    subChainBaseContract = new sdk3Contract(JSON.parse(subChainBaseAbi));
+    dappBaseContract = new sdk3Contract(JSON.parse(dappBaseAbi));
+    vssBaseContract = new sdk3Contract(JSON.parse(vssBaseAbi));
+}
+
+sendPromise = dcbase.sendPromise;
 registerSCSSubChainProtocolBasePromise = dcbase.registerSCSSubChainProtocolBasePromise;
 
-async function main() {
+/*
+var privateKey = new Buffer.from('e331b6d69882b4cb4ea581d88e0b604039a3de5967688d3dcffdd2270c0fd109', 'hex');
+var rawTx = {
+  nonce: '0x11',
+  gasPrice: '0x09184e72a000',
+  gasLimit: '0x2710',
+  to: '0x0000000000000000000000000000000000000033',
+  value: '0x22',
+  data: '0x7f7465737432000000000000000000000000000000000000000000000000000000600057'
+};
+var tx = new Tx(rawTx);
+tx.sign(privateKey);
+console.log(JSON.stringify(tx));
+var serializedTx = tx.serialize();
+console.log(serializedTx.toString());
+*/
 
+async function main() {
     // deploy two contracts: vnodeprotocolbase, subchainprotocolbase
     vnodeProtocolBase  = await deployVnodeProtocolBaseContractPromise(vnodeProtocolBaseContract);
-    console.log('VnodeProtocolBase Contract deployed! address: ' + vnodeProtocolBase.address + " " + green_check_mark);
+    if (dcbase.useChain3) {
+        vnodeProtocolBaseAddress = vnodeProtocolBase.address;
+    } else {
+        vnodeProtocolBaseAddress = vnodeProtocolBase.options.address;
+    }
+    console.log('VnodeProtocolBase Contract deployed! address: ' + vnodeProtocolBaseAddress + " " + green_check_mark);
+
     subChainProtocolBase = await deploySubChainProtocolBaseContractPromise(subChainProtocolBaseContract);
-    console.log("SubChainProtocolBase Contract deployed! address: "+ subChainProtocolBase.address + " " + green_check_mark);
+    if (dcbase.useChain3) {
+        subChainProtocolBaseAddress = subChainProtocolBase.address;
+    } else {
+        subChainProtocolBaseAddress = subChainProtocolBase.options.address;
+    }
+    console.log("SubChainProtocolBase Contract deployed! address: "+ subChainProtocolBaseAddress + " " + green_check_mark);
 
     // send scsid some mc
     allscsids = scsids.concat(scsmonitorids);
     for (i = 0; i < allscsids.length; i++) {
         scsid = allscsids[i];
-        await sendMCPromise(chain3, install_account, scsid, scs_amount);
+        await sendPromise(sdk3, sdk3Chain, install_account, scsid, scs_amount);
         console.log("Sent " + scs_amount + " mc to scsid " + scsid + " " + green_check_mark);
     }
 
     // register vnode proxy
     vnodeProxy = await registerAsVnodeProxy(install_account, install_account, vnodeLink, vnodeRpc);
     while(true) {
-        vnodeCount = parseInt(vnodeProtocolBase.vnodeList(install_account).toString());
+        if (dcbase.useChain3) {
+            vnodeCount = parseInt(vnodeProtocolBase.vnodeList(install_account).toString());
+        } else {
+            vnodeCount = await vnodeProtocolBase.methods.vnodeList(install_account).call();
+            vnodeCount = parseInt(vnodeCount);
+        }
         if (vnodeCount > 0) {
             console.log("Registered vnode proxy: " + install_account + " with vnode pool " + green_check_mark);
             break;
@@ -80,7 +132,7 @@ async function main() {
     // scs should register with subchainprotocol pool
     for (i = 0; i < scsids.length; i++) {
         scsid = scsids[i];
-        await registerSCSSubChainProtocolBasePromise(chain3, subChainProtocolBase, scsid);
+        await registerSCSSubChainProtocolBasePromise(sdk3, sdk3Chain, subChainProtocolBase, scsid);
     }
 
     // wait for scs to perform
@@ -90,7 +142,8 @@ async function main() {
         for (i = 0; i < scsids.length; i++) {
             scsid = scsids[i];
             //console.log(subChainProtocolBase.scsList("0x" + scsid));
-            if (subChainProtocolBase.isPerforming("0x" + scsid)) {
+            isPerforming = await subChainProtocolBase.methods.isPerforming("0x" + scsid);
+            if (isPerforming) {
                 if (performingSCS.indexOf(scsid) == -1) {
                     console.log("Registered scs: " + scsid + " with pool " + green_check_mark);
                     performingSCS.push(scsid);
@@ -127,7 +180,12 @@ async function main() {
     }
 
     vssBase = await deployVssBaseContractPromise(vssBaseContract, threshold);
-    console.log("VssBase contract deployed! address: " + vssBase.address + " " + green_check_mark);
+    if (dcbase.useChain3) {
+        vssBaseAddress = vssBase.address;
+    } else {
+        vssBaseAddress = vssBase.options.address;
+    }
+    console.log("VssBase contract deployed! address: " + vssBaseAddress + " " + green_check_mark);
 
     // wait for 3 blocks
     try {
@@ -150,8 +208,13 @@ async function main() {
         }
     }
 
-    subChainBase = await deploySubChainBaseContractPromise(vssBase.address);
-    console.log("SubChainBase Contract deployed! address: "+ subChainBase.address + " " + green_check_mark);
+    subChainBase = await deploySubChainBaseContractPromise(vssBaseAddress);
+    if (dcbase.useChain3) {
+        subChainBaseAddress = subChainBase.address;
+    } else {
+        subChainBaseAddress = subChainBase.options.address;
+    }
+    console.log("SubChainBase Contract deployed! address: "+ subChainBaseAddress + " " + green_check_mark);
 
     // wait for 3 blocks
     try {
@@ -174,8 +237,8 @@ async function main() {
         }
     }
 
-    setCaller =  await setCallerPromise(vssBase, subChainBase.address);
-    console.log("Set vssbase's caller to address: " + subChainBase.address + " with hash: " + setCaller + " " + green_check_mark);
+    setCaller =  await setCallerPromise(vssBase, subChainBaseAddress);
+    console.log("Set vssbase's caller to address: " + subChainBaseAddress + " with hash: " + setCaller + " " + green_check_mark);
 
     // wait for 3 blocks for set caller to finish
     try {
@@ -199,7 +262,7 @@ async function main() {
     }
 
     addfund =  await addFundPromise(addFundAmount);
-    console.log("Added fund " + addFundAmount + " mc to subchain addr: " + subChainBase.address + " "+ green_check_mark);
+    console.log("Added fund " + addFundAmount + " mc to subchain addr: " + subChainBaseAddress + " "+ green_check_mark);
 
     registerOpenResult = await registerOpenPromise();
     console.log("SubChainBase register open, hash: " + registerOpenResult + " " + green_check_mark);
@@ -251,10 +314,18 @@ async function main() {
     }
 
     //lastSender = await getLastSenderPromise(vssBase);
-    lastSender = vssBase.GetLastSender();
+    if (dcbase.useChain3) {
+        lastSender = vssBase.GetLastSender();
+    } else {
+        lastSender = await vssBase.methods.GetLastSender().call();
+    }
     console.log("get last sender: " + lastSender + " " + green_check_mark);
     //caller = await getCallerPromise(vssBase);
-    caller = vssBase.GetCaller();
+    if (dcbase.useChain3) {
+        caller = vssBase.GetCaller();
+    } else {
+        caller = await vssBase.methods.GetCaller().call();
+    }
     console.log("caller: " + caller + " " + green_check_mark);
 
     //register monitor
@@ -289,13 +360,13 @@ async function main() {
 
     nonce = 0;
     dappBaseContract = await deployDappBaseContractPromise(
-        tokensupply/exchangerate, nonce, subChainBase, chain3
+        tokensupply/exchangerate, nonce, subChainBase, sdk3, sdk3Chain,
     );
     console.log("DappBase Contract deployed!" + green_check_mark);
 
     nonce += 1;
     dappContract = await deployDappContractPromise(
-        3, nonce, subChainBase, chain3
+        3, nonce, subChainBase, sdk3
     );
     console.log("Dapp Contract deployed!" + green_check_mark);
 
@@ -357,14 +428,14 @@ async function main() {
             for (i = 0; i < scsids.length; i++) {
                 scsid = scsids[i];
                 performance = await subChainBase.nodePerformance.call("0x"+scsid);
-                role = await getSCSRolePromise("0x" + scsid, chain3);
+                role = await getSCSRolePromise("0x" + scsid, sdk3);
                 console.log("\tnode performance [" + scsid +"] => " + performance + " role => " + role);
             }
 
             for (i = 0; i < extra_scsids.length; i++) {
                 scsid = extra_scsids[i];
                 performance = await subChainBase.nodePerformance.call("0x"+scsid);
-                role = await getSCSRolePromise("0x" + scsid, chain3);
+                role = await getSCSRolePromise("0x" + scsid, sdk3);
                 console.log("\tnode performance [" + scsid +"] => " + performance + " role => " + role);
             }
 
@@ -405,38 +476,13 @@ async function main() {
 
 main();
 
-
-// For deploy vnodeprotocolbase
-function deployVnodeProtocolBaseContractPromise() {
-    return new Promise((resolve, reject) => {
-        deployTransaction = {
-            from: install_account,
-            data: '0x' + vnodeProtocolBaseBin,
-            gas: "9000000"
-        };
-
-        vnodeProtocolBaseContract.new(
-            bmin,
-            deployTransaction,
-            (e, contract) => {
-                if (e) {
-                    console.log("deployVnodeProtocolBaseContractPromise reject: " + e);
-                    reject(e);
-                }
-
-                if (contract && typeof contract.address !== 'undefined') {
-                    resolve(contract);
-                }
-            });
-    });
-}
-
 // For deploy dapp
-function deployDappContractPromise(amount_in_mc, nonce, subChainBase, chain3_){
+/*
+function deployDappContractPromise(amount_in_chain, nonce, subChainBase, sdk3Chain){
     return new Promise((resolve, reject) => {
         deployTransaction = {
             from: install_account,
-            value: chain3.toSha(amount_in_mc,'mc'),
+            value: convertUnit(amount_in_chain),
             to: subChainBase.address,
             data: '0x' + dappBin,
             gas: "0",
@@ -445,7 +491,7 @@ function deployDappContractPromise(amount_in_mc, nonce, subChainBase, chain3_){
             nonce: nonce
         };
 
-        chain3_.mc.sendTransaction(deployTransaction, (e, transactionHash) => {
+        sdk3Chain.sendTransaction(deployTransaction, (e, transactionHash) => {
             if (!e) {
                 resolve(transactionHash);
             } else {
@@ -455,58 +501,83 @@ function deployDappContractPromise(amount_in_mc, nonce, subChainBase, chain3_){
         });
     });
 }
+*/
 
 // For deploy subchainbase
 function deploySubChainBaseContractPromise(vssbaseaddr){
-    return new Promise((resolve, reject) => {
-        console.log("deploySubChainBaseContractPromise #"+ subChainBaseBin + "#");
-        deployTransaction = {
-            from: install_account,
+    if (dcbase.useChain3) {
+        return new Promise((resolve, reject) => {
+            //console.log("deploySubChainBaseContractPromise #"+ subChainBaseBin + "#");
+            deployTransaction = {
+                from: install_account,
+                data: '0x' + subChainBaseBin,
+                gas: "9000000"
+            };
+            // randdrop
+            subChainBaseContract.new(
+                subChainProtocolBaseAddress,
+                vnodeProtocolBaseAddress,
+                //vnodeProtocolBase.options.address, // ercaddr
+                //1, // ercrate
+                minMember,
+                maxMember,
+                thousandth,
+                flushRound,
+                tokensupply,
+                exchangerate,
+                vssbaseaddr,
+                deployTransaction,
+                (e, contract) => {
+                    if (e) {
+                        console.log("deploySubChainBaseContractPromise reject: " + e);
+                        reject(e);
+                    }
+                    if (contract && typeof contract.address !== 'undefined') {
+                        resolve(contract);
+                    }
+                }
+            );
+        });
+    } else {
+        return subChainBaseContract.deploy({
             data: '0x' + subChainBaseBin,
+            arguments: [
+                subChainProtocolBase.options.address,
+                vnodeProtocolBase.options.address,
+                minMember,
+                maxMember,
+                thousandth,
+                flushRound,
+                tokensupply,
+                exchangerate,
+                vssbaseaddr
+            ]
+        }).send({
+            from: install_account,
             gas: "9000000"
-        };
-
-        // randdrop
-        subChainBaseContract.new(
-            subChainProtocolBase.address,
-            vnodeProtocolBase.address,
-            //vnodeProtocolBase.address, // ercaddr
-            //1, // ercrate
-            minMember,
-            maxMember,
-            thousandth,
-            flushRound,
-            tokensupply,
-            exchangerate,
-            vssbaseaddr,
-            deployTransaction,
-            (e, contract) => {
-                if (e) {
-                    console.log("deploySubChainBaseContractPromise reject: " + e);
-                    reject(e);
-                }
-
-                if (contract && typeof contract.address !== 'undefined') {
-                    resolve(contract);
-                }
-            }
-        );
-    });
+        });
+    }
 }
 
 // For register scs to subchainbaseprotocol pool
 function registerSCSSubChainProtocolBasePromise(scsid) {
     return new Promise((resolve, reject) => {
-        data_ = subChainProtocolBase.register.getData("0x" + scsid);
+        if (dcbase.useChain3) {
+            data_ = subChainProtocolBase.register.getData("0x" + scsid);
+            to = subChainProtocolBase.address;
+        } else {
+            data_ = subChainProtocolBase.methods.register("0x" + scsid).encodeABI();
+            to = subChainProtocolBase.options.address;
+        }
         console.log("subchain protocol base register [data]: " + data_);
         registerTransaction = {
             from: install_account,
-		    to: subChainProtocolBase.address,
+		    to: to,
 		    gas: "1000000",
-		    data: subChainProtocolBase.register.getData("0x" + scsid),
-            value: chain3.toSha(bmin, 'mc')
+		    data: data_,
+            value: convertUnit(bmin)
         };
-        chain3.mc.sendTransaction(registerTransaction, (e, transactionHash) => {
+        sdk3Chain.sendTransaction(registerTransaction, (e, transactionHash) => {
             if (!e) {
                 resolve(transactionHash);
             } else {
@@ -520,16 +591,22 @@ function registerSCSSubChainProtocolBasePromise(scsid) {
 // For register scs to subchainbase as monitor
 function registerSCSSubChainBaseAsMonitorPromise(scsid) {
     return new Promise((resolve, reject) => {
-        data_ = subChainBase.registerAsMonitor.getData("0x" + scsid, "scs_monitor:8545");
+        if (dcbase.useChain3) {
+            data_ = subChainBase.registerAsMonitor.getData("0x" + scsid, "scs_monitor:8545");
+            to = subChainBase.address;
+        } else {
+            data_ = subChainBase.methods.registerAsMonitor("0x" + scsid, "scs_monitor:8545").encodeABI();
+            to = subChainBase.options.address;
+        }
         console.log("subchainbase register as monitor [data]: " + data_);
         registerTransaction = {
             from: install_account,
-		    to: subChainBase.address,
+		    to: to,
 		    gas: "1000000",
-		    data: subChainBase.registerAsMonitor.getData("0x" + scsid, "scs_monitor:8545"),
-            value: chain3.toSha(1, 'mc')
+		    data: data_,
+            value: convertUnit(1)
         };
-        chain3.mc.sendTransaction(registerTransaction, (e, transactionHash) => {
+        sdk3Chain.sendTransaction(registerTransaction, (e, transactionHash) => {
             if (!e) {
                 resolve(transactionHash);
             } else {
@@ -543,15 +620,21 @@ function registerSCSSubChainBaseAsMonitorPromise(scsid) {
 // For vssbase getlastsender()
 function getLastSenderPromise(vssBase) {
     return new Promise((resolve, reject) => {
-        data_ = vssBase.GetLastSender.getData();
+        if (dcbase.useChain3) {
+            data_ = vssBase.GetLastSender.getData();
+            to = vssBase.address;
+        } else {
+            data_ = vssBase.methods.GetLastSender().encodeABI();
+            to = vssBase.options.address;
+        }
         console.log("vssBase getLastSender [data]: " + data_);
         getLastSenderTransaction = {
             from: install_account,
-		    to: vssBase.address,
+		    to: to,
 		    gas: "1000000",
-		    data: vssBase.GetLastSender.getData()
+		    data: data_
         };
-        chain3.mc.sendTransaction(getLastSenderTransaction, (e, transactionHash) => {
+        sdk3Chain.sendTransaction(getLastSenderTransaction, (e, transactionHash) => {
             if (!e) {
                 resolve(transactionHash);
             } else {
@@ -565,15 +648,21 @@ function getLastSenderPromise(vssBase) {
 // For vssbase getcaller()
 function getCallerPromise(vssBase) {
     return new Promise((resolve, reject) => {
-        data_ = vssBase.GetCaller.getData();
+        if (dcbase.useChain3) {
+            data_ = vssBase.GetCaller.getData();
+            to = vssBase.address;
+        } else {
+            data_ = vssBase.methods.GetCaller().encodeABI();
+            to = vssBase.options.address;
+        }
         console.log("vssBase getCaller [data]: " + data_);
         getCallerTransaction = {
             from: install_account,
-		    to: vssBase.address,
+		    to: to,
 		    gas: "1000000",
-		    data: vssBase.GetCaller.getData()
+		    data: data_
         };
-        chain3.mc.sendTransaction(getCallerTransaction, (e, transactionHash) => {
+        sdk3Chain.sendTransaction(getCallerTransaction, (e, transactionHash) => {
             if (!e) {
                 resolve(transactionHash);
             } else {
@@ -587,15 +676,21 @@ function getCallerPromise(vssBase) {
 // For subchainbase register open
 function registerOpenPromise(scsid) {
     return new Promise((resolve, reject) => {
-        data_ = subChainBase.registerOpen.getData();
+        if (dcbase.useChain3) {
+            data_ = subChainBase.registerOpen.getData();
+            to = subChainBase.address;
+        } else {
+            data_ = subChainBase.methods.registerOpen().encodeABI();
+            to = subChainBase.options.address;
+        }
         console.log("subchainbase register open [data]: " + data_);
         registerOpenTransaction = {
             from: install_account,
-		    to: subChainBase.address,
+		    to: to,
 		    gas: "1000000",
-		    data: subChainBase.registerOpen.getData()
+		    data: data_
         };
-        chain3.mc.sendTransaction(registerOpenTransaction, (e, transactionHash) => {
+        sdk3Chain.sendTransaction(registerOpenTransaction, (e, transactionHash) => {
             if (!e) {
                 resolve(transactionHash);
             } else {
@@ -609,15 +704,21 @@ function registerOpenPromise(scsid) {
 // For subchainbase register close
 function registerClosePromise() {
     return new Promise((resolve, reject) => {
-        data_ = subChainBase.registerClose.getData();
+        if (dcbase.useChain3) {
+            data_ = subChainBase.registerClose.getData();
+            to = subChainBase.address;
+        } else {
+            data_ = subChainBase.methods.registerClose().encodeABI();
+            to = subChainBase.options.address;
+        }
         console.log("subchainbase register close [data]: " + data_);
         registerCloseTransaction = {
             from: install_account,
-		    to: subChainBase.address,
+		    to: to,
 		    gas: "1000000",
-		    data: subChainBase.registerClose.getData()
+		    data: data_
         };
-        chain3.mc.sendTransaction(registerCloseTransaction, (e, transactionHash) => {
+        sdk3Chain.sendTransaction(registerCloseTransaction, (e, transactionHash) => {
             if (!e) {
                 resolve(transactionHash);
             } else {
@@ -631,15 +732,21 @@ function registerClosePromise() {
 // For vssbase contract setCaller()
 function setCallerPromise(vssbase, subchainbaseaddr) {
     return new Promise((resolve, reject) => {
-        data_ = vssbase.setCaller.getData(subchainbaseaddr);
+        if (dcbase.useChain3) {
+            data_ = vssbase.setCaller.getData(subchainbaseaddr);
+            to = vssbase.address;
+        } else {
+            data_ = vssbase.methods.setCaller(subchainbaseaddr).encodeABI();
+            to = vssbase.options.address;
+        }
         console.log("vssbase setcaller [data]: " + data_);
         setCallerTransaction = {
             from: install_account,
-		    to: vssbase.address,
+		    to: to,
 		    gas: "1000000",
-		    data: vssbase.setCaller.getData(subchainbaseaddr)
+		    data: data_
         };
-        chain3.mc.sendTransaction(setCallerTransaction, (e, transactionHash) => {
+        sdk3Chain.sendTransaction(setCallerTransaction, (e, transactionHash) => {
             if (!e) {
                 resolve(transactionHash);
             } else {
@@ -651,18 +758,24 @@ function setCallerPromise(vssbase, subchainbaseaddr) {
 }
 
 // For subchainbase add fund
-function addFundPromise(amount_in_mc) {
+function addFundPromise(amount_in_chain) {
     return new Promise((resolve, reject) => {
-        data_ = subChainBase.addFund.getData();
+        if (dcbase.useChain3) {
+            data_ = subChainBase.addFund.getData();
+            to = subChainBase.address;
+        } else {
+            data_ = subChainBase.methods.addFund().encodeABI();
+            to = subChainBase.options.address;
+        }
         console.log("subchainbase addfund [data]: " + data_);
         addFundTransaction = {
             from: install_account,
-		    to: subChainBase.address,
+		    to: to,
 		    gas: "1000000",
-		    data: subChainBase.addFund.getData(),
-            value: chain3.toSha(amount_in_mc,'mc')
+		    data: data_,
+            value: convertUnit(amount_in_chain)
         };
-        chain3.mc.sendTransaction(addFundTransaction, (e, transactionHash) => {
+        sdk3Chain.sendTransaction(addFundTransaction, (e, transactionHash) => {
             if (!e) {
                 resolve(transactionHash);
             } else {
@@ -676,11 +789,10 @@ function addFundPromise(amount_in_mc) {
 // get blocknumber
 function getBlockNumber() {
     return new Promise((resolve, reject) => {
-        chain3.mc.getBlockNumber((e, blocknumber) => {
+        sdk3Chain.getBlockNumber((e, blocknumber) => {
             if (!e) {
                 resolve(blocknumber);
             } else {
-                //console.log("getBlockNumber reject: " + e);
                 reject(e);
             }
         });
@@ -690,16 +802,22 @@ function getBlockNumber() {
 // register vnode proxy
 function registerAsVnodeProxy(vnode, via, link, rpclink) {
     return new Promise((resolve, reject) => {
-        data_ = vnodeProtocolBase.register.getData(vnode, via, link, rpclink);
+        if (dcbase.useChain3) {
+            data_ = vnodeProtocolBase.register.getData(vnode, via, link, rpclink);
+            to = vnodeProtocolBase.address;
+        } else {
+            data_ = vnodeProtocolBase.methods.register(vnode, via, link, rpclink).encodeABI();
+            to = vnodeProtocolBase.options.address;
+        }
         console.log("register as vnode proxy [data]: " + data_);
         registerAsVnodeProxyTransaction = {
             from: install_account,
-		    to: vnodeProtocolBase.address,
-		    gas: "9000000",
-		    data: vnodeProtocolBase.register.getData(vnode, via, link, rpclink),
-            value: chain3.toSha(bmin, 'mc')
+		    to: to,
+		    gas: "900000",
+		    data: data_,
+            value: convertUnit(bmin)
         };
-        chain3.mc.sendTransaction(registerAsVnodeProxyTransaction, (e, transactionHash) => {
+        sdk3Chain.sendTransaction(registerAsVnodeProxyTransaction, (e, transactionHash) => {
             if (!e) {
                 resolve(transactionHash);
             } else {
@@ -712,11 +830,18 @@ function registerAsVnodeProxy(vnode, via, link, rpclink) {
 
 function getRNGNodeCountPromise() {
     return new Promise((resolve, reject) => {
+        if (dcbase.useChain3) {
+            data_ = subChainBase.rngNodeCount.getData();
+            to = subChainBase.address;
+        } else {
+            data_ = subChainBase.methods.rngNodeCount().encodeABI();
+            to = subChainBase.options.address;
+        }
         transaction = {
-		    to: subChainBase.address,
-		    data: subChainBase.rngNodeCount.getData()
+		    to: to,
+		    data: data_
         };
-        chain3.mc.call(transaction, (e, result) => {
+        sdk3Chain.call(transaction, (e, result) => {
             if (!e) {
                 resolve(result);
             } else {
@@ -732,13 +857,20 @@ function sleep(ms) {
 }
 
 // call getSCSRole
-function getSCSRolePromise(scsid, chain3) {
+function getSCSRolePromise(scsid, sdk3) {
     return new Promise((resolve, reject) => {
+        if (dcbase.useChain3) {
+            data_ = subChainBase.getSCSRole.getData(scsid);
+            to = subChainBase.address;
+        } else {
+            data_ = subChainBase.methods.getSCSRole(scsid).encodeABI();;
+            to = subChainBase.options.address;
+        }
         getscsroleTransaction = {
-		    to: subChainBase.address,
-		    data: subChainBase.getSCSRole.getData(scsid)
+		    to: to,
+		    data: data_
         };
-        chain3.mc.call(getscsroleTransaction, (e, result) => {
+        sdk3Chain.call(getscsroleTransaction, (e, result) => {
             if (!e) {
                 resolve(result);
             } else {

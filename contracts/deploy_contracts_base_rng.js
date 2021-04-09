@@ -1,6 +1,7 @@
 const fs = require("fs");
 const Chain3 = require("chain3");
 const solc = require("solc");
+const Web3 = require("web3");
 
 // global setting
 let vnodeLink = "vnode:50062";
@@ -9,6 +10,7 @@ let version = "dev";
 let bmin = 2;
 let unlock_forever = 0;
 let chain3 = new Chain3();
+let web3 = new Web3();
 let check_mark = "✓";
 let RED = "\033[0;31m";
 let GREEN = "\033[0;32m";
@@ -24,11 +26,7 @@ let flushRound = 50;
 let tokensupply = 3;
 let exchangerate = 1;
 let addFundAmount = 50;
-
-// for docker product deployment
-//let password = "1234567";
-//let threshold = 2;
-//let install_account = "0x64c2f81956ce75ef85e81534164f29a22d8a9d71";
+let useChain3 = true;
 
 install_account = "0xa35add395b804c3faacf7c7829638e42ffa1d051";
 password = "123456";
@@ -133,21 +131,29 @@ subChainBaseBin = subChainBaseOutput.contracts[subChainBaseFileName + ':SubChain
 //console.log("111" + subChainBaseBin);
 console.log("SubChainBase Contract compiled, size = " + subChainBaseBin.length + " " + green_check_mark);
 
+function convertUnit(amount_in_chain) {
+    if (useChain3 == true) {
+        return sdk3.toSha(amount_in_chain, 'mc');
+    } else {
+        return sdk3.utils.toWei(amount_in_chain.toString(), 'ether');
+    }
+}
+
 // For add fund to scsids
-function sendMCPromise(chain3_, src, dest, amount_in_mc) {
+function sendPromise(sdk3, sdk3Chain, src, dest, amount_in_chain) {
     return new Promise((resolve, reject) => {
         transaction = {
             from: src,
-		    value: chain3_.toSha(amount_in_mc,'mc'),
+		    value: convertUnit(amount_in_chain),
 		    to: dest,
 		    gas: "200000",
 		    data: ""
         };
-        chain3_.mc.sendTransaction(transaction, (e, transactionHash) => {
+        sdk3Chain.sendTransaction(transaction, (e, transactionHash) => {
             if (!e) {
                 resolve(transactionHash);
             } else {
-                console.log("sendMCPromise reject: " + e);
+                console.log("sendPromise reject: " + e);
                 reject(e);
             }
         });
@@ -155,18 +161,24 @@ function sendMCPromise(chain3_, src, dest, amount_in_mc) {
 }
 
 // For register scs to subchainbaseprotocol pool
-function registerSCSSubChainProtocolBasePromise(chain3_, subChainProtocolBase_, scsid) {
+function registerSCSSubChainProtocolBasePromise(sdk3, sdk3Chain, subChainProtocolBase_, scsid) {
     return new Promise((resolve, reject) => {
-        data_ = subChainProtocolBase_.register.getData("0x" + scsid);
-        console.log("register subchain protocol base [data]: " + data_);
+        if (useChain3) {
+            data_ = subChainProtocolBase_.register.getData("0x" + scsid);
+            to = subChainProtocolBase_.address;
+        } else {
+            data_ = subChainProtocolBase_.methods.register("0x" + scsid).encodeABI();
+            to = subChainProtocolBase_.options.address;
+        }
+        console.log("register subchain protocol base [data]: " + data_ + " " + green_check_mark);
         registerTransaction = {
             from: install_account,
-		    to: subChainProtocolBase_.address,
+		    to: to,
 		    gas: "1000000",
-		    data: subChainProtocolBase_.register.getData("0x" + scsid),
-            value: chain3_.toSha(bmin, 'mc')
+		    data: data_,
+            value: convertUnit(bmin)
         };
-        chain3_.mc.sendTransaction(registerTransaction, (e, transactionHash) => {
+        sdk3Chain.sendTransaction(registerTransaction, (e, transactionHash) => {
             if (!e) {
                 resolve(transactionHash);
             } else {
@@ -177,17 +189,23 @@ function registerSCSSubChainProtocolBasePromise(chain3_, subChainProtocolBase_, 
     });
 }
 
-function getResetRNGGroupPromise(subchainbase, chain3) {
+function getResetRNGGroupPromise(subchainbase, sdk3, sdk3Chain) {
     return new Promise((resolve, reject) => {
-        data_ = subchainbase.resetRNGGroup.getData();
+        if (useChain3) {
+            data_ = subchainbase.resetRNGGroup.getData();
+            to = subchainbase.address;
+        } else {
+            data_ = subchainbase.methods.resetRNGGroup().encodeABI();
+            to = subchainbase.options.address;
+        }
         console.log("vssbase reset rng [data]: " + data_);
         transaction = {
             from: install_account,
-		    to: subchainbase.address,
+		    to: to,
 		    gas: "1000000",
-		    data: subchainbase.resetRNGGroup.getData()
+		    data: data_
         };
-        chain3.mc.sendTransaction(transaction, (e, transactionHash) => {
+        sdk3Chain.sendTransaction(transaction, (e, transactionHash) => {
             if (!e) {
                 resolve(transactionHash);
             } else {
@@ -200,85 +218,111 @@ function getResetRNGGroupPromise(subchainbase, chain3) {
 
 // For deploy subchainprotocolbase
 function deploySubChainProtocolBaseContractPromise(subChainProtocolBaseContract){
-    return new Promise((resolve, reject) => {
-        deployTransaction = {
-            from: install_account,
+    if (useChain3) {
+        return new Promise((resolve, reject) => {
+            deployTransaction = {
+                from: install_account,
+                data: '0x' + subChainProtocolBaseBin,
+                gas: "9000000"
+            };
+            subChainProtocolBaseContract.new(
+                subChainProtocolBaseProtocol,
+                bmin,
+                subChainProtocolBaseProtocolType,
+                deployTransaction,
+                (e, contract) => {
+                    if (e) {
+                        console.log("deploySubChainProtocolBaseContractPromise reject: " + e);
+                        reject(e);
+                    }
+                    if (contract && typeof contract.address !== 'undefined') {
+                        resolve(contract);
+                    }
+                });
+        });
+    } else {
+        return subChainProtocolBaseContract.deploy({
             data: '0x' + subChainProtocolBaseBin,
+            arguments: [subChainProtocolBaseProtocol, bmin, subChainProtocolBaseProtocolType]
+        }).send({
+            from: install_account,
             gas: "9000000"
-        };
-
-        subChainProtocolBaseContract.new(
-            subChainProtocolBaseProtocol,
-            bmin,
-            subChainProtocolBaseProtocolType,
-            deployTransaction,
-            (e, contract) => {
-                if (e) {
-                    console.log("deploySubChainProtocolBaseContractPromise reject: " + e);
-                    reject(e);
-                }
-
-                if (contract && typeof contract.address !== 'undefined') {
-                    resolve(contract);
-                }
-            });
-    });
+        });
+    }
 }
 
 // For deploy vnodeprotocolbase
 function deployVssBaseContractPromise(vssBaseContract, threshold) {
-    return new Promise((resolve, reject) => {
-        deployTransaction = {
-            from: install_account,
+    if (useChain3) {
+        return new Promise((resolve, reject) => {
+            deployTransaction = {
+                from: install_account,
+                data: '0x' + vssbaseBin,
+                gas: "9000000"
+            };
+            vssBaseContract.new(
+                threshold,
+                deployTransaction,
+                (e, contract) => {
+                    if (e) {
+                        console.log("deployVssBaseContractPromise reject: " + e);
+                        reject(e);
+                    }
+                    if (contract && typeof contract.address !== 'undefined') {
+                        resolve(contract);
+                    }
+                });
+        });
+    } else {
+        return vssBaseContract.deploy({
             data: '0x' + vssbaseBin,
+            arguments: [threshold]
+        }).send({
+            from: install_account,
             gas: "9000000"
-        };
-
-        vssBaseContract.new(
-            threshold,
-            deployTransaction,
-            (e, contract) => {
-                if (e) {
-                    console.log("deployVssBaseContractPromise reject: " + e);
-                    reject(e);
-                }
-
-                if (contract && typeof contract.address !== 'undefined') {
-                    resolve(contract);
-                }
-            });
-    });
+        });
+    }
 }
 
 // For deploy vnodeprotocolbase
 function deployVnodeProtocolBaseContractPromise(vnodeProtocolBaseContract) {
-    return new Promise((resolve, reject) => {
-        deployTransaction = {
-            from: install_account,
+    if (useChain3) {
+        return new Promise((resolve, reject) => {
+            deployTransaction = {
+                from: install_account,
+                data: '0x' + vnodeProtocolBaseBin,
+                gas: "9000000"
+            };
+
+            vnodeProtocolBaseContract.new(
+                bmin,
+                deployTransaction,
+                (e, contract) => {
+                    if (e) {
+                        console.log("deployVnodeProtocolBaseContractPromise reject: " + e);
+                        reject(e);
+                    }
+
+                    if (contract && typeof contract.address !== 'undefined') {
+                        resolve(contract);
+                    }
+                });
+        });
+    } else {
+        return vnodeProtocolBaseContract.deploy({
             data: '0x' + vnodeProtocolBaseBin,
+            arguments: [bmin]
+        }).send({
+            from: install_account,
             gas: "9000000"
-        };
-
-        vnodeProtocolBaseContract.new(
-            bmin,
-            deployTransaction,
-            (e, contract) => {
-                if (e) {
-                    console.log("deployVnodeProtocolBaseContractPromise reject: " + e);
-                    reject(e);
-                }
-
-                if (contract && typeof contract.address !== 'undefined') {
-                    resolve(contract);
-                }
-            });
-    });
+        });
+    }
 }
 
 // For deploy dappbase
-function deployDappBaseContractPromise(amount_in_mc, nonce, subChainBase, chain3_){
+function deployDappBaseContractPromise(amount_in_chain, nonce, subChainBase, sdk3, sdk3Chain){
     return new Promise((resolve, reject) => {
-        dappBaseContract = chain3_.mc.contract(JSON.parse(dappBaseAbi));
+        dappBaseContract = sdk3Chain.contract(JSON.parse(dappBaseAbi));
         data = dappBaseContract.new.getData(
             "testcoin",
             false,
@@ -286,17 +330,17 @@ function deployDappBaseContractPromise(amount_in_mc, nonce, subChainBase, chain3
 
         deployTransaction = {
             from: install_account,
-            value: chain3.toSha(amount_in_mc,'mc'),
+            value: convertUnit(amount_in_chain),
             to: subChainBase.address,
             gas: "0",
-            gasPrice: chain3.mc.gasPrice,
+            gasPrice: sdk3Chain.gasPrice,
             shardingFlag: "0x3",
             data: '0x' + data,
             nonce: nonce,
             via: install_account
         };
 
-        chain3_.mc.sendTransaction(deployTransaction, (e, transactionHash) => {
+        sdk3Chain.sendTransaction(deployTransaction, (e, transactionHash) => {
             if (!e) {
                 resolve(transactionHash);
             } else {
@@ -308,6 +352,7 @@ function deployDappBaseContractPromise(amount_in_mc, nonce, subChainBase, chain3
 }
 
 module.exports = {
+    useChain3: useChain3,
     install_account: install_account,
     scsids: scsids,
     scsmonitorids: scsmonitorids,
@@ -318,6 +363,7 @@ module.exports = {
     bmin: 2,
     unlock_forever: 0,
     chain3: new Chain3(),
+    web3: new Web3(),
     check_mark: "✓",
     RED: "\033[0,31m",
     GREEN: "\033[0,32m",
@@ -336,7 +382,8 @@ module.exports = {
     addFundAmount: 50,
     scs_amount: 1000,
     scsmonitorids: scsmonitorids,
-    sendMCPromise: sendMCPromise,
+    convertUnit: convertUnit,
+    sendPromise: sendPromise,
     deploySubChainProtocolBaseContractPromise: deploySubChainProtocolBaseContractPromise,
     deployVnodeProtocolBaseContractPromise: deployVnodeProtocolBaseContractPromise,
     deployDappBaseContractPromise: deployDappBaseContractPromise,
@@ -348,6 +395,6 @@ module.exports = {
     subChainBaseAbi: subChainBaseAbi,
     dappBaseAbi: dappBaseAbi,
     subChainProtocolBaseContract: subChainProtocolBaseContract,
-    vssBaseAbi: vssbaseAbi,
+    vssBaseAbi: vssbaseAbi
 };
 
