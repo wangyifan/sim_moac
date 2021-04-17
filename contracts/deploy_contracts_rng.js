@@ -90,13 +90,18 @@ console.log(serializedTx.toString());
 
 async function main() {
     // deploy two contracts: vnodeprotocolbase, subchainprotocolbase
-    vnodeProtocolBase  = await deployVnodeProtocolBaseContractPromise(vnodeProtocolBaseContract);
+    gas = await sdk3Chain.estimateGas({
+        from: install_account,
+        data: '0x' + dcbase.vnodeProtocolBaseBin
+    });
+    vnodeProtocolBase = await deployVnodeProtocolBaseContractPromise(vnodeProtocolBaseContract, doGas(parseInt(gas)));
     if (dcbase.useChain3) {
         vnodeProtocolBaseAddress = vnodeProtocolBase.address;
     } else {
         vnodeProtocolBaseAddress = vnodeProtocolBase.options.address;
     }
-    console.log('VnodeProtocolBase Contract deployed! address: ' + vnodeProtocolBaseAddress + " " + green_check_mark);
+    console.log('VnodeProtocolBase Contract deployed(estimate: ' + doGas(parseInt(gas))
+                + ')! address: ' + vnodeProtocolBaseAddress + " " + green_check_mark);
 
     subChainProtocolBase = await deploySubChainProtocolBaseContractPromise(subChainProtocolBaseContract);
     if (dcbase.useChain3) {
@@ -502,6 +507,12 @@ function deployDappContractPromise(amount_in_chain, nonce, subChainBase, sdk3Cha
     });
 }
 */
+
+function doGas(estimatedGas) {
+    maxGas = 8995000;
+    gas = parseInt(estimatedGas * 110 / 100);
+    return Math.min(maxGas, gas);
+}
 
 // For deploy subchainbase
 function deploySubChainBaseContractPromise(vssbaseaddr){
