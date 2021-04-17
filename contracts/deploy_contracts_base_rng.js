@@ -26,7 +26,7 @@ let flushRound = 50;
 let tokensupply = 3;
 let exchangerate = 1;
 let addFundAmount = 50;
-let useChain3 = true;
+let useChain3 = false;
 
 install_account = "0xa35add395b804c3faacf7c7829638e42ffa1d051";
 password = "123456";
@@ -285,7 +285,7 @@ function deployVssBaseContractPromise(vssBaseContract, threshold) {
 }
 
 // For deploy vnodeprotocolbase
-function deployVnodeProtocolBaseContractPromise(vnodeProtocolBaseContract) {
+function deployVnodeProtocolBaseContractPromise(vnodeProtocolBaseContract, gas) {
     if (useChain3) {
         return new Promise((resolve, reject) => {
             deployTransaction = {
@@ -314,7 +314,7 @@ function deployVnodeProtocolBaseContractPromise(vnodeProtocolBaseContract) {
             arguments: [bmin]
         }).send({
             from: install_account,
-            gas: "9000000"
+            gas: gas
         });
     }
 }
@@ -395,6 +395,7 @@ module.exports = {
     subChainBaseAbi: subChainBaseAbi,
     dappBaseAbi: dappBaseAbi,
     subChainProtocolBaseContract: subChainProtocolBaseContract,
-    vssBaseAbi: vssbaseAbi
+    vssBaseAbi: vssbaseAbi,
+    vnodeProtocolBaseBin: vnodeProtocolBaseBin
 };
 
