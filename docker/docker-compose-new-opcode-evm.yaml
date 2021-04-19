@@ -9,7 +9,7 @@ services:
     image: yifan:vnode-dev
     ports:
         - "32159:8545"
-    command: moac  --networkid 95125 --vnodeconfig vnodeconfig.json --datadir=/vnode --ethash.dagdir /vnode/.ethash --verbosity 4 --rpc --rpcaddr 0.0.0.0 --mine --minerthreads 1 --rpcapi chain3,mc,net,vnode,personal,admin,miner --ipcpath=/root/.moac/moac.ipc --nodekey /vnode/1.bootnode.key 2>&1
+    command: moac  --networkid 95125 --vnodeconfig vnodeconfig.json --datadir=/vnode --ethash.dagdir /vnode/.ethash --verbosity 4 --rpc --rpcaddr 0.0.0.0 --mine --minerthreads 1 --rpcapi txpool,chain3,mc,net,vnode,personal,admin,miner --ipcpath=/root/.moac/moac.ipc --nodekey /vnode/1.bootnode.key 2>&1
     networks:
       default:
         ipv4_address: 172.20.0.11
