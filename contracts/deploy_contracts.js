@@ -36,7 +36,6 @@ console_log = dcbase.console_log;
 
 hostport = "http://"+ "172.20.0.11" + ":" + "8545";
 chain3.setProvider(new chain3.providers.HttpProvider(hostport));
-chain3.personal.unlockAccount(install_account, password, unlock_forever);
 vnodeProtocolBaseContract = chain3.mc.contract(JSON.parse(vnodeProtocolBaseAbi));
 subChainProtocolBaseContract = chain3.mc.contract(JSON.parse(subChainProtocolBaseAbi));
 subChainBaseContract = chain3.mc.contract(JSON.parse(subChainBaseAbi));
@@ -47,6 +46,9 @@ sendMCPromise = dcbase.sendMCPromise;
 registerSCSSubChainProtocolBasePromise = dcbase.registerSCSSubChainProtocolBasePromise;
 
 async function main() {
+    // unlock first
+    await chain3.personal.unlockAccount(install_account, password, unlock_forever);
+
     // deploy erc20
     erc20 = await deployErc20ContractPromise(erc20Contract);
     console_log('erc20 Contract deployed! address: ' + erc20.address + " " + green_check_mark);

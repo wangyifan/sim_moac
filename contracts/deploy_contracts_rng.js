@@ -52,7 +52,6 @@ if (dcbase.useChain3) {
 
 hostport = "http://"+ "172.20.0.11" + ":" + "8545";
 sdk3.setProvider(new sdk3.providers.HttpProvider(hostport));
-sdk3Personal.unlockAccount(install_account, password, unlock_forever);
 
 if (dcbase.useChain3) {
     vnodeProtocolBaseContract = sdk3Contract(JSON.parse(vnodeProtocolBaseAbi));
@@ -89,6 +88,9 @@ console.log(serializedTx.toString());
 */
 
 async function main() {
+    // unlock first
+    await sdk3Personal.unlockAccount(install_account, password, unlock_forever);
+
     // deploy two contracts: vnodeprotocolbase, subchainprotocolbase
     gas = await sdk3Chain.estimateGas({
         from: install_account,
