@@ -1,8 +1,8 @@
 require('console-stamp')(console, 'yyyy-mm-dd HH:MM:ss');
 
 var Web3 = require('web3');
-//var web3 = new Web3('http://172.20.0.11:8545');
-var web3 = new Web3('http://127.0.0.1:18545');
+var web3 = new Web3('http://172.20.0.11:8545');
+//var web3 = new Web3('http://127.0.0.1:18545');
 var solc = require("solc");
 var fs = require("fs");
 
@@ -99,17 +99,17 @@ async function main() {
 
     console.log(solc.semver());
     console.log("----------------------------");
-    //token1 = "0x3bD86aB1AaD5BeDcDF8Cd6f72791B91aD06d7B5a";
-    //token2 = "0x67013bCe15A69Ca00a64B3c5E74fb052907c786b";
-    //token3 = "0xd2861C34e7720A6E4D22ac1Fa77422f01add13E8";
-    //factoryAddr = "0x91228250705AF76cB0f7EbC128d27d532F36cfF9";
-    //routerAddr = "0x588d57969F4211596F7808a66EFAcC7bb890C977";
+    token1 = "0x3bD86aB1AaD5BeDcDF8Cd6f72791B91aD06d7B5a";
+    token2 = "0x67013bCe15A69Ca00a64B3c5E74fb052907c786b";
+    token3 = "0xd2861C34e7720A6E4D22ac1Fa77422f01add13E8";
+    factoryAddr = "0x91228250705AF76cB0f7EbC128d27d532F36cfF9";
+    routerAddr = "0x588d57969F4211596F7808a66EFAcC7bb890C977";
 
-    token1 = "0x3C222D7Cd6159e98Dd9a39057443D230F9b0AdfC";
-    token2 = "0xc373c746AB0D6DD3EE22Ae2299db469C5f89e8D2";
-    token3 = "0xD6874f1D76130Ea6DCE3d37f97d33a9022DDD94D";
-    factoryAddr = "0x03D60190c33A6B716FeF08bE1C964182e495F9ff";
-    routerAddr = "0x0678c50652FAeD47DC81E2d7eeEf39AFDB0ffeA3";
+    //token1 = "0x3C222D7Cd6159e98Dd9a39057443D230F9b0AdfC";
+    //token2 = "0xc373c746AB0D6DD3EE22Ae2299db469C5f89e8D2";
+    //token3 = "0xD6874f1D76130Ea6DCE3d37f97d33a9022DDD94D";
+    //factoryAddr = "0x03D60190c33A6B716FeF08bE1C964182e495F9ff";
+    //routerAddr = "0x0678c50652FAeD47DC81E2d7eeEf39AFDB0ffeA3";
 
     output = JSON.parse(solc.compile(JSON.stringify(input)));
     pairABI = JSON.stringify(output.contracts['IUniswapV2Pair.sol']['IUniswapV2Pair'].abi);

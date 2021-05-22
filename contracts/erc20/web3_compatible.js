@@ -4,7 +4,8 @@ var Common = require('ethereumjs-common').default;
 
 var Web3 = require('web3');
 var Chain3 = require('chain3');
-var hostport = "http://"+ "172.20.0.11" + ":" + "8545";
+var hostport = "http://" + "172.20.0.11" + ":" + "8545";
+//var hostport = "http://" + "localhost" + ":" + "8545";
 var web3 = new Web3();
 var chain3 = new Chain3();
 web3.setProvider(new web3.providers.HttpProvider(hostport));
