@@ -17,7 +17,7 @@ RUN apk add bash
 #COPY config/vnode/miner.config /vnode/vnodeconfig.json
 #COPY config/vnode/miner.config /vnode/config/vnodeconfig.json
 COPY config/vnode/vnodeconfig.json /vnode/vnodeconfig.json
-COPY config/vnode/vnode.genesis.json /vnode/genesis.json
+COPY config/vnode/vaulty.genesis.json /vnode/genesis.json
 
 # copy key files over
 COPY config/vnode/0.bootnode.key /vnode/0.bootnode.key

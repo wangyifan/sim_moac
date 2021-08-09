@@ -1,0 +1,80 @@
+version: '3.1'
+
+# create the network if it does not exist
+# docker network create --internal --gateway 172.21.0.1 --subnet 172.21.0.0/16 docker_moac_vnode_network_xchain
+
+services:
+  ####################### xchain 1  #######################
+  xchain1:
+    image: yifan:xchain-dev
+    ports:
+        - "32159:8545"
+    command: xchain  --networkid 800001 --vnodeconfig xchainconfig.json --datadir=/xchain --ethash.dagdir /xchain/.ethash --verbosity 3 --rpc --rpcaddr 0.0.0.0 --rpcapi txpool,chain3,mc,net,vnode,personal,admin,miner --ipcpath=/root/.moac/moac.ipc --nodekey /xchain/1.bootnode.key 2>&1
+    networks:
+      default:
+        ipv4_address: 172.21.0.31
+
+  ####################### xchain 2  #######################
+  xchain2:
+    image: yifan:xchain-dev
+    ports:
+        - "32160:8545"
+    command: xchain  --networkid 800001 --vnodeconfig xchainconfig.json --datadir=/xchain --ethash.dagdir /xchain/.ethash --verbosity 3 --rpc --rpcaddr 0.0.0.0 --mine --minerthreads 1 --rpcapi txpool,chain3,mc,net,vnode,personal,admin,miner --ipcpath=/root/.moac/moac.ipc --bootnodesv4 enode://c2d8455aa7b8d0198e36e9f9df71282b2e32122bdf46de3fa218dad900a69ab1289289a67536ea93bfe6e1d7b0044821d0985f2a364e7144c74a5fbeb7e9dc6c@172.21.0.31:30333 --nodekey /xchain/2.bootnode.key 2>&1
+    depends_on:
+      - xchain1
+    networks:
+      default:
+        ipv4_address: 172.21.0.32
+
+  ####################### xchain 3  #######################
+  xchain3:
+    image: yifan:xchain-dev
+    ports:
+        - "32161:8545"
+    command: xchain  --networkid 800001 --vnodeconfig xchainconfig.json --datadir=/xchain --ethash.dagdir /xchain/.ethash --verbosity 3 --rpc --rpcaddr 0.0.0.0  --rpcapi txpool,chain3,mc,net,vnode,personal,admin,miner --ipcpath=/root/.moac/moac.ipc --bootnodesv4 enode://c2d8455aa7b8d0198e36e9f9df71282b2e32122bdf46de3fa218dad900a69ab1289289a67536ea93bfe6e1d7b0044821d0985f2a364e7144c74a5fbeb7e9dc6c@172.21.0.31:30333 --nodekey /xchain/3.bootnode.key 2>&1
+    depends_on:
+      - xchain1
+    networks:
+      default:
+        ipv4_address: 172.21.0.33
+
+  ####################### xchain 4  #######################
+  xchain4:
+    image: yifan:xchain-dev
+    ports:
+        - "32162:8545"
+    command: xchain  --networkid 800001 --vnodeconfig xchainconfig.json --datadir=/xchain --ethash.dagdir /xchain/.ethash --verbosity 3 --rpc --rpcaddr 0.0.0.0 --rpcapi txpool,chain3,mc,net,vnode,personal,admin,miner --ipcpath=/root/.moac/moac.ipc --bootnodesv4 enode://c2d8455aa7b8d0198e36e9f9df71282b2e32122bdf46de3fa218dad900a69ab1289289a67536ea93bfe6e1d7b0044821d0985f2a364e7144c74a5fbeb7e9dc6c@172.21.0.31:30333 --nodekey /xchain/4.bootnode.key 2>&1
+    depends_on:
+      - xchain1
+    networks:
+      default:
+        ipv4_address: 172.21.0.34
+
+  ####################### xchain 5  #######################
+  xchain5:
+    image: yifan:xchain-dev
+    ports:
+        - "32163:8545"
+    command: xchain  --networkid 800001 --vnodeconfig xchainconfig.json --datadir=/xchain --ethash.dagdir /xchain/.ethash --verbosity 3 --rpc --rpcaddr 0.0.0.0 --rpcapi txpool,chain3,mc,net,vnode,personal,admin,miner --ipcpath=/root/.moac/moac.ipc --bootnodesv4 enode://c2d8455aa7b8d0198e36e9f9df71282b2e32122bdf46de3fa218dad900a69ab1289289a67536ea93bfe6e1d7b0044821d0985f2a364e7144c74a5fbeb7e9dc6c@172.21.0.31:30333 --nodekey /xchain/5.bootnode.key 2>&1
+    depends_on:
+      - xchain1
+    networks:
+      default:
+        ipv4_address: 172.21.0.35
+
+  ####################### xchain 6  #######################
+  xchain6:
+    image: yifan:xchain-dev
+    ports:
+        - "32164:8545"
+    command: xchain  --networkid 800001 --vnodeconfig xchainconfig.json --datadir=/xchain --ethash.dagdir /xchain/.ethash --verbosity 3 --rpc --rpcaddr 0.0.0.0 --rpcapi txpool,chain3,mc,net,vnode,personal,admin,miner --ipcpath=/root/.moac/moac.ipc --bootnodesv4 enode://c2d8455aa7b8d0198e36e9f9df71282b2e32122bdf46de3fa218dad900a69ab1289289a67536ea93bfe6e1d7b0044821d0985f2a364e7144c74a5fbeb7e9dc6c@172.21.0.31:30333 --nodekey /xchain/6.bootnode.key 2>&1
+    depends_on:
+      - xchain1
+    networks:
+      default:
+        ipv4_address: 172.21.0.36
+
+networks:
+  default:
+    external:
+      name: docker_moac_vnode_network_xchain
