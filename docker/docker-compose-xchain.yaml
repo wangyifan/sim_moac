@@ -38,42 +38,6 @@ services:
       default:
         ipv4_address: 172.21.0.33
 
-  ####################### xchain 4  #######################
-  xchain4:
-    image: yifan:xchain-dev
-    ports:
-        - "32162:8545"
-    command: xchain  --networkid 800001 --vnodeconfig xchainconfig.json --datadir=/xchain --ethash.dagdir /xchain/.ethash --verbosity 3 --rpc --rpcaddr 0.0.0.0 --rpcapi txpool,chain3,mc,net,vnode,personal,admin,miner --ipcpath=/root/.moac/moac.ipc --bootnodesv4 enode://c2d8455aa7b8d0198e36e9f9df71282b2e32122bdf46de3fa218dad900a69ab1289289a67536ea93bfe6e1d7b0044821d0985f2a364e7144c74a5fbeb7e9dc6c@172.21.0.31:30333 --nodekey /xchain/4.bootnode.key 2>&1
-    depends_on:
-      - xchain1
-    networks:
-      default:
-        ipv4_address: 172.21.0.34
-
-  ####################### xchain 5  #######################
-  xchain5:
-    image: yifan:xchain-dev
-    ports:
-        - "32163:8545"
-    command: xchain  --networkid 800001 --vnodeconfig xchainconfig.json --datadir=/xchain --ethash.dagdir /xchain/.ethash --verbosity 3 --rpc --rpcaddr 0.0.0.0 --rpcapi txpool,chain3,mc,net,vnode,personal,admin,miner --ipcpath=/root/.moac/moac.ipc --bootnodesv4 enode://c2d8455aa7b8d0198e36e9f9df71282b2e32122bdf46de3fa218dad900a69ab1289289a67536ea93bfe6e1d7b0044821d0985f2a364e7144c74a5fbeb7e9dc6c@172.21.0.31:30333 --nodekey /xchain/5.bootnode.key 2>&1
-    depends_on:
-      - xchain1
-    networks:
-      default:
-        ipv4_address: 172.21.0.35
-
-  ####################### xchain 6  #######################
-  xchain6:
-    image: yifan:xchain-dev
-    ports:
-        - "32164:8545"
-    command: xchain  --networkid 800001 --vnodeconfig xchainconfig.json --datadir=/xchain --ethash.dagdir /xchain/.ethash --verbosity 3 --rpc --rpcaddr 0.0.0.0 --rpcapi txpool,chain3,mc,net,vnode,personal,admin,miner --ipcpath=/root/.moac/moac.ipc --bootnodesv4 enode://c2d8455aa7b8d0198e36e9f9df71282b2e32122bdf46de3fa218dad900a69ab1289289a67536ea93bfe6e1d7b0044821d0985f2a364e7144c74a5fbeb7e9dc6c@172.21.0.31:30333 --nodekey /xchain/6.bootnode.key 2>&1
-    depends_on:
-      - xchain1
-    networks:
-      default:
-        ipv4_address: 172.21.0.36
-
 networks:
   default:
     external:

@@ -19,7 +19,7 @@ services:
     image: yifan:vaultx-dev
     ports:
         - "32160:8545"
-    command: moac  --networkid 95125 --vnodeconfig vnodeconfig.json --datadir=/vnode --ethash.dagdir /vnode/.ethash --verbosity 3 --rpc --rpcaddr 0.0.0.0 --mine --minerthreads 1 --rpcapi txpool,chain3,mc,net,vnode,personal,admin,miner --ipcpath=/root/.moac/moac.ipc --ws --wsaddr 0.0.0.0 --wsapi db,mc,net,web3,personal --wsorigins='*' --bootnodesv4 enode://c2d8455aa7b8d0198e36e9f9df71282b2e32122bdf46de3fa218dad900a69ab1289289a67536ea93bfe6e1d7b0044821d0985f2a364e7144c74a5fbeb7e9dc6c@172.21.0.11:30333 --nodekey /vnode/2.bootnode.key 2>&1
+    command: moac  --networkid 95125 --vnodeconfig vnodeconfig.json --datadir=/vnode --ethash.dagdir /vnode/.ethash --verbosity 3 --rpc --rpcaddr 0.0.0.0 --rpcapi txpool,chain3,mc,net,vnode,personal,admin,miner --ipcpath=/root/.moac/moac.ipc --ws --wsaddr 0.0.0.0 --wsapi db,mc,net,web3,personal --wsorigins='*' --bootnodesv4 enode://c2d8455aa7b8d0198e36e9f9df71282b2e32122bdf46de3fa218dad900a69ab1289289a67536ea93bfe6e1d7b0044821d0985f2a364e7144c74a5fbeb7e9dc6c@172.21.0.11:30333 --nodekey /vnode/2.bootnode.key 2>&1
     depends_on:
       - vnodex1
     networks:
@@ -37,42 +37,6 @@ services:
     networks:
       default:
         ipv4_address: 172.21.0.13
-
-  ####################### vnode 4  #######################
-  vnodex4:
-    image: yifan:vaultx-dev
-    ports:
-        - "32162:8545"
-    command: moac  --networkid 95125 --vnodeconfig vnodeconfig.json --datadir=/vnode --ethash.dagdir /vnode/.ethash --verbosity 3 --rpc --rpcaddr 0.0.0.0 --rpcapi txpool,chain3,mc,net,vnode,personal,admin,miner --ipcpath=/root/.moac/moac.ipc --ws --wsaddr 0.0.0.0 --wsapi db,mc,net,web3,personal --wsorigins='*' --bootnodesv4 enode://c2d8455aa7b8d0198e36e9f9df71282b2e32122bdf46de3fa218dad900a69ab1289289a67536ea93bfe6e1d7b0044821d0985f2a364e7144c74a5fbeb7e9dc6c@172.21.0.11:30333 --nodekey /vnode/4.bootnode.key 2>&1
-    depends_on:
-      - vnodex1
-    networks:
-      default:
-        ipv4_address: 172.21.0.14
-
-  ####################### vnode 5  #######################
-  vnodex5:
-    image: yifan:vaultx-dev
-    ports:
-        - "32163:8545"
-    command: moac  --networkid 95125 --vnodeconfig vnodeconfig.json --datadir=/vnode --ethash.dagdir /vnode/.ethash --verbosity 3 --rpc --rpcaddr 0.0.0.0 --rpcapi txpool,chain3,mc,net,vnode,personal,admin,miner --ipcpath=/root/.moac/moac.ipc --ws --wsaddr 0.0.0.0 --wsapi db,mc,net,web3,personal --wsorigins='*' --bootnodesv4 enode://c2d8455aa7b8d0198e36e9f9df71282b2e32122bdf46de3fa218dad900a69ab1289289a67536ea93bfe6e1d7b0044821d0985f2a364e7144c74a5fbeb7e9dc6c@172.21.0.11:30333 --nodekey /vnode/5.bootnode.key 2>&1
-    depends_on:
-      - vnodex1
-    networks:
-      default:
-        ipv4_address: 172.21.0.15
-
-  ####################### vnode 6  #######################
-  vnodex6:
-    image: yifan:vaultx-dev
-    ports:
-        - "32164:8545"
-    command: moac  --networkid 95125 --vnodeconfig vnodeconfig.json --datadir=/vnode --ethash.dagdir /vnode/.ethash --verbosity 3 --rpc --rpcaddr 0.0.0.0 --rpcapi txpool,chain3,mc,net,vnode,personal,admin,miner --ipcpath=/root/.moac/moac.ipc --ws --wsaddr 0.0.0.0 --wsapi db,mc,net,web3,personal --wsorigins='*' --bootnodesv4 enode://c2d8455aa7b8d0198e36e9f9df71282b2e32122bdf46de3fa218dad900a69ab1289289a67536ea93bfe6e1d7b0044821d0985f2a364e7144c74a5fbeb7e9dc6c@172.21.0.11:30333 --nodekey /vnode/6.bootnode.key 2>&1
-    depends_on:
-      - vnodex1
-    networks:
-      default:
-        ipv4_address: 172.21.0.16
 
 networks:
   default:
